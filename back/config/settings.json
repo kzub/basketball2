@@ -1,0 +1,56 @@
+{
+	"prod": {
+		"telegram": {
+			"token": "489436053:AAH9C2o94185MIOW1D0iR_pnbTpPVz46bMg",
+			"owner": "139323428",
+			"channel": "-1001116399270"
+		},
+		"server": {
+			"host": "127.0.0.1",
+			"port": 3001
+		},
+		"smtp": {
+			"email": "event@basket.msk.ru",
+			"port": 25,
+			"--forwardPort": 2525
+		},
+		"basketmsk": {
+			"login": "guest",
+			"password": "27051983"
+		},
+		"sqlite": {
+			"filename": "basket.prod.db"
+		},
+		"admin": {
+			"password": "zk",
+			"netPrice": "friend"
+		}
+	},
+	"dev": {
+		"telegram": {
+			"token": "489436053:AAH9C2o94185MIOW1D0iR_pnbTpPVz46bMg",
+			"owner": "139323428",
+			"channel": "-315468918"
+		},
+		"server": {
+			"host": "127.0.0.1",
+			"port": 53001
+		},
+		"smtp": {
+			"email": "test@basket.msk.ru",
+			"port": 2525
+		},
+		"basketmsk": {
+			"login": "guest",
+			"password": "27051983"
+		},
+		"sqlite": {
+			"filename": "basket.dev.db"
+		},
+
+		"admin": {
+			"password": "zk",
+			"netPrice": "friend"
+		}
+	}
+}

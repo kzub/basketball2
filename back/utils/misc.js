@@ -4,12 +4,22 @@ const readFile = promisify(fs.readFile);
 
 const daysOfWeek = ['Воскресенье', 'Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота'];
 const monthsOfYear = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'];
+
 exports.getBeautifulDate = (ts) => {
   const date = new Date(ts);
   const weekDay = daysOfWeek[date.getDay()];
   const monthDay = date.getDate();
   const month = monthsOfYear[date.getMonth()];
   return `${weekDay}, ${monthDay} ${month}`;
+};
+
+exports.getStartOfTheDate = (date) => {
+  const today = date || new Date();
+  today.setSeconds(0);
+  today.setMinutes(0);
+  today.setHours(0);
+  today.setMilliseconds(0);
+  return today;
 };
 
 exports.getGameSettingsOld = async () => {
@@ -36,7 +46,7 @@ exports.findBookInfoInMailText = (text) => {
 };
 
 exports.getConfig = () => {
-  let data = fs.readFileSync('settings.json');
+  let data = fs.readFileSync('./config/settings.json');
   let mode = getMode();
   return JSON.parse(data)[mode];
 };
@@ -52,4 +62,10 @@ function getMode () {
     process.exit(-1);
   }
   return mode;
+}
+
+exports.sleep = (ms) => {
+  return new Promise(res => {
+    setTimeout(res, ms);
+  });
 }
