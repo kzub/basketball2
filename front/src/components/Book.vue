@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div v-if="!game" class="my-2">
+    <div v-if="!gameDetails" class="my-2">
       <div class="d-flex justify-content-center">
         <div class="spinner-border" role="status">
           <span class="sr-only">Загружается...</span>
@@ -12,13 +12,16 @@
       <b-btn class="btn-lg mb-3 rounded-0" block @click="back" variant="warning">
         Назад
       </b-btn>
-      <GameInfo :game="game"/>
+
+      <GameInfo :game="gameDetails.game" show="place,time"/>
+      <GameInfo :game="gameDetails.game" show="organizer,payment"/>
+
       <div v-if="!booking" class="mx-2 mt-5">
         <b-btn class="w-100 btn-lg" @click="bookSlot" variant="success">
           Забронировать
         </b-btn>
       </div>
-      <div v-else class="spinner-border" role="status">
+      <div v-else class="spinner-border mt-5" role="status">
         <span class="sr-only">Бронирую...</span>
       </div>
     </div>
@@ -52,8 +55,12 @@ export default {
     };
   },
   computed: {
-    game: function() {
-      return this.mxGameInfo(this.mxLocationInfo.gameId)
+    gameDetails () {
+      if (!this.$store.state.gameDetails || 
+        this.mxLocationInfo.gameId !== this.$store.state.gameDetails.game.gameId) {
+          this.$store.dispatch('updateGameData', this.mxLocationInfo.gameId);
+      }
+      return this.$store.state.gameDetails
     },
     user () {
       return this.$store.state.user
@@ -70,17 +77,17 @@ export default {
     },
     bookSlot: function() {
       this.booking = true
-      const { game, user } = this
+      const { gameDetails, user } = this
 
       this.$store.dispatch('bookSlot', {
-        gameId: game.gameId,
+        gameId: gameDetails.game.gameId,
         userId: user.userId,
       })
       .then((data) => {
         this.$router.push({
           path: '/reservation',
           query: {
-            gameId: game.gameId,
+            gameId: gameDetails.game.gameId,
             rsvId: data.rsvId,
           }
         });
@@ -95,7 +102,7 @@ export default {
       this.$router.push({
           path: '/game',
           query: {
-            gameId: this.game.gameId,
+            gameId: this.gameDetails.game.gameId,
           }
         });
     }

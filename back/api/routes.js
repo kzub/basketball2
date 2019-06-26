@@ -10,7 +10,7 @@ const wrapper = (func) => {
 const init = (app) => {
   app.post('/api/book', wrapper(require('./book')));
   app.get('/api/user', wrapper(require('./user')));
-  app.get('/api/game', wrapper(require('./game')));
+  app.get('/api/game/:gameId', wrapper(require('./game')));
   app.get('/api/games', wrapper(require('./games')));
 };
 

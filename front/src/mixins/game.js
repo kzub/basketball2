@@ -1,9 +1,3 @@
-const mxAvailableSlots = (slots) => {
-	const len = slots.filter(s => {
-    return s.type === 'empty'
-  }).length
-  return len
-}
 
 const mxLocationInfo = function () {
   const gameId = this.$router.currentRoute.query.gameId && Number(this.$router.currentRoute.query.gameId)
@@ -56,7 +50,6 @@ export default {
     mxLocationInfo,
   },
   methods: {
-    mxAvailableSlots,
     mxGameInfo,
     mxReservationInfo,
   }

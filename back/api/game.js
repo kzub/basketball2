@@ -1,8 +1,10 @@
-const db = require('./dbemulator');
-
 const game = async (req, res) => {
-	const games = await db.getGameData();
-	res.status(200).send(games);
+	if (!isFinite(req.params.gameId)) {
+		throw new Error('api.game: gameId not number')
+	}
+	
+	const game = await req.dal.games.getGame(req.params.gameId);
+	res.status(200).send(game);
 };
 
 module.exports = game;

@@ -6,7 +6,8 @@ const Store = (Vuex) => {
     state: {
       user: undefined,
       games: [],
-      updated: false,
+      gameDetails: undefined,
+      viewDataUpdated: false,
     },
     mutations,
     actions,

@@ -5,7 +5,7 @@
     <Games :games="games"/>
 
     <b-btn class="btn-lg mt-4 rounded-0" block 
-    href="tg://resolve?domain=playbasket" variant="outline-secondary">
+    :href="link" variant="outline-secondary">
       Наш чат в телеграм
     </b-btn>
   </div>
@@ -13,14 +13,11 @@
 
 <script>
 
-// import Playground from './Playground.vue'
 import Games from './Games.vue'
 import Auth from './Auth.vue'
-// import GameUtils from '../mixins/game.js'
   
 export default {
   name: 'Main',
-  // mixins: [GameUtils],
   components: {
     Games,
     Auth,
@@ -29,6 +26,9 @@ export default {
     games () {
       return this.$store.state.games
     },
+    link () {
+      return 'tg://resolve?domain=playbasket'
+    }
   },
   methods: {
   },
