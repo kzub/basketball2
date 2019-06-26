@@ -2,9 +2,9 @@ import axios from 'axios'
 
 const bookSlot = ({ commit, state }, bookInfo) => {
   console.log('actions::bookSlot', bookInfo)
-  return axios.post(`/api/v2/book?userId=${state.user.userId}&gameId=${bookInfo.gameId}`, { bookInfo })
+  return axios.post(`/api/book?userId=${state.user.userId}&gameId=${bookInfo.gameId}`, { bookInfo })
   .then((result) => {
-    console.log('/api/v2/book result:', result.data)
+    console.log('/api/book result:', result.data)
     throw 'test err'
     commit('bookSlot', result.data.rsvId)
     return result.data
@@ -20,14 +20,14 @@ const updateGamesData = ({ commit, state }) => {
   console.log('actions::updateGamesData')
   commit('setUpdatedFlag', false)
   return axios
-    .get(`/api/v2/games`)
+    .get(`/api/games`)
     .then(response => {
-      console.log('/api/v2/games response:', response.data);
+      console.log('/api/games response:', response.data);
       commit('games', response.data);
       commit('setUpdatedFlag', true)
     })
     .catch(error => {
-      console.log('/api/v2/games error:', error);
+      console.log('/api/games error:', error);
       commit('games', []);
       commit('setUpdatedFlag', true)
     });
@@ -37,14 +37,14 @@ const updateGameData = ({ commit, state }, gameId) => {
   console.log('actions::updateGameData', gameId)
   commit('setUpdatedFlag', false)
   return axios
-    .get(`/api/v2/game/${gameId}`)
+    .get(`/api/game/${gameId}`)
     .then(response => {
-      console.log(`/api/v2/game/${gameId} response:`, response.data);
-      commit('game', gameId, response.data);
+      console.log(`/api/game/${gameId} response:`, response.data);
+      commit('gameDetails', response.data);
       commit('setUpdatedFlag', true)
     })
     .catch(error => {
-      console.log('/api/v2/games error:', error);
+      console.log('/api/games error:', error);
       commit('setUpdatedFlag', true)
     });
 };
@@ -52,20 +52,20 @@ const updateGameData = ({ commit, state }, gameId) => {
 const getUserInfo = ({ commit, state }) => {
   console.log('actions::getUserInfo')
   return axios
-    .get(`/api/v2/user`)
+    .get(`/api/user`)
     .then(response => {
-      console.log('/api/v2/user response:', response.data);
+      console.log('/api/user response:', response.data);
       commit('user', response.data);
     })
     .catch(error => {
-      console.log('/api/v2/user error:', error);
+      console.log('/api/user error:', error);
     });
 };
 
 const init = ({ commit, state, dispatch }) => {
   console.log('actions::init')
-  dispatch('getUserInfo').then(
-  dispatch('updateGamesData'))
+  dispatch('getUserInfo')
+  // .then(dispatch('updateGamesData'))
 }
 
 export default {

@@ -10,6 +10,7 @@ log.info(`use config.sqlite.filename: ${config.sqlite.filename}`);
 
 db.serialize();
 db.run(`CREATE TABLE IF NOT EXISTS bookings (
+  ts INTEGER DEFAULT CURRENT_TIMESTAMP NOT NULL,
   bookId INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
   gameId INTEGER NOT NULL,
   userId INTEGER NOT NULL,
@@ -17,20 +18,6 @@ db.run(`CREATE TABLE IF NOT EXISTS bookings (
   paymentAmount INT,
   paymentStatus TEXT NOT NULL,
   status TEXT NOT NULL
-)`);
-
-db.run(`CREATE TABLE IF NOT EXISTS games (
-  gameId INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, 
-  placeId INTEGER NOT NULL,
-  time TEXT NOT NULL,
-  date DATETIME NOT NULL,
-  organizerId INTEGER NOT NULL,
-  bookingSlots INTEGER NOT NULL,
-  reservingSlots INTEGER NOT NULL,
-  status TEXT NOT NULL,
-  paymentType TEXT NOT NULL,
-  paymentAmount INTEGER NOT NULL,
-  props TEXT NOT NULL DEFAULT '{}'
 )`);
 
 db.run(`CREATE TABLE IF NOT EXISTS places (
@@ -47,11 +34,26 @@ db.run(`CREATE TABLE IF NOT EXISTS users (
   phone TEXT NOT NULL
 )`);
 
+db.run(`CREATE TABLE IF NOT EXISTS games (
+  gameId INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+  placeId INTEGER NOT NULL,
+  date DATETIME NOT NULL,
+  timeStart TEXT NOT NULL,
+  timeEnd TEXT NOT NULL,
+  organizerId INTEGER NOT NULL,
+  playerSlots INTEGER NOT NULL,
+  waiterSlots INTEGER NOT NULL,
+  status TEXT NOT NULL,
+  paymentType TEXT NOT NULL,
+  paymentAmount INTEGER NOT NULL,
+  props TEXT NOT NULL DEFAULT '{}'
+)`);
+
 const promiseSQL = (dalLog, cmd, query, ...rest) => {
   dalLog.info(query);
   return new Promise(function (fulfill, reject){
     db[cmd](query, ...rest, function (err, res){
-      // log.info(`FIN: ${err} ${res} ${this}`);
+      // dalLog.info(`FIN: ${err} ${JSON.stringify(res, null, 2)} ${this}`);
       if (err) reject(err);
       else fulfill({
         statement: this,
@@ -73,5 +75,5 @@ const execSQL = (name) => {
 };
 
 module.exports = {
-  games: require('./games').init(execSQL('DAL_GAMES')),
+  games: require('./dal.games').init(execSQL('DAL_GAMES')),
 };

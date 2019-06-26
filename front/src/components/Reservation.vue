@@ -21,7 +21,7 @@
       </b-button>
       <b-button v-else class="mx-5 mt-2 mb-3 justify-content-center" variant="warning">
         НЕ ОПЛАЧЕНО
-        <div v-if="game.payment.type === 'prepay'" class="btn-danger">
+        <div v-if="game.paymentType === 'prepay'" class="btn-danger">
           (бронь действует до...)
         </div>
       </b-button>
@@ -76,10 +76,10 @@
           </div>
           <!-- users action buttons -->
           <div v-else class="mt-3 d-flex flex-column">
-            <b-btn v-if="game.payment.type === 'prepay' && reservation.type !== 'paid'" class="my-1" type="submit" variant="success">
+            <b-btn v-if="game.paymentType === 'prepay' && reservation.type !== 'paid'" class="my-1" type="submit" variant="success">
               Оплатить
             </b-btn>
-            <b-btn v-if="game.payment.type === 'manualPay' && reservation.type !== 'paid'" class="my-1" type="submit" variant="success">
+            <b-btn v-if="game.paymentType === 'manualPay' && reservation.type !== 'paid'" class="my-1" type="submit" variant="success">
               Сообщить об оплате
             </b-btn>
 
@@ -141,7 +141,7 @@ export default {
       return this.mxReservationInfo(this.mxLocationInfo.gameId, this.mxLocationInfo.rsvId)
     },
     isCancelable: function () {
-      return !(this.game.payment.type === 'prepay' && reservation.type === 'paid')
+      return !(this.game.paymentType === 'prepay' && reservation.type === 'paid')
     },
     user () {
       return this.$store.state.user
