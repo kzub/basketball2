@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div v-if="!game || !reservation" class="my-2">
+    <div v-if="!mxGameDetails || !mxBookInfo" class="my-2">
       <div class="d-flex justify-content-center">
         <div class="spinner-border" role="status">
           <span class="sr-only">Загружается...</span>
@@ -14,15 +14,18 @@
       </b-btn>
 
       <!-- game and payment info -->
-      <GameInfo :game="game"/>
+      <GameInfo :game="mxGameDetails.game" show="place,time"/>
+      <GameInfo :game="mxGameDetails.game" show="organizer"/>
+      <GameInfo :game="mxGameDetails.game" show="payment"/>
 
-      <b-button class="w-50 mt-2 mb-3" v-if="reservation.type === 'paid'" variant="success">
+      <b-button class="w-75 mt-3 mb-3 p-3" v-if="mxBookInfo.paymentStatus === 'paid'" variant="success">
         ОПЛАЧЕНО
       </b-button>
-      <b-button v-else class="mx-5 mt-2 mb-3 justify-content-center" variant="warning">
+      <b-button v-else class="w-75 mt-3 mb-3 justify-content-center" variant="danger">
         НЕ ОПЛАЧЕНО
-        <div v-if="game.paymentType === 'prepay'" class="btn-danger">
+        <div v-if="mxGameDetails.game.paymentType === 'prepay' && mxBookInfo.status !== 'booked'" class="btn-danger">
           (бронь действует до...)
+          {{mxBookInfo.ts}}
         </div>
       </b-button>
 
@@ -37,25 +40,24 @@
                             type="text"
                             v-model="form.name"
                             required
-                            placeholder="Фамилия и имя"
-                            :value="reservation.text">
+                            placeholder="Фамилия и имя">
               </b-form-input>
             </b-form-group>
-            <b-form-group id="phoneNumber"
+            <b-form-group v-if="isAdmin" id="phoneNumber"
                             label-for="userPhone">
                 <b-form-input id="userPhone"
                               type="number"
                               v-model="form.phone"
                               required
                               disabled
-                              placeholder="Введите телефон"
-                              :value="isAdmin?reservation.phone:user.phone">
+                              placeholder="Номер телефона">
                 </b-form-input>
               </b-form-group>
           </div>
           <hr/>
+
           <!-- waitlist warning -->
-          <div v-if="mxLocationInfo.slotType == 'empty-backup'">
+          <div v-if="mxBookInfo.type == 'waiter'">
             <div class="btn-danger py-1 px-1 rounded">
               Резерв, на случай, если кто-то откажется
             </div>
@@ -65,7 +67,7 @@
           <div v-if="isAdmin" class="mt-3 d-flex flex-column">
             <b-btn class="my-1" type="submit" variant="primary">Изменить имя</b-btn>
 
-            <b-btn v-if="reservation.type === 'paid'" class="my-1" type="submit" variant="warning">
+            <b-btn v-if="mxBookInfo.paymentStatus === 'paid'" class="my-1" type="submit" variant="warning">
               Пометить не оплаченным
             </b-btn>
             <b-btn v-else class="my-1" type="submit" variant="success">
@@ -74,19 +76,20 @@
 
             <b-btn class="my-1" variant="danger" v-b-modal.ackModal>Удалить запись</b-btn>
           </div>
+
           <!-- users action buttons -->
           <div v-else class="mt-3 d-flex flex-column">
-            <b-btn v-if="game.paymentType === 'prepay' && reservation.type !== 'paid'" class="my-1" type="submit" variant="success">
+            <b-btn v-if="mxGameDetails.game.paymentType === 'prepay' && mxBookInfo.paymentStatus !== 'paid'" class="my-1" type="submit" variant="success">
               Оплатить
             </b-btn>
-            <b-btn v-if="game.paymentType === 'manualPay' && reservation.type !== 'paid'" class="my-1" type="submit" variant="success">
+            <b-btn v-if="mxGameDetails.game.paymentType === 'manual' && mxBookInfo.paymentStatus !== 'paid'" class="my-1" type="submit" variant="success">
               Сообщить об оплате
             </b-btn>
 
             <b-btn class="my-1" type="submit" variant="primary">
               Изменить имя
             </b-btn>
-            <b-btn v-if="reservation.type !== 'paid'" class="my-1" variant="danger" v-b-modal.ackModal>
+            <b-btn v-if="mxBookInfo.paymentStatus !== 'paid'" class="my-1" variant="danger" v-b-modal.ackModal>
                 Отказаться от записи
             </b-btn>
           </div>
@@ -120,28 +123,27 @@ export default {
     Organizer,
     GameInfo,
   },
-  data () {
-    return {
-      form: {
-        phone: '',
-        name: '',
-        code: '',
-      },
-    }
-  },
   computed: {
+    form: function () {
+      return {
+        phone: this.bookingPhone,
+        name: this.mxBookInfo.playerName,
+        code: '',
+      }
+    },
     isAdmin: function () {
-      const game = this.mxGameInfo(this.mxLocationInfo.gameId)
-      return this.$store.state.user.userId === game.organizer.userId
+      return this.$store.state.user && this.$store.state.user.userId === this.mxGameDetails.game.organizer.userId
     },
-    game: function() {
-      return this.mxGameInfo(this.mxLocationInfo.gameId)
-    },
-    reservation: function() {
-      return this.mxReservationInfo(this.mxLocationInfo.gameId, this.mxLocationInfo.rsvId)
+    bookingPhone: function () {
+      if (this.$store.state.gameDetails && this.$store.state.gameDetails.users) {
+        return this.$store.state.gameDetails.users.filter(u =>
+          u.userId === this.mxBookInfo.userId)[0]
+        .phone
+      }
+      return this.$store.state.user && this.$store.state.user.phone
     },
     isCancelable: function () {
-      return !(this.game.paymentType === 'prepay' && reservation.type === 'paid')
+      return !(this.game.paymentType === 'prepay' && this.mxBookInfo.type === 'paid')
     },
     user () {
       return this.$store.state.user

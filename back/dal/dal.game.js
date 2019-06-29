@@ -4,26 +4,39 @@ const { Game, GameDetails, GameSlot, Place, User } = require('./types');
 let log;
 let execSQL;
 const getGame = async (gameId) => {
-  const games = await execSQL.all(`SELECT * FROM games WHERE gameId = ${gameId}`);
+  const games = await execSQL.all(`SELECT g.*, usedPlayerSlots FROM games g
+    LEFT JOIN (
+      SELECT gameId, count(*) usedPlayerSlots from bookings
+      WHERE status IN ('booked', 'reserved')
+      AND gameId = ${gameId}
+      GROUP BY gameId
+    ) bk ON g.gameId = bk.gameId
+    WHERE g.gameId = ${gameId}`
+  );
   if (games.length !== 1) {
     throw new Error(`getGame(): cannot find game with gameId:${gameId}`);
   }
+
   const game = games[0];
-
-  const allBookings = await execSQL.all(`SELECT * FROM bookings WHERE gameId = ${gameId}`);
-  const players = allBookings.filter(b => ['paying', 'booked'].indexOf(b.status) > -1);
-  const waiters = allBookings.filter(b => b.status == 'waiting');
-
   const place = (await getPlaces([game.placeId]))[0];
   const organizer = (await getUsers([game.organizerId]))[0];
 
-  const gameDetails = new GameDetails(
-    new Game({
+  return new Game({
       ...game,
-      usedPlayerSlots: players.length,
       place,
       organizer,
-    }),
+    });
+  }
+
+const getGameDetails = async (game) => {
+  const allBookings = await execSQL.all(`SELECT * FROM bookings 
+    WHERE gameId = ${game.gameId}`
+  );
+  const players = allBookings.filter(b => ['reserved', 'booked'].indexOf(b.status) > -1);
+  const waiters = allBookings.filter(b => b.status == 'waiting');
+
+  return new GameDetails(
+    game,
     players.map(pl => ({ ...pl, type: 'player'})).map(pl => new GameSlot(pl)),
     waiters.map(wt => ({ ...wt, type: 'waiter'})).map(wt => new GameSlot(wt)),
   );
@@ -52,7 +65,7 @@ const getGamesList = async (props = {}) => {
   let games = await execSQL.all(`SELECT g.*, usedPlayerSlots FROM games g
     LEFT JOIN (
       SELECT gameId, count(*) usedPlayerSlots from bookings
-      WHERE status IN ('booked', 'paying')
+      WHERE status IN ('booked', 'reserved')
       GROUP BY gameId
     ) bk ON g.gameId = bk.gameId
     WHERE date >= "${today.toJSON().slice(0,10)}"
@@ -92,6 +105,7 @@ module.exports = {
     return {
       getGamesList,
       getGame,
+      getGameDetails,
     };
   }
 };
