@@ -58,12 +58,13 @@ function GameDetails (game, players, waiters) {
 
   for (let i = players.length; i < game.playerSlots; i++) {
     this.players.push(new GameSlot({
+      ts: 0,
       bookId: 0,
       gameId: game.gameId,
       userId: 0,
       playerName: 'Забронировать',
       paymentAmount: 0,
-      paymentStatus: 'unpayed',
+      paymentStatus: 'unpaid',
       type: 'player',
       status: 'free',
     }))
@@ -71,12 +72,13 @@ function GameDetails (game, players, waiters) {
 
   for (let i = waiters.length; i < game.waiterSlots; i++) {
     this.waiters.push(new GameSlot({
+      ts: 0,
       bookId: 0,
       gameId: game.gameId,
       userId: 0,
       playerName: 'Занять очередь',
       paymentAmount: 0,
-      paymentStatus: 'unpayed',
+      paymentStatus: 'unpaid',
       type: 'waiter',
       status: 'free',
     }))
@@ -109,6 +111,7 @@ function User (obj) {
 }
 
 function GameSlot (obj) {
+  this.ts = Number(obj.ts);
   this.bookId = Number(obj.bookId);
   this.gameId = Number(obj.gameId);
   this.userId = Number(obj.userId);
@@ -118,6 +121,7 @@ function GameSlot (obj) {
   this.type = String(obj.type);
   this.status = String(obj.status);
 
+  if (typeof(this.ts) !== 'number' || isNaN(this.ts)) throw new Error(`GameSlot constructor: bad ts`);
   if (typeof(this.bookId) !== 'number' || isNaN(this.bookId)) throw new Error(`GameSlot constructor: bad bookId`);
   if (typeof(this.gameId) !== 'number' || isNaN(this.gameId)) throw new Error(`GameSlot constructor: bad gameId`);
   if (typeof(this.userId) !== 'number' || isNaN(this.userId)) throw new Error(`GameSlot constructor: bad userId`);

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div v-if="!gameDetails || !viewDataUpdated" class="my-2">
+    <div v-if="!mxGameDetails || !viewDataUpdated" class="my-2">
       <div class="d-flex justify-content-center flex-wrap-reverse loader">
         <div class="spinner-border" role="status">
           <span class="sr-only">Загружается...</span>
@@ -13,9 +13,9 @@
       </b-btn>
 
       <!-- game and payment info -->
-      <GameInfo :game="gameDetails.game" show="place,time"/>
+      <GameInfo :game="mxGameDetails.game" show="place,time"/>
 
-      <div v-if="gameDetails.game.freePlayerSlots == 0" class="card-title btn-danger rounded mt-2 mb-3 py-2">
+      <div v-if="mxGameDetails.game.freePlayerSlots == 0" class="card-title btn-danger rounded mt-2 mb-3 py-2">
         Свободных мест нет
       </div>
 
@@ -23,14 +23,14 @@
         Режим администратора
       </div>
 
-      <div v-if="gameDetails.game.status === 'poll'" class="m-1 p-2 rounded manualBookMode">
+      <div v-if="mxGameDetails.game.status === 'poll'" class="m-1 p-2 rounded manualBookMode">
         Предварительная запись
       </div>
 
       <div>
         <div class="text-left m-2">Список игроков:</div>
-        <div v-for="(slot, index) in gameDetails.players" :key="'p'+index">
-          <router-link class="d-flex" :to="goLink(gameDetails.game, slot)" tag="div">
+        <div v-for="(slot, index) in mxGameDetails.players" :key="'p'+index">
+          <router-link class="d-flex" :to="goLink(mxGameDetails.game, slot)" tag="div">
             <b-button href="#" class="m-1 slot" :variant="bgColors[slot.type + slot.status]">
               {{ slot.playerName }}
             </b-button>
@@ -40,11 +40,11 @@
           </router-link>
         </div>
         
-        <div v-if="gameDetails.waiters.length">
+        <div v-if="mxGameDetails.waiters.length">
           <hr/>
           <div class="text-left m-2">Список запасных:</div>
-          <div v-for="(slot, index) in gameDetails.waiters" :key="'r'+index">
-            <router-link class="d-flex" :to="goLink(gameDetails.game, slot)" tag="div">
+          <div v-for="(slot, index) in mxGameDetails.waiters" :key="'r'+index">
+            <router-link class="d-flex" :to="goLink(mxGameDetails.game, slot)" tag="div">
               <b-button href="#" class="m-1 slot" :variant="bgColors[slot.type + slot.status]">
                 {{ slot.playerName }}
               </b-button>
@@ -56,14 +56,15 @@
         </div>
       </div>
 
-      <GameInfo :game="gameDetails.game" show="organizer,payment"/>
-
+      <hr/>
+      <GameInfo :game="mxGameDetails.game" show="organizer,payment"/>
+      <hr/>
       <div class="mt-4 mb-5">
         <!-- <div class="text-left m-2">Дополнительная информация:</div> -->
 
         <!-- <b-collapse :id="'collapsePlace' + game.gameId" class="mt-4"> -->
-        <p class="card-text">{{ gameDetails.game.place.description }}</p>
-        <a :href="'https://www.google.com/maps/search/' + gameDetails.game.place.position +'/'">Координаты входа</a>
+        <p class="card-text">{{ mxGameDetails.game.place.description }}</p>
+        <a :href="'https://www.google.com/maps/search/' + mxGameDetails.game.place.position +'/'">Координаты входа</a>
         <b-btn class="mt-2" block href="tg://join?invite=CE3oJA6vM82vZHQXf03yyA" variant="link">
           Чат площаки
         </b-btn>
@@ -95,7 +96,7 @@ export default {
       bgColors: {
         'playerfree': 'primary',
         'playerbooked': 'success',
-        'playerpaying': 'warning',
+        'playerreserved': 'warning',
         'waiterfree': 'secondary',
         'waiterbooked': 'secondary',
       },
@@ -104,7 +105,7 @@ export default {
   computed: {
     isAdmin () {
       return this.$store.state.user && 
-        this.$store.state.user.userId === this.gameDetails.game.organizer.userId
+        this.$store.state.user.userId === this.mxGameDetails.game.organizer.userId
     },
     user () {
       return this.$store.state.user
@@ -112,9 +113,9 @@ export default {
     viewDataUpdated () {
       return this.$store.state.viewDataUpdated
     },
-    gameDetails () {
-      return this.$store.state.gameDetails
-    },
+    // mxGameDetails () {
+    //   return this.$store.state.mxGameDetails
+    // },
   },
   methods: {
     back: function() {

@@ -75,5 +75,6 @@ const execSQL = (name) => {
 };
 
 module.exports = {
-  games: require('./dal.games').init(execSQL('DAL_GAMES')),
+  game: require('./dal.game').init(execSQL('DAL_GAME')),
+  user: require('./dal.user').init(execSQL('DAL_USER')),
 };

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div v-if="!gameDetails" class="my-2">
+    <div v-if="!mxGameDetails" class="my-2">
       <div class="d-flex justify-content-center">
         <div class="spinner-border" role="status">
           <span class="sr-only">Загружается...</span>
@@ -13,8 +13,8 @@
         Назад
       </b-btn>
 
-      <GameInfo :game="gameDetails.game" show="place,time"/>
-      <GameInfo :game="gameDetails.game" show="organizer,payment"/>
+      <GameInfo :game="mxGameDetails.game" show="place,time"/>
+      <GameInfo :game="mxGameDetails.game" show="organizer,payment"/>
 
       <div v-if="!booking" class="mx-2 mt-5">
         <b-btn class="w-100 btn-lg" @click="bookSlot" variant="success">
@@ -55,13 +55,6 @@ export default {
     };
   },
   computed: {
-    gameDetails () {
-      if (!this.$store.state.gameDetails || 
-        this.mxLocationInfo.gameId !== this.$store.state.gameDetails.game.gameId) {
-          this.$store.dispatch('updateGameData', this.mxLocationInfo.gameId);
-      }
-      return this.$store.state.gameDetails
-    },
     user () {
       return this.$store.state.user
     },
@@ -77,17 +70,17 @@ export default {
     },
     bookSlot: function() {
       this.booking = true
-      const { gameDetails, user } = this
+      const { mxGameDetails, user } = this
 
       this.$store.dispatch('bookSlot', {
-        gameId: gameDetails.game.gameId,
+        gameId: mxGameDetails.game.gameId,
         userId: user.userId,
       })
       .then((data) => {
         this.$router.push({
           path: '/reservation',
           query: {
-            gameId: gameDetails.game.gameId,
+            gameId: mxGameDetails.game.gameId,
             rsvId: data.rsvId,
           }
         });
@@ -102,7 +95,7 @@ export default {
       this.$router.push({
           path: '/game',
           query: {
-            gameId: this.gameDetails.game.gameId,
+            gameId: this.mxGameDetails.game.gameId,
           }
         });
     }
