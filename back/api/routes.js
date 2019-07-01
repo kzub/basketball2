@@ -1,6 +1,19 @@
-const wrapper = (func) => {
+const user = require('./user');
+const book = require('./book');
+const game = require('./game');
+const games = require('./games');
+
+const wrapper = (func, needAuth) => {
   return (req, res, ...args) => {
-    func(req, res, ...args).catch(err => {
+    if (needAuth && !req.userId) {
+      res.status(401).send({
+        error: true,
+        message: 'no auth',
+      });
+      return;
+    }
+    func(req, res, ...args)
+    .catch(err => {
       req.log.error(`${err.message}\n${err.stack}`);
       res.status(500).send(err.message);
     });
@@ -8,10 +21,13 @@ const wrapper = (func) => {
 };
 
 const init = (app) => {
-  app.post('/api/book', wrapper(require('./book')));
-  app.get('/api/user', wrapper(require('./user')));
-  app.get('/api/game/:gameId', wrapper(require('./game')));
-  app.get('/api/games', wrapper(require('./games')));
+  app.post('/api/book', wrapper(book, true));
+  app.get('/api/user/get', wrapper(user.get, true));
+  app.get('/api/user/set/:name', wrapper(user.set, true));
+  app.get('/api/user/verify/:phone', wrapper(user.verify, false));
+  app.get('/api/user/auth/:phone/:code', wrapper(user.auth, false));
+  app.get('/api/game/:gameId', wrapper(game, false));
+  app.get('/api/games', wrapper(games, false));
 };
 
 module.exports = { init };

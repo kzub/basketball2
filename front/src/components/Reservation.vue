@@ -18,14 +18,16 @@
       <GameInfo :game="mxGameDetails.game" show="organizer"/>
       <GameInfo :game="mxGameDetails.game" show="payment"/>
 
-      <b-button class="w-75 mt-3 mb-3 p-3" v-if="mxBookInfo.paymentStatus === 'paid'" variant="success">
+      <b-button class="w-75 mt-3 mb-3 p-3 justify-content-center" v-if="mxBookInfo.paymentStatus === 'paid'" variant="success">
         ОПЛАЧЕНО
       </b-button>
-      <b-button v-else class="w-75 mt-3 mb-3 justify-content-center" variant="danger">
+      <b-button v-else class="w-75 mt-3 mb-3 p-3 justify-content-center" variant="danger">
         НЕ ОПЛАЧЕНО
-        <div v-if="mxGameDetails.game.paymentType === 'prepay' && mxBookInfo.status !== 'booked'" class="btn-danger">
-          (бронь действует до...)
-          {{mxBookInfo.ts}}
+        <div v-if="mxGameDetails.game.paymentType === 'prepay' && 
+                   mxBookInfo.status !== 'booked'"
+             class="btn-danger">
+             <hr style="background-color: white"/>
+          на оплату есть {{ mxMinutesTo(mxBookInfo.ts) }}
         </div>
       </b-button>
 
@@ -67,7 +69,8 @@
           <div v-if="isAdmin" class="mt-3 d-flex flex-column">
             <b-btn class="my-1" type="submit" variant="primary">Изменить имя</b-btn>
 
-            <b-btn v-if="mxBookInfo.paymentStatus === 'paid'" class="my-1" type="submit" variant="warning">
+            <b-btn v-if="mxBookInfo.paymentStatus === 'paid'" 
+                   class="my-1" type="submit" variant="warning">
               Пометить не оплаченным
             </b-btn>
             <b-btn v-else class="my-1" type="submit" variant="success">
@@ -79,17 +82,25 @@
 
           <!-- users action buttons -->
           <div v-else class="mt-3 d-flex flex-column">
-            <b-btn v-if="mxGameDetails.game.paymentType === 'prepay' && mxBookInfo.paymentStatus !== 'paid'" class="my-1" type="submit" variant="success">
+            <b-btn v-if="mxGameDetails.game.paymentType === 'prepay' && 
+                         mxBookInfo.paymentStatus !== 'paid'"
+                         class="my-1" type="submit" variant="success">
               Оплатить
             </b-btn>
-            <b-btn v-if="mxGameDetails.game.paymentType === 'manual' && mxBookInfo.paymentStatus !== 'paid'" class="my-1" type="submit" variant="success">
+            <b-btn v-if="mxGameDetails.game.status == 'settled' && 
+                         mxGameDetails.game.paymentType === 'shared' && 
+                         mxBookInfo.paymentStatus !== 'paid'" 
+                         class="my-1" type="submit" variant="success">
               Сообщить об оплате
             </b-btn>
-
             <b-btn class="my-1" type="submit" variant="primary">
               Изменить имя
             </b-btn>
-            <b-btn v-if="mxBookInfo.paymentStatus !== 'paid'" class="my-1" variant="danger" v-b-modal.ackModal>
+            <b-btn v-if="(mxGameDetails.game.paymentType === 'prepay' &&
+                         mxBookInfo.paymentStatus !== 'paid')  || 
+                         (mxGameDetails.game.paymentType === 'shared' &&
+                         mxGameDetails.game.status !== 'settled')"
+                         class="my-1" variant="danger" v-b-modal.ackModal>
                 Отказаться от записи
             </b-btn>
           </div>

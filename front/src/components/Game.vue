@@ -31,7 +31,7 @@
         <div class="text-left m-2">Список игроков:</div>
         <div v-for="(slot, index) in mxGameDetails.players" :key="'p'+index">
           <router-link class="d-flex" :to="goLink(mxGameDetails.game, slot)" tag="div">
-            <b-button href="#" class="m-1 slot" :variant="bgColors[slot.type + slot.status]">
+            <b-button href="#" class="m-1 slot" :variant="playerColor(slot)">
               {{ slot.playerName }}
             </b-button>
             <div v-if="modifyAllowed(slot)" class="arrow">
@@ -45,7 +45,7 @@
           <div class="text-left m-2">Список запасных:</div>
           <div v-for="(slot, index) in mxGameDetails.waiters" :key="'r'+index">
             <router-link class="d-flex" :to="goLink(mxGameDetails.game, slot)" tag="div">
-              <b-button href="#" class="m-1 slot" :variant="bgColors[slot.type + slot.status]">
+              <b-button href="#" class="m-1 slot" :variant="playerColor(slot)">
                 {{ slot.playerName }}
               </b-button>
               <div v-if="modifyAllowed(slot)" class="arrow">
@@ -91,17 +91,6 @@ export default {
   mounted: function(){
     this.$store.dispatch('updateGameData', this.mxLocationInfo.gameId);
   },
-  data: function() {
-    return  {
-      bgColors: {
-        'playerfree': 'primary',
-        'playerbooked': 'success',
-        'playerreserved': 'warning',
-        'waiterfree': 'secondary',
-        'waiterbooked': 'secondary',
-      },
-    }
-  },
   computed: {
     isAdmin () {
       return this.$store.state.user && 
@@ -113,11 +102,21 @@ export default {
     viewDataUpdated () {
       return this.$store.state.viewDataUpdated
     },
-    // mxGameDetails () {
-    //   return this.$store.state.mxGameDetails
-    // },
   },
   methods: {
+    playerColor: function (slot) {
+      if (slot.type == 'player') {
+        if (this.mxGameDetails.game.paymentType == 'shared') {
+          if (slot.status == 'booked' && slot.paymentStatus == 'unpaid') return 'warning'
+        }
+        if (slot.status == 'free') return 'primary'
+        if (slot.status == 'booked') return 'success'
+        if (slot.status == 'reserved') return 'warning'
+      }
+      if (slot.type == 'waiter') {
+        return slot.status == 'free' ? 'outline-secondary' : 'secondary'
+      }
+    },
     back: function() {
       this.$router.push({
         path: '/',

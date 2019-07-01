@@ -47,10 +47,14 @@
 		"sqlite": {
 			"filename": "basket.dev.db"
 		},
-
 		"admin": {
 			"password": "zk",
 			"netPrice": "friend"
+		},
+		"auth": {
+			"algorithm": "aes-128-cbc",
+			"key": "kjdwoSSid3effh34#$dshfh3dsdjfhs2",
+			"salt": "i3u4t03jf"
 		}
 	}
 }

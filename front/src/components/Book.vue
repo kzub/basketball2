@@ -16,8 +16,8 @@
       <GameInfo :game="mxGameDetails.game" show="place,time"/>
       <GameInfo :game="mxGameDetails.game" show="organizer,payment"/>
 
-      <div v-if="!booking" class="mx-2 mt-5">
-        <b-btn class="w-100 btn-lg" @click="bookSlot" variant="success">
+      <div v-if="!booking" class="mb-4 px-3 mt-4 d-flex flex-column">
+        <b-btn class="my-1" @click="bookSlot" variant="success">
           Забронировать
         </b-btn>
       </div>
@@ -70,20 +70,22 @@ export default {
     },
     bookSlot: function() {
       this.booking = true
-      const { mxGameDetails, user } = this
+      const { mxGameDetails, mxLocationInfo, user } = this
 
-      this.$store.dispatch('bookSlot', {
-        gameId: mxGameDetails.game.gameId,
-        userId: user.userId,
-      })
+      this.$store.dispatch('bookSlot', { ...mxLocationInfo })
       .then((data) => {
-        this.$router.push({
-          path: '/reservation',
-          query: {
-            gameId: mxGameDetails.game.gameId,
-            rsvId: data.rsvId,
-          }
-        });
+        if (data.result == 'booked') {
+
+          this.$router.push({
+            path: '/reservation',
+            query: {
+              gameId: data.gameId,
+              bookId: data.bookId,
+            }
+          });
+          return;
+        }
+        throw new Error('Cannot book')
       })
       .catch(error => {
         // console.log('/api/v2/book error:', error)

@@ -2,11 +2,10 @@ import axios from 'axios'
 
 const bookSlot = ({ commit, state }, bookInfo) => {
   console.log('actions::bookSlot', bookInfo)
-  return axios.post(`/api/book?userId=${state.user.userId}&gameId=${bookInfo.gameId}`, { bookInfo })
+  return axios.post(`/api/book?userId=${state.user.userId}&gameId=${bookInfo.gameId}`, { ...bookInfo })
   .then((result) => {
     console.log('/api/book result:', result.data)
-    throw 'test err'
-    commit('bookSlot', result.data.rsvId)
+    // commit('bookSlot', result.data.bookId)
     return result.data
   }).catch(err => {
     console.log('woho err:', err.message)
@@ -52,13 +51,13 @@ const updateGameData = ({ commit, state }, gameId) => {
 const getUserInfo = ({ commit, state }) => {
   console.log('actions::getUserInfo')
   return axios
-    .get(`/api/user`)
+    .get(`/api/user/get`)
     .then(response => {
-      console.log('/api/user response:', response.data);
+      console.log('/api/user/get response:', response.data);
       commit('user', response.data);
     })
     .catch(error => {
-      console.log('/api/user error:', error);
+      console.log('/api/user/get error:', error);
     });
 };
 

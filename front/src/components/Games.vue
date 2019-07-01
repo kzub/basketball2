@@ -99,7 +99,7 @@ export default {
 <style scoped>
 .userIsAdmin {
   /*border: 2px dotted #dc3545;*/
-  border-left: 10px solid #dc3545;
+  border-left: 10px solid #dc3545 !important;
 }
 .pollMode {
   /*border-left: 5px solid #dc3545;*/
