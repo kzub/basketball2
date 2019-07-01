@@ -1,9 +1,12 @@
-const book = (req, res) => {
+const book = async (req, res) => {
+  req.log.info(`book: ${JSON.stringify(req.body)}`);
+
   res
     .status(200)
     .send({
       result: 'booked',
-      rsvId: 12318,
+      gameId: 1,
+      bookId: 3,
     });
 };
 

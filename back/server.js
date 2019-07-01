@@ -1,30 +1,33 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const cookieParser = require('cookie-parser')
 const uuid = require('uuid');
+
 
 const dal = require('./dal/dal');
 const apiRoutes = require('./api/routes');
 const utils = require('./utils/misc');
 const logger = require('./utils/logger');
-
+const auth = require('./utils/auth');
 const log = logger.create('SERVER');
 const config = utils.getConfig();
 const app = express();
 
 app.use(bodyParser.json()); // support json encoded bodies
 app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
+app.use(cookieParser());
 
 app.use((req, res, next) => {
   const start = Date.now();
   req.id = uuid.v4().slice(0, 8);
-  req.userId = 'userId?';
+  req.userId = auth.decode(req.cookies.auth);
   req.log = logger.create(undefined, req);
   req.dal = dal;
 
-  req.log.info(`request: ${req.path}`);
+  req.log.info(`request ${req.path}`);
   req.on('end', () => {
     const time = Date.now() - start;
-    req.log.info(`request [${res.statusCode}]: ${req.path} (${time}ms)`);
+    req.log.info(`response [${res.statusCode}] ${time}ms`);
   });
   next();
 });

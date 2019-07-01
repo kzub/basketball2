@@ -14,6 +14,7 @@ const mxGameDetails = function () {
   if (!this.$store.state.gameDetails ||
         locationInfo.gameId !== this.$store.state.gameDetails.game.gameId) {
           this.$store.dispatch('updateGameData', locationInfo.gameId);
+        return
       }
   return this.$store.state.gameDetails
 }

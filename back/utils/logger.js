@@ -11,9 +11,9 @@ const consoleFormat = (name, req) => format.combine(
       info.message = JSON.stringify(info.message, undefined, 2);
     }
     if (req) {
-      return `${info.timestamp} [${req.ip}] ${req.userId} [${info.level}]: ${info.message}`;
+      return `${info.timestamp} RQ ${req.id} ${req.ip} ${req.userId || 'noauth'} [${info.level}]: ${info.message}`;
     }
-    return `${info.timestamp} ${name} [${info.level}]: ${info.message}`;
+    return `${info.timestamp} INT ${name} [${info.level}]: ${info.message}`;
   })
 );
 
@@ -32,9 +32,9 @@ const jsonFormat = (name, req) => format.combine(
   }),
 );
 
-const createLogger = (logFormat, transports) => {
+const createLogger = (logFormat, transports, options) => {
   return {
-    level: 'info',
+    level: options.loglevel || 'info',
     format: logFormat,
     transports,
     exitOnError: false,
@@ -44,11 +44,25 @@ const createLogger = (logFormat, transports) => {
 const create = (name, req) => {
   let logger;
   if (dev) {
-    logger = winston.createLogger(createLogger(
-      consoleFormat(name, req), new winston.transports.Console()));
+    logger = winston.createLogger(
+      createLogger(
+        consoleFormat(name, req), 
+        new winston.transports.Console(),
+        {
+          loglevel: 'debug',
+        }
+      )
+    );
   } else {
-    logger = winston.createLogger(createLogger(
-      jsonFormat(name, req), new winston.transports.File({ filename: 'basket2.log' })));
+    logger = winston.createLogger(
+      createLogger(
+        jsonFormat(name, req),
+        new winston.transports.File({ filename: 'basket2.log' }),
+        {
+          
+        },
+      )
+    );
   }
 
   const publicLogger = {};

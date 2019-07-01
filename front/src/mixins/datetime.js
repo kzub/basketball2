@@ -15,9 +15,25 @@ const mxDateDayAndMonth = (isoDate) => {
 	return `${day} ${month}`
 }
 
+const dictMinutes = ['минут', 'минута', 'минуты', 'минуты', 'минуты', 'минут', 'минут', 'минут', 'минут', 'минут',
+										 'минут', 'минут', 'минут', 'минут', 'минут', 'минут', 'минут', 'минут', 'минут', 'минут']
+const mxMinutesTo = (timestamp) => {
+	const now = Date.now()
+	const diff =  timestamp - now
+	let minutes = Math.ceil(diff / 1000 / 60)
+	if (minutes < 0) {
+		minutes = 0
+	}
+	if (minutes < 20) {
+		return `${minutes} ${dictMinutes[minutes]}`
+	}
+	return `${minutes} ${dictMinutes[minutes % 10]}`
+}
+
 export default {
   methods: {
     mxDateWeekDay,
     mxDateDayAndMonth,
+    mxMinutesTo,
   }
 }

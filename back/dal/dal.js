@@ -34,6 +34,12 @@ db.run(`CREATE TABLE IF NOT EXISTS users (
   phone TEXT NOT NULL
 )`);
 
+db.run(`CREATE TABLE IF NOT EXISTS verifications (
+  phone TEXT PRIMARY KEY NOT NULL,
+  code TEXT NOT NULL,
+  ttl INTEGER NOT NULL
+)`);
+
 db.run(`CREATE TABLE IF NOT EXISTS games (
   gameId INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
   placeId INTEGER NOT NULL,
@@ -50,10 +56,10 @@ db.run(`CREATE TABLE IF NOT EXISTS games (
 )`);
 
 const promiseSQL = (dalLog, cmd, query, ...rest) => {
-  dalLog.info(query);
+  dalLog.debug(query);
   return new Promise(function (fulfill, reject){
     db[cmd](query, ...rest, function (err, res){
-      // dalLog.info(`FIN: ${err} ${JSON.stringify(res, null, 2)} ${this}`);
+      dalLog.debug(`FIN: ${err} ${JSON.stringify(res, null, 2)} ${JSON.stringify(this, null, 2)}`);
       if (err) reject(err);
       else fulfill({
         statement: this,

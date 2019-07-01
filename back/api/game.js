@@ -6,6 +6,7 @@ const game = async (req, res) => {
 	const game = await req.dal.game.getGame(req.params.gameId);
 	const gameDetails = await req.dal.game.getGameDetails(game);
 	
+	// todo: check if user is game admin
 	if (1 || admin) {
 		const userlist = []
 		.concat(
