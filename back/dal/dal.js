@@ -10,7 +10,7 @@ log.info(`use config.sqlite.filename: ${config.sqlite.filename}`);
 
 db.serialize();
 db.run(`CREATE TABLE IF NOT EXISTS bookings (
-  ts INTEGER DEFAULT CURRENT_TIMESTAMP NOT NULL,
+  ts INTEGER NOT NULL,
   bookId INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
   gameId INTEGER NOT NULL,
   userId INTEGER NOT NULL,
@@ -59,7 +59,7 @@ const promiseSQL = (dalLog, cmd, query, ...rest) => {
   dalLog.debug(query);
   return new Promise(function (fulfill, reject){
     db[cmd](query, ...rest, function (err, res){
-      dalLog.debug(`FIN: ${err} ${JSON.stringify(res, null, 2)} ${JSON.stringify(this, null, 2)}`);
+      dalLog.debug(`FIN: ${err} ${JSON.stringify(res, null, 2)} ${this}`);
       if (err) reject(err);
       else fulfill({
         statement: this,
@@ -74,13 +74,15 @@ const execSQL = (name) => {
   return {
     methods: {
       all: async (...rest) => (await promiseSQL(dalLog, 'all', ...rest)).result,
-      run: async (...rest) => (await promiseSQL(dalLog, 'run', ...rest)).statement,      
+      run: async (...rest) => (await promiseSQL(dalLog, 'run', ...rest)).statement,
     },
     dalLog,
   };
 };
 
-module.exports = {
-  game: require('./dal.game').init(execSQL('DAL_GAME')),
-  user: require('./dal.user').init(execSQL('DAL_USER')),
-};
+const dalInstance = {};
+dalInstance.game = require('./dal.game').init(execSQL('DAL_GAME'), dalInstance);
+dalInstance.user = require('./dal.user').init(execSQL('DAL_USER'), dalInstance);
+dalInstance.reservation = require('./dal.reservation').init(execSQL('DAL_RSV'), dalInstance);
+
+module.exports = dalInstance;

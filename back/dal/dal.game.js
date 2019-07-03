@@ -1,8 +1,10 @@
 const utils = require('../utils/misc');
-const { Game, GameDetails, GameSlot, Place, User } = require('./types');
+const { Game, GameDetails, Reservation, Place, User } = require('./types');
 
 let log;
+let dal;
 let execSQL;
+
 const getGame = async (gameId) => {
   const games = await execSQL.all(`SELECT g.*, usedPlayerSlots FROM games g
     LEFT JOIN (
@@ -18,17 +20,18 @@ const getGame = async (gameId) => {
   }
 
   const game = games[0];
-  const place = (await getPlaces([game.placeId]))[0];
-  const organizer = (await getUsers([game.organizerId]))[0];
+  const places = await getPlaces([game.placeId]);
+  const organizer = await dal.user.getUser(game.organizerId);
 
   return new Game({
       ...game,
-      place,
-      organizer,
+      place: places[0],
+      organizer: organizer,
     });
   }
 
-const getGameDetails = async (game) => {
+const getGameDetails = async (gameId) => {
+  const game = await getGame(gameId);
   const allBookings = await execSQL.all(`SELECT * FROM bookings 
     WHERE gameId = ${game.gameId}`
   );
@@ -37,8 +40,8 @@ const getGameDetails = async (game) => {
 
   return new GameDetails(
     game,
-    players.map(pl => ({ ...pl, type: 'player'})).map(pl => new GameSlot(pl)),
-    waiters.map(wt => ({ ...wt, type: 'waiter'})).map(wt => new GameSlot(wt)),
+    players.map(pl => ({ ...pl, type: 'player'})).map(pl => new Reservation(pl)),
+    waiters.map(wt => ({ ...wt, type: 'waiter'})).map(wt => new Reservation(wt)),
   );
   return gameDetails;
 };
@@ -48,13 +51,6 @@ const getPlaces = async (placeIds) => {
     WHERE placeId IN (${placeIds.join()})`);
   return places.map(p => new Place(p));
 };
-
-const getUsers = async (usersIds) => {
-  const users = await execSQL.all(`SELECT * FROM users
-    WHERE userId IN (${usersIds.join()})`);
-  return users.map(u => new User(u));
-};
-
 
 const getGamesList = async (props = {}) => {
   const today = utils.getStartOfTheDate();
@@ -82,7 +78,7 @@ const getGamesList = async (props = {}) => {
   }, {}));
 
   const places = await getPlaces(placeIds);
-  const organizers = await getUsers(organizerIds);
+  const organizers = await dal.user.getUsers(organizerIds);
 
   if (!props.showDisabled) {
     games = games.filter(g => g.status !== 'disabled');
@@ -96,11 +92,12 @@ const getGamesList = async (props = {}) => {
 };
 
 module.exports = {
-  init: (driver) => {
+  init: (driver, dalInstance) => {
     if (!driver) { throw `${__filename}: undefined DAL driver`; }
 
     execSQL = driver.methods;
     log = driver.dalLog;
+    dal = dalInstance;
 
     return {
       getGamesList,

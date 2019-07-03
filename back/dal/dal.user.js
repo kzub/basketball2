@@ -9,6 +9,12 @@ const getUsers = async (usersIds) => {
   return users.map(u => new User(u));
 };
 
+const getUser = async (userId) => {
+  const users = await execSQL.all(`SELECT * FROM users
+    WHERE userId = ${userId}`);
+  return new User(users[0]);
+};
+
 const updateUser = async (userId, name) => {
   const res = await execSQL.run(`UPDATE users SET name = '${name}'
     WHERE userId = ${userId}`);
@@ -52,13 +58,14 @@ const createVerificationCode = async (phone) => {
 };
 
 module.exports = {
-  init: (driver) => {
+  init: (driver, dalInstance) => {
     if (!driver) { throw `${__filename}: undefined DAL driver`; }
 
     execSQL = driver.methods;
     log = driver.dalLog;
 
     return {
+      getUser,
       getUsers,
       getVerificationCode,
       deleteVerificationCode,

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div v-if="!mxGameDetails || !mxBookInfo" class="my-2">
+    <div v-if="!viewDataUpdated || !mxGameDetails || !mxBookInfo" class="my-2">
       <div class="d-flex justify-content-center">
         <div class="spinner-border" role="status">
           <span class="sr-only">Загружается...</span>
@@ -18,16 +18,22 @@
       <GameInfo :game="mxGameDetails.game" show="organizer"/>
       <GameInfo :game="mxGameDetails.game" show="payment"/>
 
-      <b-button class="w-75 mt-3 mb-3 p-3 justify-content-center" v-if="mxBookInfo.paymentStatus === 'paid'" variant="success">
+      <b-button v-if="mxBookInfo.paymentStatus === 'paid'" variant="success"
+      class="w-75 mt-3 mb-3 p-3 justify-content-center" >
         ОПЛАЧЕНО
       </b-button>
-      <b-button v-else class="w-75 mt-3 mb-3 p-3 justify-content-center" variant="danger">
+      <b-button v-else-if="mxBookInfo.type == 'waiter'" 
+      class="w-75 mt-3 mb-3 p-3 justify-content-center">
+        Резерв, на случай, если кто-то откажется
+      </b-button>
+      <b-button v-else class="w-75 mt-3 mb-3 p-3 justify-content-center" 
+      variant="danger">
         НЕ ОПЛАЧЕНО
-        <div v-if="mxGameDetails.game.paymentType === 'prepay' && 
+        <div v-if="reservationExpire && mxGameDetails.game.paymentType === 'prepay' && 
                    mxBookInfo.status !== 'booked'"
              class="btn-danger">
              <hr style="background-color: white"/>
-          на оплату есть {{ mxMinutesTo(mxBookInfo.ts) }}
+          на оплату есть {{ reservationExpire }}
         </div>
       </b-button>
 
@@ -58,13 +64,6 @@
           </div>
           <hr/>
 
-          <!-- waitlist warning -->
-          <div v-if="mxBookInfo.type == 'waiter'">
-            <div class="btn-danger py-1 px-1 rounded">
-              Резерв, на случай, если кто-то откажется
-            </div>
-          </div>
-
           <!-- admin action buttons -->
           <div v-if="isAdmin" class="mt-3 d-flex flex-column">
             <b-btn class="my-1" type="submit" variant="primary">Изменить имя</b-btn>
@@ -83,7 +82,8 @@
           <!-- users action buttons -->
           <div v-else class="mt-3 d-flex flex-column">
             <b-btn v-if="mxGameDetails.game.paymentType === 'prepay' && 
-                         mxBookInfo.paymentStatus !== 'paid'"
+                         mxBookInfo.paymentStatus !== 'paid' && 
+                         mxBookInfo.type !== 'waiter'"
                          class="my-1" type="submit" variant="success">
               Оплатить
             </b-btn>
@@ -127,6 +127,8 @@ import GameUtils from '../mixins/game.js'
 import Organizer from './Organizer.vue'
 import GameInfo from './GameInfo.vue'
 
+let intervalId;
+
 export default {
   name: 'Pay',
   mixins: [DateTime, GameUtils],
@@ -134,7 +136,23 @@ export default {
     Organizer,
     GameInfo,
   },
+  mounted: function () {
+    const { commit, state } = this.$store
+    const self = this;
+    intervalId = setInterval(function() {
+      if (self.mxBookInfo) {
+        commit('setReservationExpire', self.mxMinutesTo(self.mxBookInfo.ts + this.$store.state.gameDetails.game.props.timeForPayment))
+      }
+    }, 5000)
+  },
+  destroyed: function () {
+    clearInterval(intervalId)
+    this.$store.state.reservationExpire = undefined
+  },
   computed: {
+    reservationExpire: function() {
+      return this.$store.state.reservationExpire || this.mxMinutesTo(this.mxBookInfo.ts + this.$store.state.gameDetails.game.props.timeForPayment)
+    },
     form: function () {
       return {
         phone: this.bookingPhone,
@@ -158,6 +176,9 @@ export default {
     },
     user () {
       return this.$store.state.user
+    },
+    viewDataUpdated () {
+      return this.$store.state.viewDataUpdated
     },
   },
   methods: {

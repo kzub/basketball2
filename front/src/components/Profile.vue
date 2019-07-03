@@ -7,7 +7,7 @@
       <Register/>
     </div>
     <div v-else-if="wantChange" class="my-2">
-      <Register :name="user.name" :phone="user.phone"/>
+      <Register :name="user.name" :phone="'+' + user.phone"/>
     </div>
     <div v-else>
       <b-card no-body class="mb-1">
@@ -16,7 +16,7 @@
         </b-btn>
         <b-card-body>
           <h5>{{ user.name }}</h5>
-          <h5>{{ user.phone }}</h5>
+          <h5>+{{ user.phone }}</h5>
         </b-card-body>
       </b-card>
 
