@@ -17,9 +17,13 @@
       <GameInfo :game="mxGameDetails.game" show="organizer,payment"/>
 
       <div v-if="!booking" class="mb-4 px-3 mt-4 d-flex flex-column">
-        <b-btn class="my-1" @click="bookSlot" variant="success">
+        <b-btn v-if="isWaiter" class="my-1" @click="bookSlot" variant="secondary">
+          Занять очередь
+        </b-btn>
+        <b-btn v-else class="my-1" @click="bookSlot" variant="primary">
           Забронировать
         </b-btn>
+          <span v-else="isWaiter">Забронировать</span>
       </div>
       <div v-else class="spinner-border mt-5" role="status">
         <span class="sr-only">Бронирую...</span>
@@ -55,8 +59,11 @@ export default {
     };
   },
   computed: {
-    user () {
+    user: function () {
       return this.$store.state.user
+    },
+    isWaiter: function () {
+      return this.mxLocationInfo.slotType == 'waiter'
     },
   },
   methods: {
@@ -70,12 +77,12 @@ export default {
     },
     bookSlot: function() {
       this.booking = true
-      const { mxGameDetails, mxLocationInfo, user } = this
+      const { mxLocationInfo } = this
 
       this.$store.dispatch('bookSlot', { ...mxLocationInfo })
       .then((data) => {
         if (data.result == 'booked') {
-
+          this.$store.dispatch('updateGameData', mxLocationInfo.gameId);
           this.$router.push({
             path: '/reservation',
             query: {

@@ -8,6 +8,8 @@ const Store = (Vuex) => {
       games: [],
       gameDetails: undefined,
       viewDataUpdated: false,
+      reservationExpire: undefined,
+      reservationDetails: undefined,
     },
     mutations,
     actions,

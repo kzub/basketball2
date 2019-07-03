@@ -19,6 +19,7 @@ function Game (obj) {
   this.paymentType = String(obj.paymentType);
   this.paymentAmount = Number(obj.paymentAmount);
   this.props = JSON.parse(obj.props);
+  this.props.timeForPayment = Number(this.props.timeForPayment || 30*60*1000);
 
   this.organizer = obj.organizer;
   this.place = obj.place;
@@ -30,6 +31,7 @@ function Game (obj) {
   if (typeof(this.waiterSlots) !== 'number' || isNaN(this.waiterSlots)) throw new Error(`Game constructor: bad waiterSlots`);
 
   if (typeof(this.paymentAmount) !== 'number' || isNaN(this.paymentAmount)) throw new Error(`Game constructor: bad paymentAmount`);
+  if (typeof(this.props.timeForPayment) !== 'number' || isNaN(this.props.timeForPayment)) throw new Error(`Game constructor: bad timeForPayment`);
 
   checkString(obj.date, `Game constructor: bad date`);
   checkString(obj.timeStart, `Game constructor: bad timeStart`);
@@ -48,16 +50,16 @@ function GameDetails (game, players, waiters) {
 
   if (!(this.game instanceof Game)) throw new Error('GameDetails constructor: game not instanceof Game');
   if (!(this.players instanceof Array) || 
-    !this.players.reduce((acc, booking) => acc && (booking instanceof GameSlot), true)) {
-    throw new Error('GameDetails constructor: players not instanceof GameSlot');
+    !this.players.reduce((acc, booking) => acc && (booking instanceof Reservation), true)) {
+    throw new Error('GameDetails constructor: players not instanceof Reservation');
   }
   if (!(this.waiters instanceof Array) || 
-    !this.waiters.reduce((acc, booking) => acc && (booking instanceof GameSlot), true)) {
-    throw new Error('GameDetails constructor: waiters not instanceof GameSlot');
+    !this.waiters.reduce((acc, booking) => acc && (booking instanceof Reservation), true)) {
+    throw new Error('GameDetails constructor: waiters not instanceof Reservation');
   }
 
   for (let i = players.length; i < game.playerSlots; i++) {
-    this.players.push(new GameSlot({
+    this.players.push(new Reservation({
       ts: 0,
       bookId: 0,
       gameId: game.gameId,
@@ -71,7 +73,7 @@ function GameDetails (game, players, waiters) {
   }
 
   for (let i = waiters.length; i < game.waiterSlots; i++) {
-    this.waiters.push(new GameSlot({
+    this.waiters.push(new Reservation({
       ts: 0,
       bookId: 0,
       gameId: game.gameId,
@@ -110,7 +112,7 @@ function User (obj) {
   if (!this.phone.length) throw new Error(`User constructor: bad phone`);
 }
 
-function GameSlot (obj) {
+function Reservation (obj) {
   this.ts = Number(obj.ts);
   this.bookId = Number(obj.bookId);
   this.gameId = Number(obj.gameId);
@@ -121,22 +123,22 @@ function GameSlot (obj) {
   this.type = String(obj.type);
   this.status = String(obj.status);
 
-  if (typeof(this.ts) !== 'number' || isNaN(this.ts)) throw new Error(`GameSlot constructor: bad ts`);
-  if (typeof(this.bookId) !== 'number' || isNaN(this.bookId)) throw new Error(`GameSlot constructor: bad bookId`);
-  if (typeof(this.gameId) !== 'number' || isNaN(this.gameId)) throw new Error(`GameSlot constructor: bad gameId`);
-  if (typeof(this.userId) !== 'number' || isNaN(this.userId)) throw new Error(`GameSlot constructor: bad userId`);
-  if (typeof(this.paymentAmount) !== 'number' || isNaN(this.paymentAmount)) throw new Error(`GameSlot constructor: bad paymentAmount`);
+  if (typeof(this.ts) !== 'number' || isNaN(this.ts)) throw new Error(`Reservation constructor: bad ts`);
+  if (typeof(this.bookId) !== 'number' || isNaN(this.bookId)) throw new Error(`Reservation constructor: bad bookId`);
+  if (typeof(this.gameId) !== 'number' || isNaN(this.gameId)) throw new Error(`Reservation constructor: bad gameId`);
+  if (typeof(this.userId) !== 'number' || isNaN(this.userId)) throw new Error(`Reservation constructor: bad userId`);
+  if (typeof(this.paymentAmount) !== 'number' || isNaN(this.paymentAmount)) throw new Error(`Reservation constructor: bad paymentAmount`);
 
-  checkString(obj.playerName, `GameSlot constructor: bad playerName`);
-  checkString(obj.paymentStatus, `GameSlot constructor: bad paymentStatus`);
-  checkString(obj.type, `GameSlot constructor: bad type`);
-  checkString(obj.status, `GameSlot constructor: bad status`);
+  checkString(obj.playerName, `Reservation constructor: bad playerName`);
+  checkString(obj.paymentStatus, `Reservation constructor: bad paymentStatus`);
+  checkString(obj.type, `Reservation constructor: bad type`);
+  checkString(obj.status, `Reservation constructor: bad status`);
 }
 
 
 module.exports = {
   Game,
-  GameSlot,
+  Reservation,
   GameDetails,
   Place,
   User,

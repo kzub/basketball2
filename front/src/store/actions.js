@@ -2,7 +2,7 @@ import axios from 'axios'
 
 const bookSlot = ({ commit, state }, bookInfo) => {
   console.log('actions::bookSlot', bookInfo)
-  return axios.post(`/api/book?userId=${state.user.userId}&gameId=${bookInfo.gameId}`, { ...bookInfo })
+  return axios.post(`/api/reservation/book?userId=${state.user.userId}&gameId=${bookInfo.gameId}`, { ...bookInfo })
   .then((result) => {
     console.log('/api/book result:', result.data)
     // commit('bookSlot', result.data.bookId)
@@ -12,8 +12,22 @@ const bookSlot = ({ commit, state }, bookInfo) => {
   })
 }
 
-// надо запрашивать отдельно список игр, отдельно что входит в игру
-// для этого переделать формат ответа сервера
+const updateReservationData = ({ commit, state }, { gameId, bookId }) => {
+  console.log('actions::updateReservationData', gameId, bookId)
+  commit('setUpdatedFlag', false)
+  return axios
+    .get(`/api/reservation/${gameId}/${bookId}`)
+    .then(response => {
+      console.log('/api/reservation response:', response.data);
+      commit('reservationDetails', response.data);
+      commit('setUpdatedFlag', true)
+    })
+    .catch(error => {
+      console.log('/api/reservation error:', error);
+      commit('reservationDetails', undefined);
+      commit('setUpdatedFlag', true)
+    });
+}
 
 const updateGamesData = ({ commit, state }) => {
   console.log('actions::updateGamesData')
@@ -44,6 +58,7 @@ const updateGameData = ({ commit, state }, gameId) => {
     })
     .catch(error => {
       console.log('/api/games error:', error);
+      commit('gameDetails', undefined);
       commit('setUpdatedFlag', true)
     });
 };
@@ -54,9 +69,10 @@ const getUserInfo = ({ commit, state }) => {
     .get(`/api/user/get`)
     .then(response => {
       console.log('/api/user/get response:', response.data);
-      commit('user', response.data);
+      commit('user', response.data)
     })
     .catch(error => {
+      commit('user', { auth: false })
       console.log('/api/user/get error:', error);
     });
 };
@@ -71,6 +87,7 @@ export default {
   bookSlot,
   updateGamesData,
   updateGameData,
+  updateReservationData,
   getUserInfo,
   init,
 }

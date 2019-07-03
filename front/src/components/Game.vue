@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div v-if="!mxGameDetails || !viewDataUpdated" class="my-2">
+    <div v-if="!viewDataUpdated || !mxGameDetails" class="my-2">
       <div class="d-flex justify-content-center flex-wrap-reverse loader">
         <div class="spinner-border" role="status">
           <span class="sr-only">Загружается...</span>
@@ -114,7 +114,7 @@ export default {
         if (slot.status == 'reserved') return 'warning'
       }
       if (slot.type == 'waiter') {
-        return slot.status == 'free' ? 'outline-secondary' : 'secondary'
+        return 'secondary'
       }
     },
     back: function() {

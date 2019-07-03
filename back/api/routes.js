@@ -1,14 +1,14 @@
 const user = require('./user');
-const book = require('./book');
 const game = require('./game');
 const games = require('./games');
+const reservation = require('./reservation');
 
-const wrapper = (func, needAuth) => {
+const wrapper = (func, needAuth, statusCode = 401) => {
   return (req, res, ...args) => {
     if (needAuth && !req.userId) {
-      res.status(401).send({
+      res.status(statusCode).send({
         error: true,
-        message: 'no auth',
+        auth: false,
       });
       return;
     }
@@ -21,8 +21,9 @@ const wrapper = (func, needAuth) => {
 };
 
 const init = (app) => {
-  app.post('/api/book', wrapper(book, true));
-  app.get('/api/user/get', wrapper(user.get, true));
+  app.post('/api/reservation/book', wrapper(reservation.book, true));
+  // app.get('/api/reservation/:gameId/:bookId', wrapper(reservation.get, true));
+  app.get('/api/user/get', wrapper(user.get, true, 200));
   app.get('/api/user/set/:name', wrapper(user.set, true));
   app.get('/api/user/verify/:phone', wrapper(user.verify, false));
   app.get('/api/user/auth/:phone/:code', wrapper(user.auth, false));

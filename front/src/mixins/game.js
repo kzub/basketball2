@@ -21,11 +21,15 @@ const mxGameDetails = function () {
 
 const mxBookInfo = function () {
   const locationInfo = mxLocationInfo.call(this)
-  const gameDetails = mxGameDetails.call(this)
   const bookId = locationInfo.bookId
+
+  const gameDetails = mxGameDetails.call(this)
+  if (!gameDetails) return
+
   const players = gameDetails.players.filter(s => s.bookId === bookId)[0]
   const waiters = gameDetails.waiters.filter(s => s.bookId === bookId)[0]
   const book = players || waiters
+
   if (!book) {
     console.log('no book found by id:', bookId)
     this.$router.push('/')
