@@ -12,22 +12,51 @@ const bookSlot = ({ commit, state }, bookInfo) => {
   })
 }
 
-const updateReservationData = ({ commit, state }, { gameId, bookId }) => {
-  console.log('actions::updateReservationData', gameId, bookId)
+const updateReservationName = ({ commit, state }, { gameId, bookId, name }) => {
+  console.log('actions::updateReservationName', gameId, bookId, name)
   commit('setUpdatedFlag', false)
   return axios
-    .get(`/api/reservation/${gameId}/${bookId}`)
+    .get(`/api/reservation/setPlayer/${gameId}/${bookId}/${name}`)
     .then(response => {
-      console.log('/api/reservation response:', response.data);
-      commit('reservationDetails', response.data);
+      console.log('/api/reservation/setPlayer response:', response.data);
       commit('setUpdatedFlag', true)
     })
     .catch(error => {
-      console.log('/api/reservation error:', error);
-      commit('reservationDetails', undefined);
+      console.log('/api/reservation/setPlayer error:', error);
       commit('setUpdatedFlag', true)
     });
 }
+
+const updateReservationPay = ({ commit, state }, { gameId, bookId }) => {
+  console.log('actions::updateReservationPay', gameId, bookId, name)
+  commit('setUpdatedFlag', false)
+  return axios
+    .get(`/api/reservation/changePay/${gameId}/${bookId}`)
+    .then(response => {
+      console.log('/api/reservation/changePay response:', response.data);
+      commit('setUpdatedFlag', true)
+    })
+    .catch(error => {
+      console.log('/api/reservation/changePay error:', error);
+      commit('setUpdatedFlag', true)
+    });
+}
+
+const deleteReservation = ({ commit, state }, { gameId, bookId }) => {
+  console.log('actions::deleteReservation', gameId, bookId)
+  commit('setUpdatedFlag', false)
+  return axios
+    .get(`/api/reservation/cancel/${gameId}/${bookId}`)
+    .then(response => {
+      console.log('/api/reservation/cancel response:', response.data);
+      commit('setUpdatedFlag', true)
+    })
+    .catch(error => {
+      console.log('/api/reservation/cancel error:', error);
+      commit('setUpdatedFlag', true)
+    });
+}
+
 
 const updateGamesData = ({ commit, state }) => {
   console.log('actions::updateGamesData')
@@ -87,7 +116,9 @@ export default {
   bookSlot,
   updateGamesData,
   updateGameData,
-  updateReservationData,
+  updateReservationName,
+  updateReservationPay,
+  deleteReservation,
   getUserInfo,
   init,
 }

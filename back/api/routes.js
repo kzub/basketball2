@@ -22,7 +22,9 @@ const wrapper = (func, needAuth, statusCode = 401) => {
 
 const init = (app) => {
   app.post('/api/reservation/book', wrapper(reservation.book, true));
-  // app.get('/api/reservation/:gameId/:bookId', wrapper(reservation.get, true));
+  app.get('/api/reservation/setPlayer/:gameId/:bookId/:name', wrapper(reservation.setPlayer, true));
+  app.get('/api/reservation/cancel/:gameId/:bookId/', wrapper(reservation.cancel, true));
+  app.get('/api/reservation/changePay/:gameId/:bookId/', wrapper(reservation.changePay, true));
   app.get('/api/user/get', wrapper(user.get, true, 200));
   app.get('/api/user/set/:name', wrapper(user.set, true));
   app.get('/api/user/verify/:phone', wrapper(user.verify, false));
