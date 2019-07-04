@@ -24,7 +24,7 @@
                             label-for="userPhone"
                             description="Для связи, в случае каких-либо изменений">
                 <b-form-input id="userPhone"
-                              type="number"
+                              type="text"
                               v-model="form.phone"
                               required
                               placeholder="Введите телефон">

@@ -6,13 +6,19 @@ let dal;
 let execSQL;
 
 const getGame = async (gameId) => {
-  const games = await execSQL.all(`SELECT g.*, usedPlayerSlots FROM games g
+  const games = await execSQL.all(`SELECT g.*, usedPlayerSlots, usedWaiterSlots FROM games g
     LEFT JOIN (
       SELECT gameId, count(*) usedPlayerSlots from bookings
       WHERE status IN ('booked', 'reserved')
       AND gameId = ${gameId}
       GROUP BY gameId
     ) bk ON g.gameId = bk.gameId
+    LEFT JOIN (
+      SELECT gameId, count(*) usedWaiterSlots from bookings
+      WHERE status = 'waiting'
+      AND gameId = ${gameId}
+      GROUP BY gameId
+    ) bkw ON g.gameId = bkw.gameId
     WHERE g.gameId = ${gameId}`
   );
   if (games.length !== 1) {
@@ -40,8 +46,8 @@ const getGameDetails = async (gameId) => {
 
   return new GameDetails(
     game,
-    players.map(pl => ({ ...pl, type: 'player'})).map(pl => new Reservation(pl)),
-    waiters.map(wt => ({ ...wt, type: 'waiter'})).map(wt => new Reservation(wt)),
+    players.map(pl => new Reservation(pl)),
+    waiters.map(wt => new Reservation(wt)),
   );
   return gameDetails;
 };
@@ -58,12 +64,17 @@ const getGamesList = async (props = {}) => {
     today.setHours(-24*30);
   }
 
-  let games = await execSQL.all(`SELECT g.*, usedPlayerSlots FROM games g
+  let games = await execSQL.all(`SELECT g.*, usedPlayerSlots, usedWaiterSlots FROM games g
     LEFT JOIN (
       SELECT gameId, count(*) usedPlayerSlots from bookings
       WHERE status IN ('booked', 'reserved')
       GROUP BY gameId
     ) bk ON g.gameId = bk.gameId
+    LEFT JOIN (
+      SELECT gameId, count(*) usedWaiterSlots from bookings
+      WHERE status = 'waiting'
+      GROUP BY gameId
+    ) bkw ON g.gameId = bkw.gameId
     WHERE date >= "${today.toJSON().slice(0,10)}"
     ORDER BY date ASC`);
 

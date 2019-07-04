@@ -105,17 +105,11 @@ export default {
   },
   methods: {
     playerColor: function (slot) {
-      if (slot.type == 'player') {
-        if (this.mxGameDetails.game.paymentType == 'shared') {
-          if (slot.status == 'booked' && slot.paymentStatus == 'unpaid') return 'warning'
-        }
-        if (slot.status == 'free') return 'primary'
-        if (slot.status == 'booked') return 'success'
-        if (slot.status == 'reserved') return 'warning'
-      }
-      if (slot.type == 'waiter') {
-        return 'secondary'
-      }
+      if (slot.status == 'free4player') return 'primary'
+      if (slot.status == 'free4waiter') return 'secondary'
+      if (slot.paymentStatus == 'paid') return 'success'
+      if (slot.paymentStatus == 'unpaid') return 'warning'
+      return 'danger'
     },
     back: function() {
       this.$router.push({
@@ -123,46 +117,37 @@ export default {
       })
     },
     modifyAllowed (slot) {
-      if (slot.status == 'free') {
+      if (slot.status.startsWith('free')) {
         return false
       }
       return (this.user && this.user.userId == slot.userId) || this.isAdmin
     },
     goLink (game, slot) {
-      if (slot.status == 'free') {
-        if (this.$store.state.user && this.$store.state.user.auth) {
-          return {
-            // book slot
-            path: '/book',
-            query: { gameId: game.gameId, slotType: slot.type }
-          }
-        }
+      if (!this.$store.state.user || !this.$store.state.user.auth) {
         return {
-          // redirect to auth page
           path: '/profile',
-          query: { retUrl: '/book', gameId: game.gameId, slotType: slot.type }
+          query: { retUrl: '/game', gameId: game.gameId }
+        }
+      }
+      
+      if (slot.status.startsWith('free4')) {
+        return {
+          path: '/book',
+          query: { gameId: game.gameId, slotType: slot.status.slice(5) }
         }
       }
 
-      if (!this.modifyAllowed(slot)) {
+      if (this.modifyAllowed(slot)) {
         return {
-          // do nothing
-          path: '/game',
-          query: { gameId: game.gameId }
-        }
-      }
-
-      if (this.$store.state.user && this.$store.state.user.auth) {
-        return {
-          // book slot
           path: '/reservation',
           query: { gameId: game.gameId, bookId: slot.bookId }
         }
       }
+
+      // do nothing
       return {
-        // redirect to auth page
-        path: '/profile',
-        query: { retUrl: '/reservation', gameId: game.gameId, bookId: slot.bookId }
+        path: '/game',
+        query: { gameId: game.gameId }
       }
     }
   },

@@ -6,8 +6,7 @@ const game = async (req, res) => {
 	const gameDetails = await req.dal.game.getGameDetails(req.params.gameId);
 
 	if (req.userId && req.userId === gameDetails.game.organizer.userId) {
-		const userlist = []
-		.concat(
+		const userlist = [].concat(
 			gameDetails.players.map(p => p.userId),
 			gameDetails.waiters.map(p => p.userId)
 		)
