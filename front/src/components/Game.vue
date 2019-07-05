@@ -15,15 +15,16 @@
       <!-- game and payment info -->
       <GameInfo :game="mxGameDetails.game" show="place,time"/>
 
-      <div v-if="mxGameDetails.game.freePlayerSlots == 0" class="card-title btn-danger rounded mt-2 mb-3 py-2">
+      <div v-if="mxGameDetails.game.freePlayerSlots == 0" 
+           class="card-title btn-danger m-1 p-2 mx-2 rounded">
         Свободных мест нет
       </div>
 
-      <div v-if="isAdmin" class="m-1 p-2 rounded adminMode">
+      <div v-if="isAdmin" class="m-1 p-2 mx-2 rounded adminMode">
         Режим администратора
       </div>
 
-      <div v-if="mxGameDetails.game.status === 'poll'" class="m-1 p-2 rounded manualBookMode">
+      <div v-if="mxGameDetails.game.status === 'poll'" class="m-1 p-2 mx-2 rounded manualBookMode">
         Предварительная запись
       </div>
 
@@ -31,7 +32,7 @@
         <div class="text-left m-2">Список игроков:</div>
         <div v-for="(slot, index) in mxGameDetails.players" :key="'p'+index">
           <router-link class="d-flex" :to="goLink(mxGameDetails.game, slot)" tag="div">
-            <b-button href="#" class="m-1 slot" :variant="playerColor(slot)">
+            <b-button href="#" class="my-1 mx-3 slot" :variant="playerColor(slot)">
               {{ slot.playerName }}
             </b-button>
             <div v-if="modifyAllowed(slot)" class="arrow">
@@ -45,7 +46,7 @@
           <div class="text-left m-2">Список запасных:</div>
           <div v-for="(slot, index) in mxGameDetails.waiters" :key="'r'+index">
             <router-link class="d-flex" :to="goLink(mxGameDetails.game, slot)" tag="div">
-              <b-button href="#" class="m-1 slot" :variant="playerColor(slot)">
+              <b-button href="#" class="my-1 mx-3 slot" :variant="playerColor(slot)">
                 {{ slot.playerName }}
               </b-button>
               <div v-if="modifyAllowed(slot)" class="arrow">
@@ -126,7 +127,11 @@ export default {
       if (!this.$store.state.user || !this.$store.state.user.auth) {
         return {
           path: '/profile',
-          query: { retUrl: '/game', gameId: game.gameId }
+          query: { 
+            retUrl: '/game', 
+            gameId: game.gameId,
+            welcome: true,
+          }
         }
       }
       

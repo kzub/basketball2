@@ -27,7 +27,7 @@ const init = (app) => {
   app.get('/api/reservation/changePay/:gameId/:bookId/', wrapper(reservation.changePay, true));
   app.get('/api/user/get', wrapper(user.get, true, 200));
   app.get('/api/user/set/:name', wrapper(user.set, true));
-  app.get('/api/user/verify/:phone', wrapper(user.verify, false));
+  app.get('/api/user/sendCheckCode/:phone', wrapper(user.sendCheckCode, false));
   app.get('/api/user/auth/:phone/:code', wrapper(user.auth, false));
   app.get('/api/game/:gameId', wrapper(game, false));
   app.get('/api/games', wrapper(games, false));
