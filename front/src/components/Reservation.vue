@@ -15,9 +15,7 @@
 
       <!-- game and payment info -->
       <GameInfo :game="mxGameDetails.game" show="place,time"/>
-      <GameInfo :game="mxGameDetails.game" show="organizer"/>
-      <GameInfo :game="mxGameDetails.game" show="payment"/>
-
+      
       <b-button v-if="mxBookInfo.paymentStatus === 'paid'" variant="success"
       class="w-75 mt-3 mb-3 p-3 justify-content-center" >
         ОПЛАЧЕНО
@@ -48,7 +46,7 @@
                         required
                         placeholder="Фамилия и имя">
           </b-form-input>
-          <b-form-input v-if="isAdmin" class="mt-2"
+          <b-form-input class="mt-2"
                         id="userPhone"
                         type="text"
                         v-model="form.phone"
@@ -77,6 +75,10 @@
 
         <!-- users action buttons -->
         <div v-else class="mt-3 d-flex flex-column">
+          <GameInfo :game="mxGameDetails.game" show="organizer"/>
+          <GameInfo :game="mxGameDetails.game" show="payment"/>
+          <hr/>
+
           <b-btn v-if="mxGameDetails.game.paymentType === 'prepay' && 
                        mxBookInfo.paymentStatus !== 'paid' && 
                        mxBookInfo.status !== 'waiting'"

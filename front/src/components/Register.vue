@@ -9,9 +9,10 @@
 
         <b-collapse id="regStep1" visible accordion="reg-accordion" role="tabpanel">
           <b-card-body>
-            <b-form @submit="onSubmitCode">
+            <b-form @submit="sendCheckCode">
               <b-form-group id="userName"
                             label-for="userName"
+                            class="description"
                             description="Необходимо для прохода на площадку">
                 <b-form-input id="userName"
                               type="text"
@@ -19,9 +20,10 @@
                               required
                               placeholder="Фамилия и имя">
                 </b-form-input>
-              </b-form-group>              
+              </b-form-group>
               <b-form-group id="phoneNumber"
                             label-for="userPhone"
+                            class="description"
                             description="Для связи, в случае каких-либо изменений">
                 <b-form-input id="userPhone"
                               type="text"
@@ -41,7 +43,7 @@
 
         <b-collapse id="regStep2" accordion="reg-accordion" role="tabpanel">
           <b-card-body>
-            <b-form @submit="onSubmitSave">
+            <b-form @submit="authUser">
               <b-form-group id="confirmationCode"
                             label="Код подтверждения"
                             label-for="confirmationCode"
@@ -52,13 +54,25 @@
                               required
                               placeholder="">
                 </b-form-input>
-              </b-form-group>              
+              </b-form-group>
 
               <b-btn type="submit" variant="primary">Сохранить изменения</b-btn>
             </b-form>
           </b-card-body>
         </b-collapse>
       </b-card>
+    </div>
+
+    <div>
+      <b-modal id="err-check-phone" title="Ошибка" ok-variant="danger" ok-title="ОК" cancel-variant="hidden">
+        <h5 class="my-4 text">Не удалось отправить смс, проверьте номер телефона и связь с интернетом</h5>
+      </b-modal>
+    </div>
+
+    <div>
+      <b-modal id="err-check-code" @ok="onCodeError" title="Ошибка" ok-variant="danger" ok-title="ОК" cancel-variant="hidden">
+        <h5 class="my-4 text">Не правильный код или время жизни кода истекло, попробуйте сначала</h5>
+      </b-modal>
     </div>
 
   </div>
@@ -86,24 +100,50 @@
     computed: {
     },
     methods: {
-      onSubmitCode (evt) {
+      sendCheckCode (evt) {
         evt.preventDefault()
-        this.$root.$emit('bv::toggle::collapse', 'regStep2')
+        this.$store.dispatch('sendCheckCode', this.form.phone)
+        .then(res => {
+          if (res && res.ok) {
+            this.$root.$emit('bv::toggle::collapse', 'regStep2')
+          }
+          else {
+            this.$bvModal.show('err-check-phone')
+          }
+        })
       },
-      onSubmitSave (evt) {
+      authUser: function (evt) {
         evt.preventDefault()
-        // alert(JSON.stringify(this.form))
-        if (this.mxLocationInfo.retUrl) {
-          this.$router.push({
-            path: this.mxLocationInfo.retUrl,
-            query: {
-              gameId: this.mxLocationInfo.gameId,
-              retUrl: '/',
-            },
-          })
-        } else {
-          this.back()
-        }
+        this.$store.dispatch('authUser', {
+          phone: this.form.phone,
+          code: this.form.code,
+        })
+        .then(res => {
+          console.log('--', res)
+          if (!res || !res.auth) {
+            this.$bvModal.show('err-check-code')
+            return
+          }
+          return this.$store.dispatch('setUserName', this.form.name)
+        })
+        .then(() => {
+          if (this.mxLocationInfo.retUrl) {
+            this.$router.push({
+              path: this.mxLocationInfo.retUrl,
+              query: {
+                gameId: this.mxLocationInfo.gameId,
+                bookId: this.mxLocationInfo.bookId,
+                retUrl: '/',
+              },
+            })
+          }
+          else {
+            this.back()
+          }
+        })
+      },
+      onCodeError: function () {
+        this.$root.$emit('bv::toggle::collapse', 'regStep1')
       },
       back: function() {
         this.$router.back()
@@ -117,5 +157,9 @@
 h3 {
   margin: 40px 0 0;
 }
+
+.description {
+  text-align: left;
+};
 
 </style>

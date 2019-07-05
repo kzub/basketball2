@@ -14,7 +14,9 @@
       </b-btn>
 
       <GameInfo :game="mxGameDetails.game" show="place,time"/>
+      <hr/>
       <GameInfo :game="mxGameDetails.game" show="organizer,payment"/>
+      <hr/>
 
       <div v-if="!booking" class="mb-4 px-3 mt-4 d-flex flex-column">
         <b-btn v-if="isWaiter" class="my-1" @click="bookSlot" variant="secondary">

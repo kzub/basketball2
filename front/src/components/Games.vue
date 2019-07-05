@@ -11,34 +11,32 @@
 
     <div v-else>
       <div v-for="game in games" :key="game.gameId">
-        <b-card no-body class="my-2 w-100">
-          <b-card-header header-tag="header" class="p-0" role="tab">
-            <b-btn :class="gameBorderColor(game)" block variant="primary" @click="gameClick(game.gameId)">
-              <div class="d-flex flex-row  justify-content-between">
-                <div class="d-flex flex-column justify-content-start align-items-start">
-                  <div>
-                    {{mxDateWeekDay(game.date)}}, {{mxDateDayAndMonth(game.date)}}
-                  </div>
-                  <div>
-                    {{game.timeStart}} - {{game.timeEnd}}
-                  </div>
-                  <div>
-                    {{gameType(game)}}
-                  </div>
+        <b-card no-body class="my-2 mx-1">
+          <b-btn :class="gameBorderColor(game)" block variant="primary" @click="gameClick(game.gameId)">
+            <div class="d-flex flex-row  justify-content-between">
+              <div class="d-flex flex-column justify-content-start align-items-start">
+                <div>
+                  {{mxDateWeekDay(game.date)}}, {{mxDateDayAndMonth(game.date)}}
                 </div>
-                <div class="d-flex flex-column align-items-end">
-                  <div>
-                    <div class="badge px-2 my-1" :class="game.freePlayerSlots == 0 ? 'badge-danger' : 'badge-light'">
-                      {{game.freePlayerSlots}}
-                    </div>
-                  </div>
-                  <div class="badge px-2 my-1 badge-light w-100">
-                    {{ game.place.title }}
-                  </div>
+                <div>
+                  {{game.timeStart}} - {{game.timeEnd}}
+                </div>
+                <div>
+                  {{gameType(game)}}
                 </div>
               </div>
-            </b-btn>
-          </b-card-header>
+              <div class="d-flex flex-column align-items-end">
+                <div>
+                  <div class="badge px-2 my-1" :class="game.freePlayerSlots == 0 ? 'badge-danger' : 'badge-light'">
+                    {{game.freePlayerSlots}}
+                  </div>
+                </div>
+                <div class="badge px-2 my-1 badge-light w-100">
+                  {{ game.place.title }}
+                </div>
+              </div>
+            </div>
+          </b-btn>
         </b-card>
       </div>      
     </div>

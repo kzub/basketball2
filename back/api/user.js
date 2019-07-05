@@ -17,7 +17,7 @@ const formatPhone = phoneNumber => {
   return phone;
 };
 
-const verify = async (req, res) => {
+const sendCheckCode = async (req, res) => {
   const phone = formatPhone(req.params.phone);
   const code = await req.dal.user.createVerificationCode(phone);
   req.log.debug(`phone: ${phone}, code: ${code}`);
@@ -69,7 +69,7 @@ const set = async (req, res) => {
 
 module.exports = {
   get,
-  verify,
+  sendCheckCode,
   auth,
   set,
 };
