@@ -27,7 +27,7 @@ const decode = (token) => {
 
 const encode = (userId) => {
   if (userId == undefined || !isFinite(userId) || isNaN(Number(userId))) {
-    throw `auth.js encode(): bad userId ${userId}`;
+    throw new Error(`auth.js encode(): bad userId ${userId}`);
   }
   const cipher = crypto.createCipher(config.auth.algorithm, config.auth.key);
   let token = cipher.update(config.auth.salt + ':' + userId, 'utf8', 'hex');

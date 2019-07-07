@@ -7,9 +7,11 @@
         </div>
       </div>
     </div>
+
     <div v-else>
-      <b-btn class="btn-lg mb-3 rounded-0" block @click="back" variant="warning">
-        Назад
+      <b-btn @click="back" class="btn-lg mb-3 rounded-0" block variant="warning">
+        <i class="left"></i>
+        <span>Назад</span>
       </b-btn>
 
       <!-- game and payment info -->
@@ -58,15 +60,20 @@
       </div>
 
       <hr/>
-      <GameInfo :game="mxGameDetails.game" show="organizer,payment"/>
+      <div class="pl-2 text-left">
+        <GameInfo class="" :game="mxGameDetails.game" show="organizer"/>
+        <GameInfo class="" :game="mxGameDetails.game" show="payment"/>
+      </div>
       <hr/>
-      <div class="mt-4 mb-5">
-        <!-- <div class="text-left m-2">Дополнительная информация:</div> -->
-
-        <!-- <b-collapse :id="'collapsePlace' + game.gameId" class="mt-4"> -->
-        <p class="card-text">{{ mxGameDetails.game.place.description }}</p>
-        <a :href="'https://www.google.com/maps/search/' + mxGameDetails.game.place.position +'/'">Координаты входа</a>
-        <b-btn class="mt-2" block href="tg://join?invite=CE3oJA6vM82vZHQXf03yyA" variant="link">
+      <div class="mt-4 mb-5 mx-3">
+        <router-link :to="'/map?gameId=' + mxGameDetails.game.gameId">
+          <b-btn class="mt-2" block variant="outline-secondary">
+            Как добраться
+          </b-btn >
+        </router-link>
+        <b-btn v-if="mxGameDetails.game.place.chatLink" 
+               :href="mxGameDetails.game.place.chatLink"
+               class="mt-2" block variant="outline-secondary">
           Чат площаки
         </b-btn>
         <!-- </b-collapse>   -->
@@ -170,24 +177,6 @@ export default {
   width: 100%;
 }
 
-.arrow {
-  position: absolute;
-  margin-left: 85%;
-  margin-top: 9px;
-}
-
-i {
-  border: solid black;
-  border-width: 0 3px 3px 0;
-  display: inline-block;
-  padding: 3px;
-}
-
-.right {
-  transform: rotate(-45deg);
-  -webkit-transform: rotate(-45deg);
-}
-
 .adminMode {
   border: 1px solid #dc3545;
   color: #dc3545;
@@ -201,5 +190,7 @@ i {
 .loader {
   height: 150px;
 }
-
+</style>
+<style>
+@import '../assets/backarrow.css'; 
 </style>

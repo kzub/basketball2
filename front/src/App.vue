@@ -18,25 +18,25 @@ import Profile from './components/Profile.vue'
 import Book from './components/Book.vue'
 import Reservation from './components/Reservation.vue'
 import Game from './components/Game.vue'
+import Success from './components/Success.vue'
+import MapView from './components/MapView.vue'
 
 const router = new VueRouter({
   routes :[
     { path: '/', component: Main },
     { path: '/admin', component: Admin },
     { path: '/profile', component: Profile },
-    { path: '/game', name:'game', component: Game },
-    { path: '/book', name:'book', component: Book },
-    { path: '/reservation', name:'reservation', component: Reservation },
+    { path: '/game', component: Game },
+    { path: '/book', component: Book },
+    { path: '/reservation', component: Reservation },
+    { path: '/success', component: Success},
+    { path: '/map', component: MapView}
   ],
 })
 
 export default {
   name: 'app',
   components: {
-    Main,
-    Admin,
-    Profile,
-    Book,
   },
   router,
 }

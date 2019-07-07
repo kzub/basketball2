@@ -24,8 +24,9 @@ db.run(`CREATE TABLE IF NOT EXISTS places (
   placeId INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
   title TEXT NOT NULL,
   description TEXT,
-  link TEXT,
-  position TEXT
+  chatLink TEXT,
+  position TEXT,
+  howToGet TEXT
 )`);
 
 db.run(`CREATE TABLE IF NOT EXISTS users (
@@ -52,6 +53,7 @@ db.run(`CREATE TABLE IF NOT EXISTS games (
   status TEXT NOT NULL,
   paymentType TEXT NOT NULL,
   paymentAmount INTEGER NOT NULL,
+  paymentInfo TEXT NOT NULL DEFAULT '{}',
   props TEXT NOT NULL DEFAULT '{}'
 )`);
 

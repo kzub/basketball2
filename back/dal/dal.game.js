@@ -104,7 +104,7 @@ const getGamesList = async (props = {}) => {
 
 module.exports = {
   init: (driver, dalInstance) => {
-    if (!driver) { throw `${__filename}: undefined DAL driver`; }
+    if (!driver) { throw new Error(`${__filename}: undefined DAL driver`); }
 
     execSQL = driver.methods;
     log = driver.dalLog;

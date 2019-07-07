@@ -23,8 +23,14 @@ const updateUser = async (userId, name) => {
 
 const createUserByPhone = async (phone) => {
   const res = await execSQL.run(`INSERT INTO users (name, phone)
-    VALUES ('Фамилия и Имя', ${phone})`);
-  return res && res.changes == 1;
+    VALUES ('new', ${phone})`);
+  if (res && res.lastID) {
+    return new User({
+      userId: res.lastID,
+      phone: phone,
+      name: 'new',
+    });
+  }
 };
 
 const findUserByPhone = async (phone) => {
@@ -59,7 +65,7 @@ const createVerificationCode = async (phone) => {
 
 module.exports = {
   init: (driver, dalInstance) => {
-    if (!driver) { throw `${__filename}: undefined DAL driver`; }
+    if (!driver) { throw new Error(`${__filename}: undefined DAL driver`); }
 
     execSQL = driver.methods;
     log = driver.dalLog;

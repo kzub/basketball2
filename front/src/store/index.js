@@ -10,6 +10,7 @@ const Store = (Vuex) => {
       viewDataUpdated: false,
       reservationExpire: undefined,
       reservationDetails: undefined,
+      place: undefined,
     },
     mutations,
     actions,
