@@ -49,6 +49,7 @@
                             label-for="confirmationCode"
                             description="Код отправлен в смс на ваш номер">
                 <b-form-input id="confirmationCode"
+                              ref="focusThis"
                               type="number"
                               v-model="form.code"
                               required
@@ -119,27 +120,26 @@
           code: this.form.code,
         })
         .then(res => {
-          console.log('--', res)
           if (!res || !res.auth) {
             this.$bvModal.show('err-check-code')
             return
           }
-          return this.$store.dispatch('setUserName', this.form.name)
-        })
-        .then(() => {
+
           if (this.mxLocationInfo.retUrl) {
             this.$router.push({
               path: this.mxLocationInfo.retUrl,
               query: {
                 gameId: this.mxLocationInfo.gameId,
                 bookId: this.mxLocationInfo.bookId,
-                retUrl: '/',
               },
             })
           }
           else {
             this.back()
           }
+
+          this.$store.dispatch('setUserName', this.form.name)
+          .then(() => this.$store.dispatch('getUserInfo'))
         })
       },
       onCodeError: function () {

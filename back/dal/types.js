@@ -20,6 +20,7 @@ function Game (obj) {
   this.status = String(obj.status);
   this.paymentType = String(obj.paymentType);
   this.paymentAmount = Number(obj.paymentAmount);
+  this.paymentInfo = JSON.parse(obj.paymentInfo);
   this.props = JSON.parse(obj.props);
 
   this.organizer = obj.organizer;
@@ -108,14 +109,14 @@ function Place (obj) {
   this.placeId = Number(obj.placeId);
   this.title = String(obj.title);
   this.description = String(obj.description);
-  this.link = String(obj.link);
-  this.position = String(obj.position);
+  this.position = JSON.parse(obj.position);
+  this.chatLink = String(obj.chatLink);
+  this.howToGet = String(obj.howToGet);
 
   if (typeof(this.placeId) !== 'number' || isNaN(this.placeId)) throw new Error('Place constructor: bad placeId');
   if (!this.title.length) throw new Error('Place constructor: bad title');
   if (!this.description.length) throw new Error('Place constructor: bad description');
-  if (!this.link.length) throw new Error('Place constructor: bad link');
-  if (!this.position.length) throw new Error('Place constructor: bad position');
+  if (!this.position.lat || !this.position.lng) throw new Error('Place constructor: bad position');
 }
 
 function User (obj) {

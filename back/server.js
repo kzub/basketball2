@@ -24,7 +24,7 @@ app.use((req, res, next) => {
   req.log = logger.create(undefined, req);
   req.dal = dal;
 
-  req.log.info(`request ${req.path}`);
+  req.log.info(`${req.ip} ${req.userId || 'noauth'} request: ${req.path}`);
   req.on('end', () => {
     const time = Date.now() - start;
     req.log.info(`response [${res.statusCode}] ${time}ms`);

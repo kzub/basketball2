@@ -10,12 +10,18 @@
 
     <div v-else>
       <b-btn class="btn-lg mb-3 rounded-0" block @click="back" variant="warning">
-        Назад
+        <i class="left"></i>
+        <span>Назад</span>
       </b-btn>
 
       <GameInfo :game="mxGameDetails.game" show="place,time"/>
       <hr/>
-      <GameInfo :game="mxGameDetails.game" show="organizer,payment"/>
+      <h5 class="mt-2">
+        <GameInfo class="pl-3 text-left" :game="mxGameDetails.game" show="organizer"/>
+      </h5>
+      <h5 class="mt-2">
+        <GameInfo class="pl-3 text-left font-weight-bold" :game="mxGameDetails.game" show="payment"/>
+      </h5>
       <hr/>
 
       <div v-if="!booking" class="mb-4 px-3 mt-4 d-flex flex-column">
@@ -116,13 +122,11 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-h3 {
-  margin: 40px 0 0;
-}
-
 </style>
+
 <style>
 .btn-hidden {
   display: none;
 }  
+@import '../assets/backarrow.css'; 
 </style>

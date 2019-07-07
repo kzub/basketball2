@@ -1,5 +1,5 @@
 <template>
-  <div class="d-flex flex-row">
+  <div class="text-left d-flex flex-row">
     <div>Организатор:</div>
     <div>
       <div class="flex-column">

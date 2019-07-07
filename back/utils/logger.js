@@ -11,7 +11,7 @@ const consoleFormat = (name, req) => format.combine(
       info.message = JSON.stringify(info.message, undefined, 2);
     }
     if (req) {
-      return `${info.timestamp} RQ ${req.id} ${req.ip} ${req.userId || 'noauth'} [${info.level}]: ${info.message}`;
+      return `${info.timestamp} RQ ${req.id} [${info.level}]: ${info.message}`;
     }
     return `${info.timestamp} INT ${name} [${info.level}]: ${info.message}`;
   })

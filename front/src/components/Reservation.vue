@@ -10,7 +10,8 @@
 
     <div v-else>
       <b-btn @click="back" class="btn-lg mb-3 rounded-0" block variant="warning">
-        Назад
+        <i class="left"></i>
+        <span>Назад</span>
       </b-btn>
 
       <!-- game and payment info -->
@@ -35,10 +36,8 @@
       </b-button>
 
       <div class="mb-4 px-3">
-        <b-form @submit="onPaySubmit">
-        </b-form>
         <!-- player details -->
-        <div class="text-left">
+        <b-form class="text-left">
           Участник:
           <b-form-input id="userName"  class="mt-2"
                         type="text"
@@ -54,7 +53,7 @@
                         disabled
                         placeholder="Номер телефона">
           </b-form-input>
-        </div>
+        </b-form>
         <hr/>
 
         <!-- admin action buttons -->
@@ -74,35 +73,42 @@
         </div>
 
         <!-- users action buttons -->
-        <div v-else class="mt-3 d-flex flex-column">
-          <GameInfo :game="mxGameDetails.game" show="organizer"/>
-          <GameInfo :game="mxGameDetails.game" show="payment"/>
+        <div v-else class="mt-3 mb-4">
+          <div class="d-flex flex-column">
+            <h5 class="font-weight-bold text-right mt-2 mb-3" >
+              <GameInfo :game="mxGameDetails.game" show="payment"/>
+            </h5>
+
+            <div v-if="isPayAvailable">
+              <PayButton
+                :account="mxGameDetails.game.paymentInfo.account"
+                :message="mxGameDetails.game.paymentInfo.payMessage"
+                :amount="mxGameDetails.game.paymentAmount"
+                :label="paymentId"/>
+            </div>
+            <b-btn v-if="mxGameDetails.game.status == 'settled' && 
+                         mxGameDetails.game.paymentType === 'shared' && 
+                         mxBookInfo.paymentStatus !== 'paid'" 
+                   @click="informAboutPayment" class="my-1" variant="success">
+              Сообщить об оплате
+            </b-btn>
+            <b-btn @click="changeName" class="my-1" variant="primary">
+              Изменить имя
+            </b-btn>
+            <b-btn v-if="(mxGameDetails.game.paymentType === 'prepay' &&
+                         mxBookInfo.paymentStatus !== 'paid')  || 
+                         (mxGameDetails.game.paymentType === 'shared' &&
+                         mxGameDetails.game.status !== 'settled')"
+                         class="my-1" variant="danger" v-b-modal.ackModal>
+                Отказаться от записи
+            </b-btn>
+          </div>
           <hr/>
-
-          <b-btn v-if="mxGameDetails.game.paymentType === 'prepay' && 
-                       mxBookInfo.paymentStatus !== 'paid' && 
-                       mxBookInfo.status !== 'waiting'"
-                 @click="makePayment" class="my-1" variant="success">
-            Оплатить
-          </b-btn>
-          <b-btn v-if="mxGameDetails.game.status == 'settled' && 
-                       mxGameDetails.game.paymentType === 'shared' && 
-                       mxBookInfo.paymentStatus !== 'paid'" 
-                 @click="informAboutPayment" class="my-1" variant="success">
-            Сообщить об оплате
-          </b-btn>
-          <b-btn @click="changeName" class="my-1" variant="primary">
-            Изменить имя
-          </b-btn>
-          <b-btn v-if="(mxGameDetails.game.paymentType === 'prepay' &&
-                       mxBookInfo.paymentStatus !== 'paid')  || 
-                       (mxGameDetails.game.paymentType === 'shared' &&
-                       mxGameDetails.game.status !== 'settled')"
-                       class="my-1" variant="danger" v-b-modal.ackModal>
-              Отказаться от записи
-          </b-btn>
+          <h5 class="mt-4 mb-5">
+            <GameInfo :game="mxGameDetails.game" show="organizer"/>
+          </h5>
+          <hr/>
         </div>
-
         <!-- delete confirmation window -->
         <div>
           <b-modal id="ackModal" title="Подтверждение" ok-variant="danger" ok-title="Да" cancel-title="Отмена"
@@ -122,15 +128,17 @@ import DateTime from '../mixins/datetime.js'
 import GameUtils from '../mixins/game.js'
 import Organizer from './Organizer.vue'
 import GameInfo from './GameInfo.vue'
+import PayButton from './PayButton.vue'
 
 let intervalId;
 
 export default {
-  name: 'Pay',
+  name: 'Reservation',
   mixins: [DateTime, GameUtils],
   components: {
     Organizer,
     GameInfo,
+    PayButton,
   },
   mounted: function () {
     const { commit, state } = this.$store
@@ -159,6 +167,14 @@ export default {
     },
     isAdmin: function () {
       return this.$store.state.user && this.$store.state.user.userId === this.mxGameDetails.game.organizer.userId
+    },
+    isPayAvailable: function () {
+      return this.mxGameDetails.game.paymentType === 'prepay' && 
+             this.mxBookInfo.paymentStatus !== 'paid' && 
+             this.mxBookInfo.status !== 'waiting'
+    },
+    paymentId: function () {
+      return [this.mxBookInfo.gameId, this.mxBookInfo.bookId].join('|')
     },
     bookingPhone: function () {
       if (this.$store.state.gameDetails && this.$store.state.gameDetails.users) {
@@ -221,9 +237,6 @@ export default {
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
-h3 {
-  margin: 40px 0 0;
-}
-
+<style>
+@import '../assets/backarrow.css'; 
 </style>

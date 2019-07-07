@@ -1,10 +1,16 @@
 const authLib = require('../utils/auth');
 
 const get = async (req, res) => {
-  const users = await req.dal.user.getUsers([req.userId]);
+  if (!req.userId) {
+    res.status(200).send({
+      auth: false,
+    });
+  }
+
+  const user = await req.dal.user.getUser(req.userId);
   res.status(200).send({
     auth: true,
-    ...users[0],
+    ...user,
   });
 };
 
@@ -47,7 +53,7 @@ const auth = async (req, res) => {
     user = await req.dal.user.createUserByPhone(phone);
   }
   if (!user) {
-    throw new Error('auth: cannot find/create user');
+    throw new Error('auth: cannot find/create user ${phone}');
   }
 
   await req.dal.user.deleteVerificationCode(phone);
@@ -67,9 +73,17 @@ const set = async (req, res) => {
   });
 };
 
+const exit = async (req, res) => {
+  req.log.info(`exit userId: ${req.userId}`);
+  res.cookie('auth', '').status(200).send({
+    ok: true,
+  });
+};
+
 module.exports = {
   get,
   sendCheckCode,
   auth,
   set,
+  exit,
 };

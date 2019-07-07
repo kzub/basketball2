@@ -27,11 +27,11 @@
               </div>
               <div class="d-flex flex-column align-items-end">
                 <div>
-                  <div class="badge px-2 my-1" :class="game.freePlayerSlots == 0 ? 'badge-danger' : 'badge-light'">
+                  <div class="badge px-2 py-1 mt-2" :class="game.freePlayerSlots == 0 ? 'badge-danger' : 'badge-light'">
                     {{game.freePlayerSlots}}
                   </div>
                 </div>
-                <div class="badge px-2 my-1 badge-light w-100">
+                <div class="badge p-2 mt-2 badge-light w-100">
                   {{ game.place.title }}
                 </div>
               </div>

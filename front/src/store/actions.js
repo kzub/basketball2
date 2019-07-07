@@ -126,13 +126,23 @@ const authUser = ({ commit, state }, { phone, code }) => {
     .get(`/api/user/auth/${phone}/${code}`)
     .then(response => {
       console.log('/api/user/auth response:', response.data)
-      if (response.data.auth) {
-        return getUserInfo({ commit, state })
-      }
       return response.data
     })
     .catch(error => {
       console.log('/api/user/auth error:', error)
+    })
+}
+
+const exitUser = ({ commit, state }) => {
+  console.log(`actions::exitUser`)
+  return axios
+    .get(`/api/user/exit`)
+    .then(response => {
+      console.log('/api/user/exit response:', response.data)
+      commit('user', { auth: false })
+    })
+    .catch(error => {
+      console.log('/api/user/exit error:', error)
     })
 }
 
@@ -145,6 +155,7 @@ const setUserName = ({ commit, state }, name) => {
       if (response.data.ok) {
         commit('userName', name)
       }
+      return response.data
     })
     .catch(error => {
       console.log('/api/user/set error:', error)
@@ -166,6 +177,7 @@ export default {
   updateReservationPay,
   deleteReservation,
   authUser,
+  exitUser,
   getUserInfo,
   sendCheckCode,
   setUserName,
