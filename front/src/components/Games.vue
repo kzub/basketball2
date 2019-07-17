@@ -66,14 +66,14 @@ export default {
         return 'Предварительная запись'
       }
       if (game.status === 'settled') {
-        return 'Игра запланирована'
+        return '' //'Игра запланирована'
       }
-      return 'Неизвестный тип';
+      return '(статус не определен)';
     },
     gameBorderColor: function (game) {
       let mode = '';
       if (game.status === 'poll') {
-        mode += ' pollMode'
+        mode += ' btn-secondary'
       }
       if (this.$store.state.user && this.$store.state.user.userId === game.organizer.userId) {
         mode += ' userIsAdmin'
@@ -101,8 +101,8 @@ export default {
 }
 .pollMode {
   /*border-left: 5px solid #dc3545;*/
-  background-color: #557aa2;
-  border-color: #557aa2;
+  background-color: #da7833;
+  border-color: #da7833;
 }
 
 </style>

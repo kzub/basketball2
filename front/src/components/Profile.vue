@@ -1,8 +1,8 @@
 <template>
   <div>
     <b-btn @click="back" class="btn-lg mb-4 rounded-0" block variant="warning">
-      <i class="left"></i>
-      <span>Назад</span>
+      <i v-if="user.name" i class="left"></i>
+      <span v-if="user.name">Назад</span> &nbsp;
     </b-btn>
     <div v-if="!user || !user.auth" class="my-2">
       <div v-if="wentFromGame" class="mb-4">
@@ -12,7 +12,10 @@
       </div>
       <Register/>
     </div>
-    <div v-else-if="wantChange" class="my-2">
+    <div v-else-if="wantChange || !user.name" class="my-2">
+      <b-btn class="p-2 rounded-0" block href="#" variant="secondary">
+          Фамилия и имя
+        </b-btn>
       <b-form @submit="changeName" class="mt-3 d-flex flex-column" >
         <b-form-group id="userName"
                       label-for="userName"
@@ -99,9 +102,12 @@ export default {
       this.back()
     },
     back: function() {
+      if (!this.user.name) {
+        return
+      }
       if (this.wantChange) {
         this.wantChange = false;
-        return;
+        return
       }
       this.$router.back()
     },

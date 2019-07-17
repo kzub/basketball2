@@ -17,7 +17,17 @@ db.run(`CREATE TABLE IF NOT EXISTS bookings (
   playerName TEXT NOT NULL,
   paymentAmount INT,
   paymentStatus TEXT NOT NULL,
+  paymentId INT,
   status TEXT NOT NULL
+)`);
+
+db.run(`CREATE TABLE IF NOT EXISTS payments (
+  ts INTEGER NOT NULL,
+  paymentId INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+  recipientId INTEGER NOT NULL DEFAULT 0,
+  paySystem TEXT NOT NULL,
+  amount INT,
+  rawData TEXT NOT NULL DEFAULT '{}'
 )`);
 
 db.run(`CREATE TABLE IF NOT EXISTS places (
@@ -86,5 +96,6 @@ const dalInstance = {};
 dalInstance.game = require('./dal.game').init(execSQL('DAL_GAME'), dalInstance);
 dalInstance.user = require('./dal.user').init(execSQL('DAL_USER'), dalInstance);
 dalInstance.reservation = require('./dal.reservation').init(execSQL('DAL_RSV'), dalInstance);
+dalInstance.payment = require('./dal.payment').init(execSQL('DAL_PAYMENT'), dalInstance);
 
 module.exports = dalInstance;

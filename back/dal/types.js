@@ -125,7 +125,6 @@ function User (obj) {
   this.phone = String(obj.phone);
 
   if (typeof(this.userId) !== 'number' || isNaN(this.userId)) throw new Error('User constructor: bad userId');
-  if (!this.name.length) throw new Error('User constructor: bad name');
   if (!this.phone.length) throw new Error('User constructor: bad phone');
   this.phone = `+${this.phone}`;
 }
@@ -138,6 +137,7 @@ function Reservation (obj) {
   this.playerName = String(obj.playerName);
   this.paymentAmount = Number(obj.paymentAmount);
   this.paymentStatus = String(obj.paymentStatus);
+  this.paymentId = obj.paymentId !== undefined && Number(obj.paymentId);
   this.status = String(obj.status);
   this.expireTime = 0;
 
@@ -146,6 +146,7 @@ function Reservation (obj) {
   if (typeof(this.gameId) !== 'number' || isNaN(this.gameId)) throw new Error('Reservation constructor: bad gameId');
   if (typeof(this.userId) !== 'number' || isNaN(this.userId)) throw new Error('Reservation constructor: bad userId');
   if (typeof(this.paymentAmount) !== 'number' || isNaN(this.paymentAmount)) throw new Error('Reservation constructor: bad paymentAmount');
+  if (typeof(this.paymentId) === 'number' && isNaN(this.paymentId)) throw new Error('Reservation constructor: bad paymentId');
 
   checkString(obj.playerName, 'Reservation constructor: bad playerName');
   checkString(obj.paymentStatus, 'Reservation constructor: bad paymentStatus');
@@ -163,6 +164,22 @@ Reservation.prototype.setExpire = function(time) {
 Reservation.prototype.isPaid = function() {
   return this.paymentStatus === 'paid';
 };
+
+Reservation.prototype.makePaid = function(amount) {
+  if (typeof(amount) === 'number' && !isNaN(amount)) {
+    this.paymentAmount = amount
+  }
+  this.paymentStatus = 'paid';
+};
+
+Reservation.prototype.makeUnpaid = function() {
+  this.paymentStatus = 'unpaid';
+};
+
+Reservation.prototype.realPaymentComplete = function() {
+  return this.paymentId > 0;
+};
+
 
 module.exports = {
   Game,

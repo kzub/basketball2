@@ -34,7 +34,8 @@ const updateReservationPay = ({ commit, state }, { gameId, bookId }) => {
     .get(`/api/reservation/changePay/${gameId}/${bookId}`)
     .then(response => {
       console.log('/api/reservation/changePay response:', response.data)
-      commit('setUpdatedFlag', true)
+      updateGameData({ commit, state }, gameId)
+      // commit('setUpdatedFlag', true)
     })
     .catch(error => {
       console.log('/api/reservation/changePay error:', error)

@@ -4,33 +4,24 @@
 
       <b-card no-body class="mb-1">
         <b-btn class="p-2 rounded-0" block href="#" v-b-toggle.regStep1 variant="secondary">
-          Личные данные
+          Номер телефона
         </b-btn>
 
         <b-collapse id="regStep1" visible accordion="reg-accordion" role="tabpanel">
           <b-card-body>
             <b-form @submit="sendCheckCode">
-              <b-form-group id="userName"
-                            label-for="userName"
-                            class="description"
-                            description="Необходимо для прохода на площадку">
-                <b-form-input id="userName"
-                              type="text"
-                              v-model="form.name"
-                              required
-                              placeholder="Фамилия и имя">
-                </b-form-input>
-              </b-form-group>
               <b-form-group id="phoneNumber"
                             label-for="userPhone"
                             class="description"
                             description="Для связи, в случае каких-либо изменений">
-                <b-form-input id="userPhone"
-                              type="text"
+                <div class="d-flex flex-row">
+                  <b-form-input id="userPhone"
+                              type="number"
                               v-model="form.phone"
                               required
                               placeholder="Введите телефон">
-                </b-form-input>
+                  </b-form-input>
+                </div>
               </b-form-group>
               <b-btn type="submit" variant="primary">Отправить код</b-btn>
             </b-form>
@@ -57,7 +48,7 @@
                 </b-form-input>
               </b-form-group>
 
-              <b-btn type="submit" variant="primary">Сохранить изменения</b-btn>
+              <b-btn type="submit" variant="primary">Отправить</b-btn>
             </b-form>
           </b-card-body>
         </b-collapse>
@@ -119,27 +110,13 @@
           phone: this.form.phone,
           code: this.form.code,
         })
-        .then(res => {
-          if (!res || !res.auth) {
+        .then(user => {
+          if (!user || !user.auth) {
             this.$bvModal.show('err-check-code')
+            this.form.code = ''
             return
           }
-
-          if (this.mxLocationInfo.retUrl) {
-            this.$router.push({
-              path: this.mxLocationInfo.retUrl,
-              query: {
-                gameId: this.mxLocationInfo.gameId,
-                bookId: this.mxLocationInfo.bookId,
-              },
-            })
-          }
-          else {
-            this.back()
-          }
-
-          this.$store.dispatch('setUserName', this.form.name)
-          .then(() => this.$store.dispatch('getUserInfo'))
+          this.$store.commit('user', user)
         })
       },
       onCodeError: function () {

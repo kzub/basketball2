@@ -10,7 +10,7 @@
     <div v-else>
       <router-link to="/profile" tag="div">
         <b-btn v-if="user.auth" class="btn-lg rounded-0" block variant="warning">
-          {{ user.name }}
+          {{ user.name }} <i class="right"></i>
         </b-btn>
         <b-btn v-else class="btn-lg rounded-0" block variant="warning">
           Зарегистрироваться
@@ -41,4 +41,8 @@ export default {
 .user {
   line-height: 32px;
 }
+</style>
+
+<style>
+@import '../assets/backarrow.css';
 </style>

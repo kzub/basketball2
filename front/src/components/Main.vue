@@ -4,10 +4,12 @@
 
     <Games :games="games"/>
 
-    <b-btn class="btn-lg mt-4 rounded-0" block 
-    :href="link" variant="outline-secondary">
+    <hr/>
+    <b-btn class="btn-lg mt-2 mb-3 rounded-0" block
+    :href="link" variant="warning">
       Наш чат в телеграм
     </b-btn>
+
   </div>
 </template>
 
@@ -15,7 +17,7 @@
 
 import Games from './Games.vue'
 import Auth from './Auth.vue'
-  
+
 export default {
   name: 'Main',
   components: {
