@@ -1,8 +1,8 @@
 <template>
   <div>
     <b-btn @click="back" class="btn-lg mb-4 rounded-0" block variant="warning">
-      <i v-if="user.name" i class="left"></i>
-      <span v-if="user.name">Назад</span> &nbsp;
+      <i v-if="!newUser" i class="left"></i>
+      <span v-if="!newUser">Назад</span> &nbsp;
     </b-btn>
     <div v-if="!user || !user.auth" class="my-2">
       <div v-if="wentFromGame" class="mb-4">
@@ -12,7 +12,7 @@
       </div>
       <Register/>
     </div>
-    <div v-else-if="wantChange || !user.name" class="my-2">
+    <div v-else-if="wantChange || newUser" class="my-2">
       <b-btn class="p-2 rounded-0" block href="#" variant="secondary">
           Фамилия и имя
         </b-btn>
@@ -78,11 +78,14 @@ export default {
     },
     wentFromGame: function () {
       return this.$router.currentRoute.query.welcome
+    },
+    newUser: function () {
+      return this.$store.state.user && this.$store.state.user.name === ''
     }
   },
   methods: {
     changeProfile: function () {
-      this.newName = this.user.name
+      this.newName = this.user && this.user.name
       this.wantChange = true
     },
     changeName: function (evt) {
@@ -102,7 +105,7 @@ export default {
       this.back()
     },
     back: function() {
-      if (!this.user.name) {
+      if (this.newUser) {
         return
       }
       if (this.wantChange) {

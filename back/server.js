@@ -3,7 +3,6 @@ const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser')
 const uuid = require('uuid');
 
-
 const dal = require('./dal/dal');
 const apiRoutes = require('./api/routes');
 const utils = require('./utils/misc');

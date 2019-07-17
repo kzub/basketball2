@@ -8,7 +8,14 @@
         </b-btn>
 
         <b-collapse id="regStep1" visible accordion="reg-accordion" role="tabpanel">
-          <b-card-body>
+          <div v-if="sendingSMS" class="my-2">
+            <div class="d-flex justify-content-center">
+              <div class="spinner-border" role="status">
+                <span class="sr-only">Loading...</span>
+              </div>
+            </div>
+          </div>
+          <b-card-body v-else>
             <b-form @submit="sendCheckCode">
               <b-form-group id="phoneNumber"
                             label-for="userPhone"
@@ -57,7 +64,7 @@
 
     <div>
       <b-modal id="err-check-phone" title="Ошибка" ok-variant="danger" ok-title="ОК" cancel-variant="hidden">
-        <h5 class="my-4 text">Не удалось отправить смс, проверьте номер телефона и связь с интернетом</h5>
+        <h5 class="my-4 text">Не удалось отправить смс, превышено разрешенное число попыток, неверный номер телефона или проблемы с интернетом</h5>
       </b-modal>
     </div>
 
@@ -85,6 +92,7 @@
           name: this.name,
           code: '',
         },
+        sendingSMS: false,
       }
     },
     components: {
@@ -94,13 +102,16 @@
     methods: {
       sendCheckCode (evt) {
         evt.preventDefault()
+        this.sendingSMS = true
         this.$store.dispatch('sendCheckCode', this.form.phone)
         .then(res => {
           if (res && res.ok) {
             this.$root.$emit('bv::toggle::collapse', 'regStep2')
+            setTimeout(() => { this.sendingSMS = false }, 1000)
           }
           else {
             this.$bvModal.show('err-check-phone')
+            this.sendingSMS = false
           }
         })
       },

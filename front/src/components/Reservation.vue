@@ -18,7 +18,7 @@
       <GameInfo :game="mxGameDetails.game" show="place,time"/>
 
       <b-button v-if="mxBookInfo.paymentStatus === 'paid'" variant="success"
-      class="w-75 mt-3 mb-3 p-3 justify-content-center" >
+      :class="paymentStyleClass() + ' w-75 mt-3 mb-3 p-3 justify-content-center'" >
         ОПЛАЧЕНО
       </b-button>
       <b-button v-else-if="mxBookInfo.status == 'waiting'"
@@ -59,7 +59,7 @@
         <div v-if="isAdmin" class="mt-3 d-flex flex-column">
           <b-btn v-b-modal.chgName class="my-1" variant="primary">Изменить имя</b-btn>
 
-          <div v-if="!isRealPayment" class="d-flex flex-column">
+          <div v-if="!isPaymentGatewayUsed" class="d-flex flex-column">
             <b-btn v-if="mxBookInfo.paymentStatus === 'paid'"
                    @click="changePay" class="my-1" variant="warning">
               Пометить не оплаченным
@@ -182,7 +182,7 @@ export default {
     isAdmin: function () {
       return this.$store.state.user && this.$store.state.user.userId === this.mxGameDetails.game.organizer.userId
     },
-    isRealPayment: function () {
+    isPaymentGatewayUsed: function () {
       return this.mxBookInfo.paymentId > 0
     },
     isPayAvailable: function () {
@@ -245,6 +245,9 @@ export default {
         name: this.form.name
       })
     },
+    paymentStyleClass: function() {
+      return this.isPaymentGatewayUsed ? '' : 'manualPayment'
+    },
     handleDeleteOk: function () {
       this.$store.dispatch('deleteReservation', {
         ...this.mxLocationInfo,
@@ -255,6 +258,14 @@ export default {
 }
 </script>
 
+<style scoped>
+.manualPayment {
+  /*border: 2px dotted #dc3545;*/
+  border-left: 6px solid #ffc207 !important;
+  border-right: 6px solid #ffc207 !important;
+}
+
+</style>
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style>
 @import '../assets/backarrow.css';

@@ -1,4 +1,5 @@
 const authLib = require('../utils/auth');
+const smsGate = require('../connector/twilio');
 
 const get = async (req, res) => {
   if (!req.userId) {
@@ -30,16 +31,29 @@ const formatPhone = phoneNumber => {
 const sendCheckCode = async (req, res) => {
   const phone = formatPhone(req.params.phone);
   const code = await req.dal.user.createVerificationCode(phone);
-  req.log.debug(`phone: ${phone}, code: ${code}`);
-  res.status(200).send({
-    ok: true,
-  });
+  let ok = true;
+  req.log.info(`phone: ${phone}, code: ${code}`);
+  try {
+    // await smsGate.sendSMS(phone, code);
+  } catch (err) {
+    ok = false;
+    if (err === 'BAD_PHONE_NUMBER') {
+      req.log.warn(`SMSAUTH: bad phone number: ${phone}`);
+    }
+    else {
+      req.log.error(`SMSAUTH: ${JSON.stringify(err,null,2)}`);
+    }
+  }
+  setTimeout(function(){
+    res.status(200).send({
+      ok,
+    });
+  }, 1000);
 };
 
 const auth = async (req, res) => {
   const phone = formatPhone(req.params.phone);
   const code = req.params.code;
-  const name = req.params.name;
 
   const check = await req.dal.user.getVerificationCode(phone);
 
@@ -72,7 +86,7 @@ const auth = async (req, res) => {
 
 const set = async (req, res) => {
   req.log.info(`set userId: ${req.userId}, name: ${req.params.name}`);
-  const users = await req.dal.user.updateUser(req.userId, req.params.name);
+  await req.dal.user.updateUser(req.userId, req.params.name);
   res.status(200).send({
     ok: true,
   });

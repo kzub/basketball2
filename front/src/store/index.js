@@ -7,7 +7,7 @@ const Store = (Vuex) => {
       user: undefined,
       games: [],
       gameDetails: undefined,
-      viewDataUpdated: false,
+      viewDataUpdated: true,
       reservationExpire: undefined,
       reservationDetails: undefined,
       place: undefined,
