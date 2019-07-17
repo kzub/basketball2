@@ -12,8 +12,8 @@ i {
 }
 
 .right {
-  transform: rotate(-45deg);
-  -webkit-transform: rotate(-45deg);
+  transform: translate(+5px,-2px) rotate(-45deg);
+  -webkit-transform: translate(+5px,-2px) rotate(-45deg);
 }
 
 .left {

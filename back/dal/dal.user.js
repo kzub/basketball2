@@ -23,12 +23,12 @@ const updateUser = async (userId, name) => {
 
 const createUserByPhone = async (phone) => {
   const res = await execSQL.run(`INSERT INTO users (name, phone)
-    VALUES ('new', ${phone})`);
+    VALUES ('', ${phone})`);
   if (res && res.lastID) {
     return new User({
       userId: res.lastID,
       phone: phone,
-      name: 'new',
+      name: '',
     });
   }
 };

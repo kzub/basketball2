@@ -5,6 +5,7 @@ const get = async (req, res) => {
     res.status(200).send({
       auth: false,
     });
+    return;
   }
 
   const user = await req.dal.user.getUser(req.userId);
@@ -16,10 +17,13 @@ const get = async (req, res) => {
 
 const formatPhone = phoneNumber => {
   let phone = phoneNumber.toString();
-  if (phone[0] == '8') {
+  if (phone[0] === '8') { // 89154443322 -> 79154443322
     phone = '7' + phone.slice(1); 
   }
-  phone = phone.replace(/[()\-+]/g, '');
+  else if (phone[0] !== '+') { // 9154443322 -> 79154443322
+    phone = '7' + phone;
+  }
+  phone = phone.replace(/[()\W\-+]/g, ''); // +7(915)444-44-33 -> 79154443322
   return phone;
 };
 
@@ -62,6 +66,7 @@ const auth = async (req, res) => {
   req.log.debug(`set auth '${authCookie}' for userId: ${user.userId}`);
   res.cookie('auth', authCookie).status(200).send({
     auth: true,
+    ...user,
   });
 };
 

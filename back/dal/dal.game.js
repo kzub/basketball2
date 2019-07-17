@@ -30,11 +30,22 @@ const getGame = async (gameId) => {
   const organizer = await dal.user.getUser(game.organizerId);
 
   return new Game({
-      ...game,
-      place: places[0],
-      organizer: organizer,
-    });
+    ...game,
+    place: places[0],
+    organizer: organizer,
+  });
+}
+
+const getGameOrganizerId = async (gameId) => {
+  const games = await execSQL.all(`SELECT organizerId FROM games g
+    WHERE g.gameId = ${gameId}`
+  );
+  if (games.length !== 1) {
+    throw new Error(`getGame(): cannot find game with gameId:${gameId}`);
   }
+
+  return games[0].organizerId;
+};
 
 const getGameDetails = async (gameId) => {
   const game = await getGame(gameId);
@@ -114,6 +125,7 @@ module.exports = {
       getGamesList,
       getGame,
       getGameDetails,
+      getGameOrganizerId,
     };
   }
 };

@@ -16,22 +16,22 @@
 
       <!-- game and payment info -->
       <GameInfo :game="mxGameDetails.game" show="place,time"/>
-      
+
       <b-button v-if="mxBookInfo.paymentStatus === 'paid'" variant="success"
       class="w-75 mt-3 mb-3 p-3 justify-content-center" >
         ОПЛАЧЕНО
       </b-button>
-      <b-button v-else-if="mxBookInfo.status == 'waiting'" 
+      <b-button v-else-if="mxBookInfo.status == 'waiting'"
       class="w-75 mt-3 mb-3 p-3 justify-content-center">
         Резерв, на случай, если кто-то откажется
       </b-button>
-      <b-button v-else class="w-75 mt-3 mb-3 p-3 justify-content-center" 
+      <b-button v-else class="w-75 mt-3 mb-3 p-3 justify-content-center"
       variant="danger">
         НЕ ОПЛАЧЕНО
         <div v-if="reservationExpire"
              class="btn-danger">
              <hr style="background-color: white"/>
-          на оплату есть {{ reservationExpire }}
+          на оплату есть {{ reservationExpire }} {{mxTextMinutesTo(reservationExpire)}}
         </div>
       </b-button>
 
@@ -42,14 +42,13 @@
           <b-form-input id="userName"  class="mt-2"
                         type="text"
                         v-model="form.name"
-                        required
+                        disabled
                         placeholder="Фамилия и имя">
           </b-form-input>
           <b-form-input class="mt-2"
                         id="userPhone"
                         type="text"
                         v-model="form.phone"
-                        required
                         disabled
                         placeholder="Номер телефона">
           </b-form-input>
@@ -58,18 +57,20 @@
 
         <!-- admin action buttons -->
         <div v-if="isAdmin" class="mt-3 d-flex flex-column">
-          <b-btn @click="changeName" class="my-1" variant="primary">Изменить имя</b-btn>
+          <b-btn v-b-modal.chgName class="my-1" variant="primary">Изменить имя</b-btn>
 
-          <b-btn v-if="mxBookInfo.paymentStatus === 'paid'" 
-                 @click="changePay" class="my-1" variant="warning">
-            Пометить не оплаченным
-          </b-btn>
-          <b-btn v-else 
-                 @click="changePay" class="my-1" variant="success">
-            Пометить оплаченым
-          </b-btn>
+          <div v-if="!isRealPayment" class="d-flex flex-column">
+            <b-btn v-if="mxBookInfo.paymentStatus === 'paid'"
+                   @click="changePay" class="my-1" variant="warning">
+              Пометить не оплаченным
+            </b-btn>
+            <b-btn v-else
+                   @click="changePay" class="my-1" variant="success">
+              Пометить оплаченым
+            </b-btn>
+          </div>
 
-          <b-btn class="my-1" variant="danger" v-b-modal.ackModal>Удалить запись</b-btn>
+          <b-btn v-b-modal.ackModal class="my-1" variant="danger">Удалить запись</b-btn>
         </div>
 
         <!-- users action buttons -->
@@ -86,9 +87,9 @@
                 :amount="mxGameDetails.game.paymentAmount"
                 :label="paymentId"/>
             </div>
-            <b-btn v-if="mxGameDetails.game.status == 'settled' && 
-                         mxGameDetails.game.paymentType === 'shared' && 
-                         mxBookInfo.paymentStatus !== 'paid'" 
+            <b-btn v-if="mxGameDetails.game.status == 'settled' &&
+                         mxGameDetails.game.paymentType === 'shared' &&
+                         mxBookInfo.paymentStatus !== 'paid'"
                    @click="informAboutPayment" class="my-1" variant="success">
               Сообщить об оплате
             </b-btn>
@@ -96,7 +97,7 @@
               Изменить имя
             </b-btn>
             <b-btn v-if="(mxGameDetails.game.paymentType === 'prepay' &&
-                         mxBookInfo.paymentStatus !== 'paid')  || 
+                         mxBookInfo.paymentStatus !== 'paid')  ||
                          (mxGameDetails.game.paymentType === 'shared' &&
                          mxGameDetails.game.status !== 'settled')"
                          class="my-1" variant="danger" v-b-modal.ackModal>
@@ -114,6 +115,20 @@
           <b-modal id="ackModal" title="Подтверждение" ok-variant="danger" ok-title="Да" cancel-title="Отмена"
             @ok="handleDeleteOk">
             <p class="my-4">Удалить запись?</p>
+          </b-modal>
+        </div>
+        <!-- change name window -->
+        <div>
+          <b-modal id="chgName" title="Введите участника" ok-variant="danger" ok-title="Ок" cancel-title="Отмена"
+            @ok="handleChangeOk">
+            <b-form class="text-left">
+              <b-form-input id="userName"  class="mt-2"
+                            type="text"
+                            v-model="form.name"
+                            required
+                            placeholder="Фамилия и имя">
+              </b-form-input>
+            </b-form>
           </b-modal>
         </div>
       </div>
@@ -155,8 +170,7 @@ export default {
   },
   computed: {
     reservationExpire: function() {
-        return this.$store.state.reservationExpire || 
-               this.mxMinutesTo(this.mxBookInfo.expireTime)
+        return this.$store.state.reservationExpire || this.mxMinutesTo(this.mxBookInfo.expireTime)
     },
     form: function () {
       return {
@@ -168,13 +182,16 @@ export default {
     isAdmin: function () {
       return this.$store.state.user && this.$store.state.user.userId === this.mxGameDetails.game.organizer.userId
     },
+    isRealPayment: function () {
+      return this.mxBookInfo.paymentId > 0
+    },
     isPayAvailable: function () {
-      return this.mxGameDetails.game.paymentType === 'prepay' && 
-             this.mxBookInfo.paymentStatus !== 'paid' && 
+      return this.mxGameDetails.game.paymentType === 'prepay' &&
+             this.mxBookInfo.paymentStatus !== 'paid' &&
              this.mxBookInfo.status !== 'waiting'
     },
     paymentId: function () {
-      return [this.mxBookInfo.gameId, this.mxBookInfo.bookId].join('|')
+      return ['RSV', this.mxBookInfo.gameId, this.mxBookInfo.bookId].join('|')
     },
     bookingPhone: function () {
       if (this.$store.state.gameDetails && this.$store.state.gameDetails.users) {
@@ -203,18 +220,11 @@ export default {
         }
       })
     },
-    changeName: function() {
-      this.$store.dispatch('updateReservationName', {
-        ...this.mxLocationInfo,
-        name: this.form.name
-      })
-      .then(this.back)
-    },
     changePay: function() {
       this.$store.dispatch('updateReservationPay', {
         ...this.mxLocationInfo,
       })
-      .then(this.back)
+      // .then(this.back)
     },
     makePayment: function() {
       console.log('makePayment');
@@ -225,6 +235,15 @@ export default {
     onPaySubmit: function (evt) {
       console.log('change', evt)
       evt.preventDefault()
+    },
+    handleChangeOk: function() {
+      if(!this.form.name) {
+        return
+      }
+      this.$store.dispatch('updateReservationName', {
+        ...this.mxLocationInfo,
+        name: this.form.name
+      })
     },
     handleDeleteOk: function () {
       this.$store.dispatch('deleteReservation', {
@@ -238,5 +257,5 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style>
-@import '../assets/backarrow.css'; 
+@import '../assets/backarrow.css';
 </style>

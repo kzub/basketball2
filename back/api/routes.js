@@ -1,6 +1,7 @@
 const user = require('./user');
 const game = require('./game');
 const games = require('./games');
+const payment = require('./payment');
 const reservation = require('./reservation');
 
 const wrapper = (func, needAuth, statusCode = 401) => {
@@ -13,11 +14,12 @@ const wrapper = (func, needAuth, statusCode = 401) => {
       });
       return;
     }
-    func(req, res, ...args)
-    .catch(err => {
+    func(req, res, ...args).catch(err => {
       // console.log(err)
       req.log.error(`${err.message}\n${err.stack}`);
-      res.status(500).send(err.message);
+      if (!res.headersSent) {
+        res.status(500).send(err.message);
+      }
     });
   };
 };
@@ -34,6 +36,8 @@ const init = (app) => {
   app.get('/api/user/auth/:phone/:code', wrapper(user.auth, false));
   app.get('/api/game/:gameId', wrapper(game, false));
   app.get('/api/games', wrapper(games, false));
+  app.post('/api/payment/complete/:paySystem', wrapper(payment.complete, false));
+
 };
 
 module.exports = { init };

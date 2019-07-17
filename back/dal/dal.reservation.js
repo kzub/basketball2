@@ -24,6 +24,7 @@ const update = async (reservation) => {
     playerName = '${reservation.playerName}',
     paymentAmount = ${reservation.paymentAmount},
     paymentStatus = '${reservation.paymentStatus}',
+    paymentId = ${reservation.paymentId},
     status = '${reservation.status}'
     WHERE gameId = ${reservation.gameId}
     AND bookId = ${reservation.bookId}`);

@@ -183,8 +183,8 @@ export default {
 }
 
 .manualBookMode {
-  border: 1px solid #557aa2;
-  color: #557aa2;
+  border: 1px solid #6c757d;
+  color: #6c757d;
 }
 
 .loader {
