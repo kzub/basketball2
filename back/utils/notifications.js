@@ -27,8 +27,8 @@ emitter.on('reservation.cancel', ({ reservation }) => {
   console.log(`reservation canceled: ${reservation.gameId}/${reservation.bookId}/${reservation.playerName}`);
 });
 
-emitter.on('reservation.waiter.promouted', ({ reservation }) => {
-  console.log(`waiter promouted: ${reservation.gameId}/${reservation.bookId}/${reservation.playerName}`);
+emitter.on('reservation.waiter.promoted', ({ reservation }) => {
+  console.log(`waiter promoted: ${reservation.gameId}/${reservation.bookId}/${reservation.playerName}`);
 });
 
 module.exports = emitter;

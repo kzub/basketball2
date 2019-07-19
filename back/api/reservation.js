@@ -84,10 +84,10 @@ const cancel = async (req, res) => {
 
     if (ok) { 
       events.emit('reservation.canceled', { reservation });
-      const promoutedRsvId = await req.dal.game.moveWaiters(gameId);
-      if (promoutedRsvId) {
-        const promoutedReservation = await req.dal.reservation.get(gameId, promoutedRsvId);
-        events.emit('reservation.waiter.promouted', { promoutedReservation });
+      const promotedRsvId = await req.dal.game.moveWaiters(gameId);
+      if (promotedRsvId) {
+        const promotedReservation = await req.dal.reservation.get(gameId, promotedRsvId);
+        events.emit('reservation.waiter.promoted', { promotedReservation });
       }
     }
   }

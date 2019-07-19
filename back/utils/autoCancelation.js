@@ -12,10 +12,10 @@ const checkExpiredReservations = async () => {
     const ok = await dal.reservation.update(reservation);
     if (ok) { 
       events.emit('reservation.expired', { reservation });
-      const promoutedRsvId = await dal.game.moveWaiters(reservation.gameId);
-      if (promoutedRsvId) {
-        const promoutedReservation = await dal.reservation.get(reservation.gameId, promoutedRsvId);
-        events.emit('reservation.waiter.promouted', { promoutedReservation });
+      const promotedRsvId = await dal.game.moveWaiters(reservation.gameId);
+      if (promotedRsvId) {
+        const promotedReservation = await dal.reservation.get(reservation.gameId, promotedRsvId);
+        events.emit('reservation.waiter.promoted', { promotedReservation });
       }
     }
   }
