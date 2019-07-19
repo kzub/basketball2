@@ -96,7 +96,7 @@
                    @click="informAboutPayment" class="my-1" variant="success">
               Сообщить об оплате
             </b-btn>
-            <b-btn @click="changeName" class="my-1" variant="primary">
+            <b-btn v-b-modal.chgName class="my-1" variant="primary">
               Изменить имя
             </b-btn>
             <b-btn v-if="(mxGameDetails.game.paymentType === 'prepay' &&
@@ -162,8 +162,8 @@ export default {
     const { commit, state } = this.$store
     const self = this;
     intervalId = setInterval(function() {
-      if (self.mxBookInfo && self.mxBookInfo.expireTime) {
-        commit('setReservationExpire', self.mxMinutesTo(self.mxBookInfo.expireTime))
+      if (self.mxBookInfo && self.mxBookInfo.expireAt) {
+        commit('setReservationExpire', self.mxMinutesTo(self.mxBookInfo.expireAt))
       }
     }, 1000)
   },
@@ -173,7 +173,7 @@ export default {
   },
   computed: {
     reservationExpire: function() {
-        return this.$store.state.reservationExpire || this.mxMinutesTo(this.mxBookInfo.expireTime)
+        return this.$store.state.reservationExpire || this.mxMinutesTo(this.mxBookInfo.expireAt)
     },
     form: function () {
       return {

@@ -22,6 +22,7 @@ const checkExpiredReservations = async () => {
 };
 
 const startMonitoring = () => {
+  checkExpiredReservations();
   setInterval(checkExpiredReservations, 60000);
 };
 

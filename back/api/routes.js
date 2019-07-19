@@ -28,12 +28,12 @@ const wrapper = (func, needAuth, statusCode = 401) => {
 };
 
 const apiLimiter = rateLimit({
-  windowMs: 60 * 60 * 1000, // 60 minutes
-  max: 10, // limit each IP to 100 requests per windowMs
+  windowMs: 10 * 60 * 1000, // 10 minutes
+  max: 100, // limit each IP to 100 requests per windowMs
   handler: (req, res, next) => { // function to handle requests once the max limit is exceeded
     events.emit('request.limit', { userId: req.userId, ip: req.ip });
+    req.log.warn(`Too many requests from user: ${req.userId}, ip: ${req.ip}`);
     if (req.userId) {
-      req.log.warn(`Too many requests from user: ${req.userId}`);
       next();
       return;
     }
@@ -42,8 +42,13 @@ const apiLimiter = rateLimit({
 });
 
 const smsLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5
+  windowMs: 30 * 60 * 1000, // 30 minutes
+  max: 5,
+  handler: (req, res, /*next*/) => { // function to handle requests once the max limit is exceeded
+    events.emit('request.limit.sms', { phone: req.params.phone, ip: req.ip });
+    req.log.warn(`Too many sms sent to: ${req.params.phone}, by: ${req.ip}`);
+    res.status(429).send('Too many requests, please try again later.');
+  }
 });
 
 const init = (app) => {

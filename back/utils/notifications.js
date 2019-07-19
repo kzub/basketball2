@@ -15,6 +15,10 @@ emitter.on('request.limit', ({ userId, ip }) => {
   console.log(`request limit reached: ${userId}, ${ip}`);
 });
 
+emitter.on('request.limit.sms', ({ phone, ip }) => {
+  console.log(`sent SMS limit reached: ${phone}, ${ip}`);
+});
+
 emitter.on('reservation.new', ({ game, bookId, user }) => {
   console.log(`new reservation: ${game.gameId}/${bookId}/${user.name}`);
 });
