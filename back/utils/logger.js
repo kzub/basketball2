@@ -69,7 +69,7 @@ const create = (name, req) => {
   for (let level in logger.levels) {
     publicLogger[level] = (...rest) => {
       return logger[level](...rest);
-    }
+    };
   }
   return publicLogger;
 };

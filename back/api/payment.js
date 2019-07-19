@@ -12,7 +12,7 @@ const complete = async (req, res) => {
     const paymentId = await req.dal.payment.addTransaction(organizerId, paySystem, amount, req.body);
     
     const reservation = await req.dal.reservation.get(gameId, bookId);
-    reservation.status  = 'booked';
+    reservation.book();
     reservation.makePaid(amount);
     reservation.paymentId = paymentId;
     await req.dal.reservation.update(reservation);

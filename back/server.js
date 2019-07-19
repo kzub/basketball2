@@ -1,16 +1,18 @@
-const express = require('express');
 const bodyParser = require('body-parser');
-const cookieParser = require('cookie-parser')
+const cookieParser = require('cookie-parser');
+const express = require('express');
 const uuid = require('uuid');
 
-const dal = require('./dal/dal');
 const apiRoutes = require('./api/routes');
-const utils = require('./utils/misc');
-const logger = require('./utils/logger');
 const auth = require('./utils/auth');
-const log = logger.create('SERVER');
-const config = utils.getConfig();
+const autoCancelation = require('./utils/autoCancelation');
+const dal = require('./dal/dal');
+const logger = require('./utils/logger');
+const utils = require('./utils/misc');
+
 const app = express();
+const config = utils.getConfig();
+const log = logger.create('SERVER');
 
 app.use(bodyParser.json()); // support json encoded bodies
 app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
@@ -40,7 +42,7 @@ app.get('*', function (req, res) {
 app.listen(config.server.port, config.server.host);
 log.info(`listen on: ${config.server.host}:${config.server.port}`);
 
-// const autoCancelation = require('./autoCancelation');
+autoCancelation.startMonitoring();
 
 // const bot = require('./telegram_bot');
 // function makeError(msg) {

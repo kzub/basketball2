@@ -4,6 +4,12 @@ const checkString = (str, msg) => {
   }
 };
 
+const checkNumber = (num, msg) => {
+  if (typeof(num) !== 'number' || isNaN(num) || !isFinite(num)) {
+    throw new Error(msg);
+  }
+};
+
 function Game (obj) {
   this.gameId = Number(obj.gameId);
   this.date = String(obj.date),
@@ -26,15 +32,14 @@ function Game (obj) {
   this.organizer = obj.organizer;
   this.place = obj.place;
 
-  if (typeof(this.gameId) !== 'number' || isNaN(this.gameId)) throw new Error('Game constructor: bad gameId');
-  if (typeof(this.playerSlots) !== 'number' || isNaN(this.playerSlots)) throw new Error('Game constructor: bad playerSlots');
-  if (typeof(this.usedPlayerSlots) !== 'number' || isNaN(this.usedPlayerSlots)) throw new Error('Game constructor: bad usedPlayerSlots');
-  if (typeof(this.freePlayerSlots) !== 'number' || isNaN(this.freePlayerSlots)) throw new Error('Game constructor: bad freePlayerSlots');
-  if (typeof(this.waiterSlots) !== 'number' || isNaN(this.waiterSlots)) throw new Error('Game constructor: bad waiterSlots');
-  if (typeof(this.usedWaiterSlots) !== 'number' || isNaN(this.usedWaiterSlots)) throw new Error('Game constructor: bad usedWaiterSlots');
-  if (typeof(this.freeWaiterSlots) !== 'number' || isNaN(this.freeWaiterSlots)) throw new Error('Game constructor: bad freeWaiterSlots');
-
-  if (typeof(this.paymentAmount) !== 'number' || isNaN(this.paymentAmount)) throw new Error('Game constructor: bad paymentAmount');
+  checkNumber(this.gameId, 'Game constructor: bad gameId');
+  checkNumber(this.playerSlots, 'Game constructor: bad playerSlots');
+  checkNumber(this.usedPlayerSlots, 'Game constructor: bad usedPlayerSlots');
+  checkNumber(this.freePlayerSlots, 'Game constructor: bad freePlayerSlots');
+  checkNumber(this.waiterSlots, 'Game constructor: bad waiterSlots');
+  checkNumber(this.usedWaiterSlots, 'Game constructor: bad usedWaiterSlots');
+  checkNumber(this.freeWaiterSlots, 'Game constructor: bad freeWaiterSlots');
+  checkNumber(this.paymentAmount, 'Game constructor: bad paymentAmount');
 
   checkString(obj.date, 'Game constructor: bad date');
   checkString(obj.timeStart, 'Game constructor: bad timeStart');
@@ -54,6 +59,12 @@ Game.prototype.isPrepay = function () {
   return this.paymentType === 'prepay';
 };
 
+Game.prototype.freeSlotExists = function (slotType) {
+  return (
+    (slotType === 'player' && this.freePlayerSlots > 0) ||
+    (slotType === 'waiter' && this.freeWaiterSlots > 0)
+  );
+};
 
 function GameDetails (game, players, waiters) {
   this.game = game;
@@ -70,13 +81,6 @@ function GameDetails (game, players, waiters) {
     throw new Error('GameDetails constructor: waiters not instanceof Reservation');
   }
 
-  players = players.map(p => {
-    if (game.isPrepay() && !p.isPaid()) {
-      p.setExpire(game.props.reservationExpire || 30*60*1000);
-    }
-    return p;
-  });
-
   for (let i = players.length; i < game.playerSlots; i++) {
     this.players.push(new Reservation({
       ts: 0,
@@ -87,6 +91,7 @@ function GameDetails (game, players, waiters) {
       paymentAmount: 0,
       paymentStatus: 'unpaid',
       status: 'free4player',
+      expireAt: 0,
     }));
   }
 
@@ -139,14 +144,15 @@ function Reservation (obj) {
   this.paymentStatus = String(obj.paymentStatus);
   this.paymentId = obj.paymentId !== undefined && Number(obj.paymentId);
   this.status = String(obj.status);
-  this.expireTime = 0;
+  this.expireAt = Number(obj.expireAt || 0);
 
-  if (typeof(this.ts) !== 'number' || isNaN(this.ts)) throw new Error('Reservation constructor: bad ts');
-  if (typeof(this.bookId) !== 'number' || isNaN(this.bookId)) throw new Error('Reservation constructor: bad bookId');
-  if (typeof(this.gameId) !== 'number' || isNaN(this.gameId)) throw new Error('Reservation constructor: bad gameId');
-  if (typeof(this.userId) !== 'number' || isNaN(this.userId)) throw new Error('Reservation constructor: bad userId');
-  if (typeof(this.paymentAmount) !== 'number' || isNaN(this.paymentAmount)) throw new Error('Reservation constructor: bad paymentAmount');
-  if (typeof(this.paymentId) === 'number' && isNaN(this.paymentId)) throw new Error('Reservation constructor: bad paymentId');
+  checkNumber(this.ts, 'Reservation constructor: bad ts');
+  checkNumber(this.bookId, 'Reservation constructor: bad bookId');
+  checkNumber(this.gameId, 'Reservation constructor: bad gameId');
+  checkNumber(this.userId, 'Reservation constructor: bad userId');
+  checkNumber(this.paymentAmount, 'Reservation constructor: bad paymentAmount');
+  checkNumber(this.paymentId||0, 'Reservation constructor: bad paymentId');
+  checkNumber(this.expireAt, 'Reservation constructor: bad expireAt');
 
   checkString(obj.playerName, 'Reservation constructor: bad playerName');
   checkString(obj.paymentStatus, 'Reservation constructor: bad paymentStatus');
@@ -157,17 +163,17 @@ Reservation.prototype.isOwner = function(user) {
   return user.userId === this.userId;
 };
 
-Reservation.prototype.setExpire = function(time) {
-  return this.expireTime = this.ts + time;
-};
-
 Reservation.prototype.isPaid = function() {
   return this.paymentStatus === 'paid';
 };
 
+Reservation.prototype.setExpire = function(time) {
+  this.expireAt = time;
+};
+
 Reservation.prototype.makePaid = function(amount) {
   if (typeof(amount) === 'number' && !isNaN(amount)) {
-    this.paymentAmount = amount
+    this.paymentAmount = amount;
   }
   this.paymentStatus = 'paid';
 };
@@ -180,6 +186,17 @@ Reservation.prototype.realPaymentComplete = function() {
   return this.paymentId > 0;
 };
 
+Reservation.prototype.reserve = function() {
+  this.status = 'reserved';
+};
+
+Reservation.prototype.cancel = function() {
+  this.status = 'canceled';
+};
+
+Reservation.prototype.book = function() {
+  this.status = 'booked';
+};
 
 module.exports = {
   Game,

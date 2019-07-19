@@ -1,8 +1,5 @@
-const utils = require('../utils/misc');
-const { Game, GameDetails, Reservation, Place, User } = require('./types');
-
-let log;
-let dal;
+let log; // eslint-disable-line
+let dal; // eslint-disable-line
 let execSQL;
 
 const addTransaction = async (recipientId, paySystem, amount, rawData) => {
@@ -11,7 +8,7 @@ const addTransaction = async (recipientId, paySystem, amount, rawData) => {
     VALUES (${Date.now()}, ${recipientId}, '${paySystem}', ${amount}, '${JSON.stringify(rawData)}')`);
   
   return res && res.lastID;
-}
+};
 
 module.exports = {
   init: (driver, dalInstance) => {

@@ -1,38 +1,32 @@
-const bot = require('./telegram_bot');
-const routines = {};
-const timeout = 30*60*1000;
+const dal = require('../dal/dal');
+const events = require('../utils/notifications');
+const logger = require('../utils/logger');
 
-function makeId(gameId, playerId) {
-  return [gameId, playerId].join(':');
-}
+const log = logger.create('AUTO_CANCEL');
 
-function cancelWrapper(gameId, player, deleteMethod) {
-  console.log('AUTO cancellation DELETE expired player book', gameId, player.id, player.firstName, player.surName);
-  bot.send('zk', `Book expired: ${gameId}/${player.id} ${player.firstName} ${player.surName}`);
-  deleteMethod(gameId, player.id);
-}
-
-exports.add = function(gameId, player, deleteMethod) {
-  if (!(player instanceof Object) || !isFinite(gameId) || !(deleteMethod instanceof Function)) {
-    console.log('autoCancelation: bad input parameters', gameId, player, deleteMethod);
-    return;
+const checkExpiredReservations = async () => {
+  const reservations = await dal.reservation.getExpired();
+  for(const reservation of reservations) {
+    log.info(`start canceling reservation: ${reservation.bookId}, ${reservation.playerName}`);
+    reservation.cancel();
+    const ok = await dal.reservation.update(reservation);
+    if (ok) { 
+      events.emit('reservation.expired', { reservation });
+      const promoutedRsvId = await dal.game.moveWaiters(reservation.gameId);
+      if (promoutedRsvId) {
+        const promoutedReservation = await dal.reservation.get(reservation.gameId, promoutedRsvId);
+        events.emit('reservation.waiter.promouted', { promoutedReservation });
+      }
+    }
   }
-
-  let id = makeId(gameId, player.id);
-  if (routines[id]) {
-    clearTimeout(routines[id]);
-  }
-
-  routines[id] = setTimeout(cancelWrapper, timeout, gameId, player, deleteMethod);
-  console.log(`AUTO cancellation ON for ${gameId}/${player.id} ${player.firstName} ${player.surName}`);
 };
 
-exports.del = function(gameId, player) {
-  let id = makeId(gameId, player.id);
-  if (routines[id]) {
-    clearTimeout(routines[id]);
-    delete routines[id];
-    console.log(`AUTO cancellation OFF for ${gameId}/${player.id} ${player.firstName} ${player.surName}`);
-  }
+const startMonitoring = () => {
+  setInterval(checkExpiredReservations, 60000);
+};
+
+module.exports = {
+  checkExpiredReservations,
+  startMonitoring,
 };
 

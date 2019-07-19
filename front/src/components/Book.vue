@@ -89,7 +89,7 @@ export default {
 
       this.$store.dispatch('bookSlot', { ...mxLocationInfo })
       .then((data) => {
-        if (data.result == 'booked') {
+        if (data.result === 'ok') {
           this.$store.dispatch('updateGameData', mxLocationInfo.gameId);
           this.$router.push({
             path: '/reservation',

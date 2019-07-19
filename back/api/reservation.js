@@ -1,16 +1,27 @@
+const events = require('../utils/notifications');
+
+const newReservationTTL = 30*60*1000;
+
 const book = async (req, res) => {
   const { gameId, slotType } = req.body;
   const user = await req.dal.user.getUser(req.userId);
   const game = await req.dal.game.getGame(gameId);
 
   let bookId = 0;
-  if ((slotType === 'player' && game.freePlayerSlots > 0) ||
-      (slotType === 'waiter' && game.freeWaiterSlots > 0) ) {
-    bookId = await req.dal.reservation.create(gameId, slotType, user);
+  let ttl = 0;
+  if (game.freeSlotExists(slotType)) {
+    if (game.isPrepay() && slotType === 'player') {
+      ttl = newReservationTTL;
+    }
+    bookId = await req.dal.reservation.create(gameId, slotType, ttl, user);
+  }
+
+  if (bookId > 0) {
+    events.emit('reservation.new', { game, bookId, user });
   }
 
   res.status(200).send({
-    result: bookId > 0 ? 'booked' : 'error',
+    result: bookId > 0 ? 'ok' : 'error',
     gameId,
     bookId,
     freePlayerSlots: game.freePlayerSlots,
@@ -25,7 +36,7 @@ const changePay = async (req, res) => {
   const reservation = await req.dal.reservation.get(gameId, bookId);
 
   let ok = false;
-  let reason = undefined;
+  let reason;
 
   if (!game.isAdmin(user)) {
     reason = 'you are not game admin';
@@ -38,6 +49,7 @@ const changePay = async (req, res) => {
       reservation.makeUnpaid();
     } else {
       reservation.makePaid();
+      reservation.setExpire(0);
     }
     ok = await req.dal.reservation.update(reservation);
   }
@@ -67,8 +79,17 @@ const cancel = async (req, res) => {
 
   let ok = false;
   if (game.isAdmin(user) || reservation.isOwner(user)) {
-    reservation.status  = 'canceled';
+    reservation.cancel();
     ok = await req.dal.reservation.update(reservation);
+
+    if (ok) { 
+      events.emit('reservation.canceled', { reservation });
+      const promoutedRsvId = await req.dal.game.moveWaiters(gameId);
+      if (promoutedRsvId) {
+        const promoutedReservation = await req.dal.reservation.get(gameId, promoutedRsvId);
+        events.emit('reservation.waiter.promouted', { promoutedReservation });
+      }
+    }
   }
   res.status(200).send({ ok });
 };

@@ -10,7 +10,7 @@ const sendSMS = async (number, text) => {
       from: config.twilio.senderNumber,
       body: text,
     }, (err, message) => {
-      console.log(err, message)
+      // console.log(err, message);
       if (err) {
         if (err.code === 21211) {
           reject('BAD_PHONE_NUMBER');

@@ -18,7 +18,8 @@ db.run(`CREATE TABLE IF NOT EXISTS bookings (
   paymentAmount INT,
   paymentStatus TEXT NOT NULL,
   paymentId INT,
-  status TEXT NOT NULL
+  status TEXT NOT NULL,
+  expireAt INTEGER
 )`);
 
 db.run(`CREATE TABLE IF NOT EXISTS payments (

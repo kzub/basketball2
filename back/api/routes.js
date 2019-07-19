@@ -5,6 +5,7 @@ const games = require('./games');
 const payment = require('./payment');
 const reservation = require('./reservation');
 const user = require('./user');
+const events = require('../utils/notifications');
 
 const wrapper = (func, needAuth, statusCode = 401) => {
   return (req, res, ...args) => {
@@ -30,6 +31,7 @@ const apiLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 60 minutes
   max: 10, // limit each IP to 100 requests per windowMs
   handler: (req, res, next) => { // function to handle requests once the max limit is exceeded
+    events.emit('request.limit', { userId: req.userId, ip: req.ip });
     if (req.userId) {
       req.log.warn(`Too many requests from user: ${req.userId}`);
       next();

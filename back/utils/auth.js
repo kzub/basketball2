@@ -9,7 +9,7 @@ const decode = (token) => {
   }
   try {
     const decipher = crypto.createDecipher(config.auth.algorithm, config.auth.key);
-    let text = decipher.update(token, 'hex', 'utf8')
+    let text = decipher.update(token, 'hex', 'utf8');
     text += decipher.final('utf8');
 
     const [salt, userId] = text.split(':');

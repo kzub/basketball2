@@ -1,4 +1,5 @@
 const authLib = require('../utils/auth');
+const events = require('../utils/notifications');
 const smsGate = require('../connector/twilio');
 
 const get = async (req, res) => {
@@ -35,13 +36,14 @@ const sendCheckCode = async (req, res) => {
   req.log.info(`phone: ${phone}, code: ${code}`);
   try {
     // await smsGate.sendSMS(phone, code);
+    events.emit('user.sms', { phone, code });
   } catch (err) {
     ok = false;
     if (err === 'BAD_PHONE_NUMBER') {
       req.log.warn(`SMSAUTH: bad phone number: ${phone}`);
     }
     else {
-      req.log.error(`SMSAUTH: ${JSON.stringify(err,null,2)}`);
+      req.log.error(`SMSAUTH: ${err} ${err.stack}`);
     }
   }
   setTimeout(function(){
@@ -69,6 +71,7 @@ const auth = async (req, res) => {
   let user = await req.dal.user.findUserByPhone(phone);
   if (!user) {
     user = await req.dal.user.createUserByPhone(phone);
+    events.emit('user.new', { phone });
   }
   if (!user) {
     throw new Error('auth: cannot find/create user ${phone}');

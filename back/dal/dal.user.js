@@ -1,6 +1,7 @@
 const { User } = require('./types');
 
-let log;
+let log; // eslint-disable-line
+let dal; // eslint-disable-line
 let execSQL;
 
 const getUsers = async (usersIds) => {
@@ -69,6 +70,7 @@ module.exports = {
 
     execSQL = driver.methods;
     log = driver.dalLog;
+    dal = dalInstance;
 
     return {
       getUser,

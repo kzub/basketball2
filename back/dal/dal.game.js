@@ -1,8 +1,8 @@
 const utils = require('../utils/misc');
-const { Game, GameDetails, Reservation, Place, User } = require('./types');
+const { Game, GameDetails, Reservation, Place } = require('./types');
 
-let log;
-let dal;
+let log; // eslint-disable-line
+let dal; // eslint-disable-line
 let execSQL;
 
 const getGame = async (gameId) => {
@@ -34,7 +34,7 @@ const getGame = async (gameId) => {
     place: places[0],
     organizer: organizer,
   });
-}
+};
 
 const getGameOrganizerId = async (gameId) => {
   const games = await execSQL.all(`SELECT organizerId FROM games g
@@ -49,7 +49,7 @@ const getGameOrganizerId = async (gameId) => {
 
 const getGameDetails = async (gameId) => {
   const game = await getGame(gameId);
-  const allBookings = await execSQL.all(`SELECT * FROM bookings 
+  const allBookings = await execSQL.all(`SELECT * FROM bookings
     WHERE gameId = ${game.gameId}`
   );
   const players = allBookings.filter(b => ['reserved', 'booked'].indexOf(b.status) > -1);
@@ -60,7 +60,6 @@ const getGameDetails = async (gameId) => {
     players.map(pl => new Reservation(pl)),
     waiters.map(wt => new Reservation(wt)),
   );
-  return gameDetails;
 };
 
 const getPlaces = async (placeIds) => {
@@ -113,6 +112,28 @@ const getGamesList = async (props = {}) => {
   }));
 };
 
+const moveWaiters = async (gameId, ttl) => {
+  const bookIds = await execSQL.all(`SELECT bookId from bookings
+    WHERE status = 'waiting'
+    AND gameId = ${gameId}
+    ORDER by ts 
+    LIMIT 1`);
+
+  if (bookIds.length > 0) {
+    const bookId = bookIds[0].bookId;
+    const ttlDB = (ttl > 0) ? (Date.now() + ttl) : 0;
+    const res = await execSQL.run(`UPDATE bookings SET status = 'reserved', expireAt = ${ttlDB}
+      WHERE bookId = ${bookId} AND 
+      (SELECT count(*) from bookings WHERE status IN ('booked', 'reserved') AND gameId = ${gameId}) <
+      (SELECT bookingSlots from games WHERE gameId = ${gameId})`);
+
+    if (res && res.changes == 1) {
+      return bookId;
+    }
+  }
+}; 
+
+
 module.exports = {
   init: (driver, dalInstance) => {
     if (!driver) { throw new Error(`${__filename}: undefined DAL driver`); }
@@ -126,6 +147,7 @@ module.exports = {
       getGame,
       getGameDetails,
       getGameOrganizerId,
+      moveWaiters,
     };
   }
 };

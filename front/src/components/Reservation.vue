@@ -18,8 +18,11 @@
       <GameInfo :game="mxGameDetails.game" show="place,time"/>
 
       <b-button v-if="mxBookInfo.paymentStatus === 'paid'" variant="success"
-      :class="paymentStyleClass() + ' w-75 mt-3 mb-3 p-3 justify-content-center'" >
+                class="w-75 mt-3 mb-3 p-3 justify-content-center">
         ОПЛАЧЕНО
+        <div v-if="!isPaymentGatewayUsed && isAdmin">
+          (ручной режим)
+        </div>
       </b-button>
       <b-button v-else-if="mxBookInfo.status == 'waiting'"
       class="w-75 mt-3 mb-3 p-3 justify-content-center">
@@ -195,9 +198,9 @@ export default {
     },
     bookingPhone: function () {
       if (this.$store.state.gameDetails && this.$store.state.gameDetails.users) {
-        return this.$store.state.gameDetails.users.filter(u =>
+        const user = this.$store.state.gameDetails.users.filter(u =>
           u.userId === this.mxBookInfo.userId)[0]
-        .phone
+        return user && user.phone
       }
       return this.$store.state.user && this.$store.state.user.phone
     },
@@ -244,9 +247,6 @@ export default {
         ...this.mxLocationInfo,
         name: this.form.name
       })
-    },
-    paymentStyleClass: function() {
-      return this.isPaymentGatewayUsed ? '' : 'manualPayment'
     },
     handleDeleteOk: function () {
       this.$store.dispatch('deleteReservation', {
