@@ -71,8 +71,8 @@
             Как добраться
           </b-btn >
         </router-link>
-        <b-btn v-if="mxGameDetails.game.place.chatLink" 
-               :href="mxGameDetails.game.place.chatLink"
+        <b-btn v-if="mxGameDetails.game.chatLink" 
+               :href="mxGameDetails.game.chatLink"
                class="mt-2" block variant="outline-secondary">
           Чат площаки
         </b-btn>

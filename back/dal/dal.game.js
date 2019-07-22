@@ -6,7 +6,7 @@ let dal; // eslint-disable-line
 let execSQL;
 
 const getGame = async (gameId) => {
-  const games = await execSQL.all(`SELECT g.*, usedPlayerSlots, usedWaiterSlots FROM games g
+  const games = await execSQL.all(`SELECT g.*, usedPlayerSlots, usedWaiterSlots, chatLink FROM games g
     LEFT JOIN (
       SELECT gameId, count(*) usedPlayerSlots from bookings
       WHERE status IN ('booked', 'reserved')
@@ -19,6 +19,9 @@ const getGame = async (gameId) => {
       AND gameId = ${gameId}
       GROUP BY gameId
     ) bkw ON g.gameId = bkw.gameId
+    LEFT JOIN (
+      SELECT notifyId, chatLink from notifications
+    ) ntf ON g.notifyId = ntf.notifyId    
     WHERE g.gameId = ${gameId}`
   );
   if (games.length !== 1) {
@@ -26,13 +29,13 @@ const getGame = async (gameId) => {
   }
 
   const game = games[0];
-  const places = await getPlaces([game.placeId]);
+  const place = await getPlace(game.placeId);
   const organizer = await dal.user.getUser(game.organizerId);
 
   return new Game({
     ...game,
-    place: places[0],
-    organizer: organizer,
+    place,
+    organizer,
   });
 };
 
@@ -66,6 +69,12 @@ const getPlaces = async (placeIds) => {
   const places = await execSQL.all(`SELECT * FROM places
     WHERE placeId IN (${placeIds.join()})`);
   return places.map(p => new Place(p));
+};
+
+const getPlace = async (placeId) => {
+  const place = await execSQL.all(`SELECT * FROM places
+    WHERE placeId = ${placeId}`);
+  return new Place(place[0]);
 };
 
 const getGamesList = async (props = {}) => {

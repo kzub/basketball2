@@ -29,10 +29,14 @@ function Game (obj) {
   this.paymentInfo = JSON.parse(obj.paymentInfo);
   this.props = JSON.parse(obj.props);
 
+  this.notifyId = Number(obj.notifyId);
+  this.chatLink = String(obj.chatLink);
+
   this.organizer = obj.organizer;
   this.place = obj.place;
 
   checkNumber(this.gameId, 'Game constructor: bad gameId');
+  checkNumber(this.notifyId, 'Game constructor: bad notifyId');
   checkNumber(this.playerSlots, 'Game constructor: bad playerSlots');
   checkNumber(this.usedPlayerSlots, 'Game constructor: bad usedPlayerSlots');
   checkNumber(this.freePlayerSlots, 'Game constructor: bad freePlayerSlots');
@@ -41,11 +45,12 @@ function Game (obj) {
   checkNumber(this.freeWaiterSlots, 'Game constructor: bad freeWaiterSlots');
   checkNumber(this.paymentAmount, 'Game constructor: bad paymentAmount');
 
-  checkString(obj.date, 'Game constructor: bad date');
-  checkString(obj.timeStart, 'Game constructor: bad timeStart');
-  checkString(obj.timeEnd, 'Game constructor: bad timeEnd');
-  checkString(obj.status, 'Game constructor: bad status');
-  checkString(obj.paymentType, 'Game constructor: bad paymentType');
+  checkString(this.chatLink, 'Game constructor: bad chatLink');
+  checkString(this.date, 'Game constructor: bad date');
+  checkString(this.timeStart, 'Game constructor: bad timeStart');
+  checkString(this.timeEnd, 'Game constructor: bad timeEnd');
+  checkString(this.status, 'Game constructor: bad status');
+  checkString(this.paymentType, 'Game constructor: bad paymentType');
 
   if (!(this.place instanceof Place)) throw new Error('Game constructor: place not instanceof Place');
   if (!(this.organizer instanceof User)) throw new Error('Game constructor: organizer not instanceof User');
@@ -55,7 +60,7 @@ Game.prototype.isAdmin = function (user) {
   return this.organizer.userId === user.userId;
 };
 
-Game.prototype.isPrepay = function () {
+Game.prototype.isPrepay =function  () {
   return this.paymentType === 'prepay';
 };
 
@@ -114,13 +119,15 @@ function Place (obj) {
   this.placeId = Number(obj.placeId);
   this.title = String(obj.title);
   this.description = String(obj.description);
-  this.position = JSON.parse(obj.position);
-  this.chatLink = String(obj.chatLink);
   this.howToGet = String(obj.howToGet);
+  this.position = JSON.parse(obj.position);
 
-  if (typeof(this.placeId) !== 'number' || isNaN(this.placeId)) throw new Error('Place constructor: bad placeId');
-  if (!this.title.length) throw new Error('Place constructor: bad title');
-  if (!this.description.length) throw new Error('Place constructor: bad description');
+  checkNumber(this.placeId, 'Place constructor: bad placeId');
+
+  checkString(this.title, 'Place constructor: bad title');
+  checkString(this.description, 'Place constructor: bad description');
+  checkString(this.howToGet, 'Place constructor: bad howToGet');
+  
   if (!this.position.lat || !this.position.lng) throw new Error('Place constructor: bad position');
 }
 
@@ -154,54 +161,86 @@ function Reservation (obj) {
   checkNumber(this.paymentId||0, 'Reservation constructor: bad paymentId');
   checkNumber(this.expireAt, 'Reservation constructor: bad expireAt');
 
-  checkString(obj.playerName, 'Reservation constructor: bad playerName');
-  checkString(obj.paymentStatus, 'Reservation constructor: bad paymentStatus');
-  checkString(obj.status, 'Reservation constructor: bad status');
+  checkString(this.playerName, 'Reservation constructor: bad playerName');
+  checkString(this.paymentStatus, 'Reservation constructor: bad paymentStatus');
+  checkString(this.status, 'Reservation constructor: bad status');
 }
 
-Reservation.prototype.isOwner = function(user) {
+Reservation.prototype.isOwner = function (user) {
   return user.userId === this.userId;
 };
 
-Reservation.prototype.isPaid = function() {
+Reservation.prototype.isPaid = function () {
   return this.paymentStatus === 'paid';
 };
 
-Reservation.prototype.setExpire = function(time) {
+Reservation.prototype.setExpire = function (time) {
   this.expireAt = time;
 };
 
-Reservation.prototype.makePaid = function(amount) {
+Reservation.prototype.makePaid = function (amount) {
   if (typeof(amount) === 'number' && !isNaN(amount)) {
     this.paymentAmount = amount;
   }
   this.paymentStatus = 'paid';
 };
 
-Reservation.prototype.makeUnpaid = function() {
+Reservation.prototype.makeUnpaid = function () {
   this.paymentStatus = 'unpaid';
 };
 
-Reservation.prototype.realPaymentComplete = function() {
+Reservation.prototype.realPaymentComplete = function () {
   return this.paymentId > 0;
 };
 
-Reservation.prototype.reserve = function() {
+Reservation.prototype.reserve = function () {
   this.status = 'reserved';
 };
 
-Reservation.prototype.cancel = function() {
+Reservation.prototype.cancel = function () {
   this.status = 'canceled';
 };
 
-Reservation.prototype.book = function() {
+Reservation.prototype.book = function () {
   this.status = 'booked';
+};
+
+
+function Notification (obj) {
+  this.notifyId = Number(obj.notifyId);
+  this.organizerId = Number(obj.organizerId);
+
+  this.botToken = String(obj.botToken);
+  this.adminChatId = String(obj.adminChatId);
+  this.userChatId = String(obj.userChatId);
+  this.userEvents =
+    obj.userEvents
+      .split(',')
+      .reduce((acc, elm) => {
+        acc[elm] = true;
+        return acc;
+      }, {});
+
+  checkNumber(this.notifyId, 'Notification constructor: bad notifyId');
+  checkNumber(this.organizerId, 'Notification constructor: bad organizerId');
+
+  checkString(this.botToken, 'Notification constructor: bad botToken');
+  checkString(this.userChatId, 'Notification constructor: bad userChatId');
+  checkString(this.adminChatId, 'Notification constructor: bad adminChatId');
+}
+
+Notification.prototype.getChatId = function (event) {
+  if (this.userEvents[event]) {
+    return this.userChatId;
+  }
+  return this.adminChatId;
 };
 
 module.exports = {
   Game,
   Reservation,
   GameDetails,
+  Notification,
   Place,
   User,
 };

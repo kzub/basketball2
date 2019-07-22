@@ -33,7 +33,7 @@ const sendCheckCode = async (req, res) => {
   const phone = formatPhone(req.params.phone);
   const code = await req.dal.user.createVerificationCode(phone);
   let ok = true;
-  req.log.info(`phone: ${phone}, code: ${code}`);
+  req.log.info(`sendCheckCode phone: ${phone}, code: ${code}`);
   try {
     // await smsGate.sendSMS(phone, code);
     events.emit('user.sms', { phone, code });

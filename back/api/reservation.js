@@ -47,9 +47,11 @@ const changePay = async (req, res) => {
   } else {
     if (reservation.isPaid()) {
       reservation.makeUnpaid();
+      events.emit('reservation.admin.unpaid', { reservation });
     } else {
       reservation.makePaid();
       reservation.setExpire(0);
+      events.emit('reservation.admin.paid', { reservation });
     }
     ok = await req.dal.reservation.update(reservation);
   }

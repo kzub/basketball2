@@ -7,7 +7,7 @@ const log = logger.create('AUTO_CANCEL');
 const checkExpiredReservations = async () => {
   const reservations = await dal.reservation.getExpired();
   for(const reservation of reservations) {
-    log.info(`start canceling reservation: ${reservation.bookId}, ${reservation.playerName}`);
+    log.info(`start canceling reservation: ${reservation.gameId}/${reservation.bookId}/${reservation.playerName}`);
     reservation.cancel();
     const ok = await dal.reservation.update(reservation);
     if (ok) { 

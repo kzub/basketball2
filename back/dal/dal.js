@@ -31,11 +31,15 @@ db.run(`CREATE TABLE IF NOT EXISTS payments (
   rawData TEXT NOT NULL DEFAULT '{}'
 )`);
 
+db.run(`CREATE TABLE IF NOT EXISTS organizers (
+  organizerId INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+  paySystem TEXT NOT NULL
+)`);
+
 db.run(`CREATE TABLE IF NOT EXISTS places (
   placeId INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
   title TEXT NOT NULL,
   description TEXT,
-  chatLink TEXT,
   position TEXT,
   howToGet TEXT
 )`);
@@ -52,9 +56,20 @@ db.run(`CREATE TABLE IF NOT EXISTS verifications (
   ttl INTEGER NOT NULL
 )`);
 
+db.run(`CREATE TABLE IF NOT EXISTS notifications (
+  notifyId INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+  organizerId INTEGER NOT NULL,
+  chatLink TEXT,
+  userEvents TEXT,
+  userChatId INTEGER NOT NULL,
+  adminChatId INTEGER NOT NULL,
+  botToken TEXT
+)`);
+
 db.run(`CREATE TABLE IF NOT EXISTS games (
   gameId INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
   placeId INTEGER NOT NULL,
+  notifyId INTEGER NOT NULL,
   date DATETIME NOT NULL,
   timeStart TEXT NOT NULL,
   timeEnd TEXT NOT NULL,
@@ -98,5 +113,6 @@ dalInstance.game = require('./dal.game').init(execSQL('DAL_GAME'), dalInstance);
 dalInstance.user = require('./dal.user').init(execSQL('DAL_USER'), dalInstance);
 dalInstance.reservation = require('./dal.reservation').init(execSQL('DAL_RSV'), dalInstance);
 dalInstance.payment = require('./dal.payment').init(execSQL('DAL_PAYMENT'), dalInstance);
+dalInstance.notification = require('./dal.notification').init(execSQL('DAL_NOTIFICATION'), dalInstance);
 
 module.exports = dalInstance;
