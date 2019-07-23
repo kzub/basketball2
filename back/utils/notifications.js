@@ -41,10 +41,14 @@ emitter.on('payment.unknown.paysystem', async ({ paySystem, label, amount, ip })
 // --------------------- GAME ADMIN NOTIFICATIONS ------------------------
 const sendGameMessage = async (gameId, event, msg) => {
   log.info(msg);
-  const game = await dal.game.getGame(gameId);
-  const notification = await dal.notification.getNotification(game.notifyId);
-  const chatId = notification.getChatId(event);
-  telegram.send(notification.botToken, chatId, msg);
+  try {
+    const game = await dal.game.getGame(gameId);
+    const notification = await dal.notification.getNotification(game.notifyId);
+    const chatId = notification.getChatId(event);
+    await telegram.send(notification.botToken, chatId, msg);    
+  } catch (err) {
+    log.error(`sendGameMessage: ${err}`);
+  }
 };
 
 emitter.on('reservation.new', async ({ game, bookId, user }) => {

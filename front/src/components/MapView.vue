@@ -70,10 +70,10 @@ export default {
   },
   computed: {
     lng: function () {
-      return this.mxGameDetails && this.mxGameDetails.game.place.position.lng
+      return this.mxGameDetails && this.mxGameDetails.game.place.lng
     },
     lat: function () {
-      return this.mxGameDetails && this.mxGameDetails.game.place.position.lat  
+      return this.mxGameDetails && this.mxGameDetails.game.place.lat  
     },
     position: function () {
       return { lng: this.lng, lat: this.lat }

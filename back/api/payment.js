@@ -7,7 +7,7 @@ const complete = async (req, res) => {
   const amount = req.body.withdraw_amount;
   const label = req.body.label;
 
-  const organizerId = await req.dal.payment.findOrganizerId(paySystem);
+  const organizerId = await req.dal.payment.findOrganizerByPaySystem(paySystem);
   if (!organizerId) {
     events.emit('payment.unknown.paysystem', { paySystem, label, amount, ip: req.ip });
     return;

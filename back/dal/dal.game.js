@@ -1,5 +1,5 @@
 const utils = require('../utils/misc');
-const { Game, GameDetails, Reservation, Place } = require('./types');
+const { Game, GameDetails, Reservation } = require('./types');
 
 let log; // eslint-disable-line
 let dal; // eslint-disable-line
@@ -29,7 +29,7 @@ const getGame = async (gameId) => {
   }
 
   const game = games[0];
-  const place = await getPlace(game.placeId);
+  const place = await dal.place.getPlace(game.placeId);
   const organizer = await dal.user.getUser(game.organizerId);
 
   return new Game({
@@ -65,25 +65,13 @@ const getGameDetails = async (gameId) => {
   );
 };
 
-const getPlaces = async (placeIds) => {
-  const places = await execSQL.all(`SELECT * FROM places
-    WHERE placeId IN (${placeIds.join()})`);
-  return places.map(p => new Place(p));
-};
-
-const getPlace = async (placeId) => {
-  const place = await execSQL.all(`SELECT * FROM places
-    WHERE placeId = ${placeId}`);
-  return new Place(place[0]);
-};
-
 const getGamesList = async (props = {}) => {
   const today = utils.getStartOfTheDate();
   if (props.showLastMonth) {
     today.setHours(-24*30);
   }
 
-  let games = await execSQL.all(`SELECT g.*, usedPlayerSlots, usedWaiterSlots FROM games g
+  let games = await execSQL.all(`SELECT g.*, usedPlayerSlots, usedWaiterSlots, chatLink FROM games g
     LEFT JOIN (
       SELECT gameId, count(*) usedPlayerSlots from bookings
       WHERE status IN ('booked', 'reserved')
@@ -94,8 +82,11 @@ const getGamesList = async (props = {}) => {
       WHERE status = 'waiting'
       GROUP BY gameId
     ) bkw ON g.gameId = bkw.gameId
+    LEFT JOIN (
+      SELECT notifyId, chatLink from notifications
+    ) ntf ON g.notifyId = ntf.notifyId 
     WHERE date >= "${today.toJSON().slice(0,10)}"
-    ORDER BY date ASC`);
+    ORDER BY date,timeStart ASC`);
 
   const organizerIds = Object.keys(games.reduce((acc, val) => {
     acc[val.organizerId] = true;
@@ -107,12 +98,8 @@ const getGamesList = async (props = {}) => {
     return acc;
   }, {}));
 
-  const places = await getPlaces(placeIds);
+  const places = await dal.place.getPlaces(placeIds);
   const organizers = await dal.user.getUsers(organizerIds);
-
-  if (!props.showDisabled) {
-    games = games.filter(g => g.status !== 'disabled');
-  }
 
   return games.map(game => new Game({
     ...game,

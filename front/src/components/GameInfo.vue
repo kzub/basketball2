@@ -16,7 +16,7 @@
     <div v-if="visible('organizer')">
       <Organizer :name="game.organizer.name" :phone="game.organizer.phone" />
     </div>
-      
+
     <div v-if="visible('payment')">
       <div v-if="game.paymentType == 'prepay'">
         Стоимость: {{ game.paymentAmount }} р.
@@ -25,9 +25,9 @@
         Стоимость зала: {{ game.paymentAmount }} р. <br>
         Делится на всех участников
       </div>
-      <div v-if="game.paymentInfo.message">
+      <div v-if="game.paymentMessage">
         <hr/>
-        {{ game.paymentInfo.message }}
+        {{ game.paymentMessage }}
       </div>
     </div>
 

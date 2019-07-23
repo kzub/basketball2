@@ -1,56 +1,45 @@
-const checkString = (str, msg) => {
-  if (!str || !str.length) {
+const checkString = (str, required, msg) => {
+  if (required && (typeof(str) !== 'string' || !str.length)) {
     throw new Error(msg);
   }
+  else if (str && typeof(str) !== 'string') {
+    throw new Error(msg); 
+  }
+  return str;
 };
 
 const checkNumber = (num, msg) => {
   if (typeof(num) !== 'number' || isNaN(num) || !isFinite(num)) {
+    console.log('TEST:', typeof(num), isNaN(num), !isFinite(num), num);
     throw new Error(msg);
   }
+  return num;
 };
 
 function Game (obj) {
-  this.gameId = Number(obj.gameId);
-  this.date = String(obj.date),
-  this.timeStart = String(obj.timeStart);
-  this.timeEnd = String(obj.timeEnd);
-
-  this.playerSlots = Number(obj.playerSlots);
-  this.usedPlayerSlots = Number(obj.usedPlayerSlots);
-  this.freePlayerSlots = this.playerSlots - this.usedPlayerSlots;
-  this.waiterSlots = Number(obj.waiterSlots);
-  this.usedWaiterSlots = Number(obj.usedWaiterSlots);
-  this.freeWaiterSlots = this.waiterSlots - this.usedWaiterSlots;
-
-  this.status = String(obj.status);
-  this.paymentType = String(obj.paymentType);
-  this.paymentAmount = Number(obj.paymentAmount);
-  this.paymentInfo = JSON.parse(obj.paymentInfo);
-  this.props = JSON.parse(obj.props);
-
-  this.notifyId = Number(obj.notifyId);
-  this.chatLink = String(obj.chatLink);
+  this.gameId             = checkNumber(obj.gameId, 'Game constructor: bad gameId');
+  this.playerSlots        = checkNumber(obj.playerSlots, 'Game constructor: bad playerSlots');
+  this.usedPlayerSlots    = checkNumber(obj.usedPlayerSlots || 0, 'Game constructor: bad usedPlayerSlots');
+  this.freePlayerSlots    = checkNumber(this.playerSlots - this.usedPlayerSlots, 'Game constructor: bad freePlayerSlots');
+  this.waiterSlots        = checkNumber(obj.waiterSlots, 'Game constructor: bad waiterSlots');
+  this.usedWaiterSlots    = checkNumber(obj.usedWaiterSlots || 0, 'Game constructor: bad usedWaiterSlots');
+  this.freeWaiterSlots    = checkNumber(this.waiterSlots - this.usedWaiterSlots, 'Game constructor: bad freeWaiterSlots');
+  this.paymentAmount      = checkNumber(obj.paymentAmount, 'Game constructor: bad paymentAmount');
+  this.notifyId           = checkNumber(obj.notifyId, 'Game constructor: bad notifyId');
+  
+  this.date               = checkString(obj.date, true, 'Game constructor: bad date');
+  this.timeStart          = checkString(obj.timeStart, true, 'Game constructor: bad timeStart');
+  this.timeEnd            = checkString(obj.timeEnd, true, 'Game constructor: bad timeEnd');
+  this.status             = checkString(obj.status, true, 'Game constructor: bad status');
+  this.paymentType        = checkString(obj.paymentType, true, 'Game constructor: bad paymentType');
+  this.chatLink           = checkString(obj.chatLink, true, 'Game constructor: bad chatLink');
+  
+  this.paymentMessage     = checkString(obj.paymentMessage, false, 'Game constructor: bad paymentMessage');
+  this.paymentGateMessage = checkString(obj.paymentGateMessage, false, 'Game constructor: bad paymentGateMessage');
+  this.paymentGateAccount = checkString(obj.paymentGateAccount, false, 'Game constructor: bad paymentGateAccount');
 
   this.organizer = obj.organizer;
   this.place = obj.place;
-
-  checkNumber(this.gameId, 'Game constructor: bad gameId');
-  checkNumber(this.notifyId, 'Game constructor: bad notifyId');
-  checkNumber(this.playerSlots, 'Game constructor: bad playerSlots');
-  checkNumber(this.usedPlayerSlots, 'Game constructor: bad usedPlayerSlots');
-  checkNumber(this.freePlayerSlots, 'Game constructor: bad freePlayerSlots');
-  checkNumber(this.waiterSlots, 'Game constructor: bad waiterSlots');
-  checkNumber(this.usedWaiterSlots, 'Game constructor: bad usedWaiterSlots');
-  checkNumber(this.freeWaiterSlots, 'Game constructor: bad freeWaiterSlots');
-  checkNumber(this.paymentAmount, 'Game constructor: bad paymentAmount');
-
-  checkString(this.chatLink, 'Game constructor: bad chatLink');
-  checkString(this.date, 'Game constructor: bad date');
-  checkString(this.timeStart, 'Game constructor: bad timeStart');
-  checkString(this.timeEnd, 'Game constructor: bad timeEnd');
-  checkString(this.status, 'Game constructor: bad status');
-  checkString(this.paymentType, 'Game constructor: bad paymentType');
 
   if (!(this.place instanceof Place)) throw new Error('Game constructor: place not instanceof Place');
   if (!(this.organizer instanceof User)) throw new Error('Game constructor: organizer not instanceof User');
@@ -112,58 +101,38 @@ function GameDetails (game, players, waiters) {
       status: 'free4waiter',
     }));
   }
-
 }
 
 function Place (obj) {
-  this.placeId = Number(obj.placeId);
-  this.title = String(obj.title);
-  this.description = String(obj.description);
-  this.howToGet = String(obj.howToGet);
-  this.position = JSON.parse(obj.position);
-
-  checkNumber(this.placeId, 'Place constructor: bad placeId');
-
-  checkString(this.title, 'Place constructor: bad title');
-  checkString(this.description, 'Place constructor: bad description');
-  checkString(this.howToGet, 'Place constructor: bad howToGet');
+  this.placeId     = checkNumber(obj.placeId, 'Place constructor: bad placeId');
+  this.lng         = checkNumber(obj.lng, 'Place constructor: bad lng');
+  this.lat         = checkNumber(obj.lat, 'Place constructor: bad lat');
   
-  if (!this.position.lat || !this.position.lng) throw new Error('Place constructor: bad position');
+  this.title       = checkString(obj.title, true, 'Place constructor: bad title');
+  this.description = checkString(obj.description, true, 'Place constructor: bad description');
+  this.howToGet    = checkString(obj.howToGet, true, 'Place constructor: bad howToGet');
 }
 
 function User (obj) {
-  this.userId = Number(obj.userId);
-  this.name = String(obj.name);
-  this.phone = String(obj.phone);
+  this.userId = checkNumber(obj.userId, 'User constructor: bad userId');
+  this.name = checkString(obj.name, false, 'User constructor: bad name');
+  this.phone = checkString(obj.phone, true, 'User constructor: bad phone');
 
-  if (typeof(this.userId) !== 'number' || isNaN(this.userId)) throw new Error('User constructor: bad userId');
-  if (!this.phone.length) throw new Error('User constructor: bad phone');
   this.phone = `+${this.phone}`;
 }
 
 function Reservation (obj) {
-  this.ts = Number(obj.ts);
-  this.bookId = Number(obj.bookId);
-  this.gameId = Number(obj.gameId);
-  this.userId = Number(obj.userId);
-  this.playerName = String(obj.playerName);
-  this.paymentAmount = Number(obj.paymentAmount);
-  this.paymentStatus = String(obj.paymentStatus);
-  this.paymentId = obj.paymentId !== undefined && Number(obj.paymentId);
-  this.status = String(obj.status);
-  this.expireAt = Number(obj.expireAt || 0);
-
-  checkNumber(this.ts, 'Reservation constructor: bad ts');
-  checkNumber(this.bookId, 'Reservation constructor: bad bookId');
-  checkNumber(this.gameId, 'Reservation constructor: bad gameId');
-  checkNumber(this.userId, 'Reservation constructor: bad userId');
-  checkNumber(this.paymentAmount, 'Reservation constructor: bad paymentAmount');
-  checkNumber(this.paymentId||0, 'Reservation constructor: bad paymentId');
-  checkNumber(this.expireAt, 'Reservation constructor: bad expireAt');
-
-  checkString(this.playerName, 'Reservation constructor: bad playerName');
-  checkString(this.paymentStatus, 'Reservation constructor: bad paymentStatus');
-  checkString(this.status, 'Reservation constructor: bad status');
+  this.ts            = checkNumber(obj.ts, 'Reservation constructor: bad ts');
+  this.bookId        = checkNumber(obj.bookId, 'Reservation constructor: bad bookId');
+  this.gameId        = checkNumber(obj.gameId, 'Reservation constructor: bad gameId');
+  this.userId        = checkNumber(obj.userId, 'Reservation constructor: bad userId');
+  this.paymentAmount = checkNumber(obj.paymentAmount, 'Reservation constructor: bad paymentAmount');
+  this.expireAt      = checkNumber(obj.expireAt || 0, 'Reservation constructor: bad expireAt');
+  this.paymentId     = obj.paymentId && checkNumber(obj.paymentId, 'Reservation constructor: bad paymentId');
+  
+  this.playerName    = checkString(obj.playerName, true, 'Reservation constructor: bad playerName');
+  this.paymentStatus = checkString(obj.paymentStatus, true, 'Reservation constructor: bad paymentStatus');
+  this.status        = checkString(obj.status, true, 'Reservation constructor: bad status');
 }
 
 Reservation.prototype.isOwner = function (user) {
@@ -205,28 +174,19 @@ Reservation.prototype.book = function () {
   this.status = 'booked';
 };
 
-
 function Notification (obj) {
-  this.notifyId = Number(obj.notifyId);
-  this.organizerId = Number(obj.organizerId);
-
-  this.botToken = String(obj.botToken);
-  this.adminChatId = String(obj.adminChatId);
-  this.userChatId = String(obj.userChatId);
-  this.userEvents =
-    obj.userEvents
-      .split(',')
-      .reduce((acc, elm) => {
-        acc[elm] = true;
-        return acc;
-      }, {});
-
-  checkNumber(this.notifyId, 'Notification constructor: bad notifyId');
-  checkNumber(this.organizerId, 'Notification constructor: bad organizerId');
-
-  checkString(this.botToken, 'Notification constructor: bad botToken');
-  checkString(this.userChatId, 'Notification constructor: bad userChatId');
-  checkString(this.adminChatId, 'Notification constructor: bad adminChatId');
+  this.notifyId    = checkNumber(obj.notifyId, 'Notification constructor: bad notifyId');
+  this.organizerId = checkNumber(obj.organizerId, 'Notification constructor: bad organizerId');
+  
+  this.botToken    = checkString(obj.botToken, true, 'Notification constructor: bad botToken');
+  this.adminChatId = checkString(obj.adminChatId, true, 'Notification constructor: bad adminChatId');
+  this.userChatId  = checkString(obj.userChatId, true, 'Notification constructor: bad userChatId');
+  this.userEvents  = checkString(obj.userEvents, false, 'Notification constructor: bad userChatId')
+    .split(',')
+    .reduce((acc, elm) => {
+      acc[elm] = true;
+      return acc;
+    }, {});
 }
 
 Notification.prototype.getChatId = function (event) {
@@ -236,11 +196,27 @@ Notification.prototype.getChatId = function (event) {
   return this.adminChatId;
 };
 
+function Organizer (obj) {
+  this.organizerId = checkNumber(obj.organizerId, 'Organizer constructor: bad organizerId');
+  this.paySystem   = checkString(obj.paySystem, false, 'Notification constructor: bad paySystem');
+  this.placesIds   = checkString(obj.placesIds, true, 'Notification constructor: bad placesIds')
+    .split(',')
+    .reduce((acc, elm) => {
+      acc[elm] = true;
+      return acc;
+    }, {});
+}
+
+Organizer.prototype.adminOf = function (placeId) {
+  return this.placesIds[placeId];
+};
+
 module.exports = {
   Game,
-  Reservation,
   GameDetails,
   Notification,
+  Organizer,
   Place,
+  Reservation,
   User,
 };

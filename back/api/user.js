@@ -35,7 +35,7 @@ const sendCheckCode = async (req, res) => {
   let ok = true;
   req.log.info(`sendCheckCode phone: ${phone}, code: ${code}`);
   try {
-    // await smsGate.sendSMS(phone, code);
+    await smsGate.sendSMS(phone, code);
     events.emit('user.sms', { phone, code });
   } catch (err) {
     ok = false;

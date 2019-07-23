@@ -53,18 +53,20 @@ const smsLimiter = rateLimit({
 
 const init = (app) => {
   app.use(apiLimiter);
-  app.post('/api/reservation/book', wrapper(reservation.book, true));
-  app.get('/api/reservation/setPlayer/:gameId/:bookId/:name', wrapper(reservation.setPlayer, true));
+  app.get('/api/game/:gameId', wrapper(game.get, false));
+  app.get('/api/games', wrapper(games.list, false));
+  app.get('/api/games/my', wrapper(games.my, true));
   app.get('/api/reservation/cancel/:gameId/:bookId/', wrapper(reservation.cancel, true));
   app.get('/api/reservation/changePay/:gameId/:bookId/', wrapper(reservation.changePay, true));
-  app.get('/api/user/get', wrapper(user.get, false));
-  app.get('/api/user/exit', wrapper(user.exit, true));
-  app.get('/api/user/set/:name', wrapper(user.set, true));
-  app.get('/api/user/sendCheckCode/:phone', smsLimiter, wrapper(user.sendCheckCode, false));
+  app.get('/api/reservation/setPlayer/:gameId/:bookId/:name', wrapper(reservation.setPlayer, true));
   app.get('/api/user/auth/:phone/:code', wrapper(user.auth, false));
-  app.get('/api/game/:gameId', wrapper(game, false));
-  app.get('/api/games', wrapper(games, false));
+  app.get('/api/user/exit', wrapper(user.exit, true));
+  app.get('/api/user/get', wrapper(user.get, false));
+  app.get('/api/user/sendCheckCode/:phone', smsLimiter, wrapper(user.sendCheckCode, false));
+  app.get('/api/user/set/:name', wrapper(user.set, true));
+  app.post('/api/game/add', wrapper(game.add, true));
   app.post('/api/payment/complete/:paySystem', wrapper(payment.complete, false));
+  app.post('/api/reservation/book', wrapper(reservation.book, true));
 };
 
 module.exports = { init };

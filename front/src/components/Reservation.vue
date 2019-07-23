@@ -85,8 +85,8 @@
 
             <div v-if="isPayAvailable">
               <PayButton
-                :account="mxGameDetails.game.paymentInfo.account"
-                :message="mxGameDetails.game.paymentInfo.payMessage"
+                :account="mxGameDetails.game.paymentGateAccount"
+                :message="mxGameDetails.game.paymentGateMessage"
                 :amount="mxGameDetails.game.paymentAmount"
                 :label="paymentId"/>
             </div>

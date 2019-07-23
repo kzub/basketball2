@@ -10,15 +10,15 @@ const addTransaction = async (recipientId, paySystem, amount, rawData) => {
   return res && res.lastID;
 };
 
-const findOrganizerId = async (paySystem) => {
+const findOrganizerIdByPaySystem = async (paySystem) => {
   const organizerId = await execSQL.all(`SELECT organizerId FROM organizers
     WHERE paySystem = '${paySystem}'`);
 
   return organizerId[0] && organizerId[0].organizerId;
 }
 
-const findOrganizer = async (paySystem) => {
-  const organizerId = await findOrganizer(paySystem);
+const findOrganizerByPaySystem = async (paySystem) => {
+  const organizerId = await findOrganizerIdByPaySystem(paySystem);
   if (organizerId) {
     const user = dal.user.getUser(organizerId);
     return user;
@@ -35,8 +35,8 @@ module.exports = {
 
     return {
       addTransaction,
-      findOrganizer,
-      findOrganizerId,
+      findOrganizerByPaySystem,
+      findOrganizerIdByPaySystem,
     };
   }
 };

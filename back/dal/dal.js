@@ -6,7 +6,7 @@ let sqlite3 = require('sqlite3').verbose();
 const log = logger.create('DAL');
 
 let db = new sqlite3.Database(config.sqlite.filename);
-log.info(`use config.sqlite.filename: ${config.sqlite.filename}`);
+log.info(`use DB filename: ${config.sqlite.filename}`);
 
 db.serialize();
 db.run(`CREATE TABLE IF NOT EXISTS bookings (
@@ -33,14 +33,16 @@ db.run(`CREATE TABLE IF NOT EXISTS payments (
 
 db.run(`CREATE TABLE IF NOT EXISTS organizers (
   organizerId INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-  paySystem TEXT NOT NULL
+  paySystem TEXT NOT NULL,
+  placesIds TEXT NOT NULL
 )`);
 
 db.run(`CREATE TABLE IF NOT EXISTS places (
   placeId INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
   title TEXT NOT NULL,
   description TEXT,
-  position TEXT,
+  lat INTEGER,
+  lng INTEGER,
   howToGet TEXT
 )`);
 
@@ -61,8 +63,8 @@ db.run(`CREATE TABLE IF NOT EXISTS notifications (
   organizerId INTEGER NOT NULL,
   chatLink TEXT,
   userEvents TEXT,
-  userChatId INTEGER NOT NULL,
-  adminChatId INTEGER NOT NULL,
+  userChatId TEXT NOT NULL,
+  adminChatId TEXT NOT NULL,
   botToken TEXT
 )`);
 
@@ -79,8 +81,9 @@ db.run(`CREATE TABLE IF NOT EXISTS games (
   status TEXT NOT NULL,
   paymentType TEXT NOT NULL,
   paymentAmount INTEGER NOT NULL,
-  paymentInfo TEXT NOT NULL DEFAULT '{}',
-  props TEXT NOT NULL DEFAULT '{}'
+  paymentMessage TEXT,
+  paymentGateAccount TEXT,
+  paymentGateMessage TEXT
 )`);
 
 const promiseSQL = (dalLog, cmd, query, ...rest) => {
@@ -110,6 +113,7 @@ const execSQL = (name) => {
 
 const dalInstance = {};
 dalInstance.game = require('./dal.game').init(execSQL('DAL_GAME'), dalInstance);
+dalInstance.place = require('./dal.place').init(execSQL('DAL_PLACE'), dalInstance);
 dalInstance.user = require('./dal.user').init(execSQL('DAL_USER'), dalInstance);
 dalInstance.reservation = require('./dal.reservation').init(execSQL('DAL_RSV'), dalInstance);
 dalInstance.payment = require('./dal.payment').init(execSQL('DAL_PAYMENT'), dalInstance);

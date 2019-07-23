@@ -1,4 +1,4 @@
-const { User } = require('./types');
+const { User, Organizer } = require('./types');
 
 let log; // eslint-disable-line
 let dal; // eslint-disable-line
@@ -64,6 +64,14 @@ const createVerificationCode = async (phone) => {
   return code;
 };
 
+
+const findOrganizerByUserId = async (userId) => {
+  const organizerId = await execSQL.all(`SELECT * FROM organizers
+    WHERE organizerId = ${userId}`);
+
+  return organizerId[0] && new Organizer(organizerId[0]);
+};
+
 module.exports = {
   init: (driver, dalInstance) => {
     if (!driver) { throw new Error(`${__filename}: undefined DAL driver`); }
@@ -73,13 +81,14 @@ module.exports = {
     dal = dalInstance;
 
     return {
+      createUserByPhone,
+      createVerificationCode,
+      deleteVerificationCode,
+      findOrganizerByUserId,
+      findUserByPhone,
       getUser,
       getUsers,
       getVerificationCode,
-      deleteVerificationCode,
-      createVerificationCode,
-      createUserByPhone,
-      findUserByPhone,
       updateUser,
     };
   }

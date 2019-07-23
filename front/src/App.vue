@@ -11,7 +11,6 @@
 
 import VueRouter from 'vue-router'
 
-
 import Main from './components/Main.vue'
 import Admin from './components/Admin.vue'
 import Profile from './components/Profile.vue'
@@ -50,7 +49,7 @@ export default {
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-  /*margin-top: 60px;*/
+  max-width: 380px;
 }
 
 .slide-enter {
@@ -81,6 +80,5 @@ export default {
 
   transition: left 0.3s, opacity 0.3s;
 }
-
 
 </style>
