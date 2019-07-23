@@ -121,7 +121,7 @@ const moveWaiters = async (gameId, ttl) => {
     const res = await execSQL.run(`UPDATE bookings SET status = 'reserved', expireAt = ${ttlDB}
       WHERE bookId = ${bookId} AND 
       (SELECT count(*) from bookings WHERE status IN ('booked', 'reserved') AND gameId = ${gameId}) <
-      (SELECT bookingSlots from games WHERE gameId = ${gameId})`);
+      (SELECT playerSlots from games WHERE gameId = ${gameId})`);
 
     if (res && res.changes == 1) {
       return bookId;

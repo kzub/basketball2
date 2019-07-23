@@ -72,7 +72,7 @@ emitter.on('reservation.canceled', async ({ reservation }) => {
 });
 
 emitter.on('reservation.waiter.promoted', async ({ reservation }) => {
-  sendGameMessage(reservation.gameId, 'reservation.new',
+  sendGameMessage(reservation.gameId, 'reservation.waiter.promoted',
     `waiter promoted: ${reservation.gameId}/${reservation.bookId}/${reservation.playerName}`);
 });
 
@@ -82,7 +82,7 @@ emitter.on('reservation.admin.unpaid', async ({ reservation }) => {
 });
 
 emitter.on('reservation.admin.paid', async ({ reservation }) => {
-  sendGameMessage(reservation.gameId, 'reservation.admin.unpaid',
+  sendGameMessage(reservation.gameId, 'reservation.admin.paid',
     `admin set as paid reservation: ${reservation.gameId}/${reservation.bookId}/${reservation.playerName}`);
 });
 

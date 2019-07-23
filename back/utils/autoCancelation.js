@@ -15,7 +15,7 @@ const checkExpiredReservations = async () => {
       const promotedRsvId = await dal.game.moveWaiters(reservation.gameId);
       if (promotedRsvId) {
         const promotedReservation = await dal.reservation.get(reservation.gameId, promotedRsvId);
-        events.emit('reservation.waiter.promoted', { promotedReservation });
+        events.emit('reservation.waiter.promoted', { reservation: promotedReservation });
       }
     }
   }
