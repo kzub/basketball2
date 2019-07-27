@@ -1,12 +1,21 @@
 <template>
   <div class="hello">
-    <h3>ADMIN!!!!!</h3>
-    <h1>{{ msg }}</h1>
-    <p>
-      For a guide and recipes on how to configure / customize this project,<br>
-      check out the
-      <a href="https://cli.vuejs.org" target="_blank" rel="noopener">vue-cli documentation</a>.
-    </p>
+    <div v-if="!viewDataUpdated" class="my-2">
+      <div class="d-flex justify-content-center">
+        <div class="spinner-border" role="status">
+          <span class="sr-only">Загружается...</span>
+        </div>
+      </div>
+    </div>
+
+    <div v-else>
+      <b-btn @click="back" class="btn-lg mb-3 rounded-0" block variant="warning">
+        <div class="arrow-left"><i class="left"></i></div>
+        <span>Назад</span>
+      </b-btn>
+    </div>
+
+    LALALA
   </div>
 </template>
 
@@ -14,8 +23,27 @@
 export default {
   name: 'Admin',
   props: {
-    msg: String
-  }
+  },
+  mounted: function(){
+    this.$store.dispatch('updateGamesData')
+  },
+  computed: {
+    isAdmin () {
+      return this.$store.state.user &&
+        this.$store.state.user.userId === this.mxGameDetails.game.organizer.userId
+    },
+    user () {
+      return this.$store.state.user
+    },
+    viewDataUpdated () {
+      return this.$store.state.viewDataUpdated
+    },
+  },
+  methods: {
+    back: function() {
+      this.$router.back()
+    },
+  },
 }
 </script>
 

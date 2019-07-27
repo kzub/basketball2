@@ -117,7 +117,9 @@ function User (obj) {
   this.userId = checkNumber(obj.userId, 'User constructor: bad userId');
   this.name = checkString(obj.name, false, 'User constructor: bad name');
   this.phone = checkString(obj.phone, true, 'User constructor: bad phone');
-
+  if (obj.organizerId) {
+    this.isOrganizer = true;
+  }
   this.phone = `+${this.phone}`;
 }
 
@@ -141,6 +143,11 @@ Reservation.prototype.isOwner = function (user) {
 
 Reservation.prototype.isPaid = function () {
   return this.paymentStatus === 'paid';
+};
+
+Reservation.prototype.isWaiter = function () {
+  console.log('1!!!!!!!!', this);
+  return this.status === 'waiting';
 };
 
 Reservation.prototype.setExpire = function (time) {
@@ -190,6 +197,9 @@ function Notification (obj) {
 }
 
 Notification.prototype.getChatId = function (event) {
+  if (event === '*') {
+    return this.userChatId;
+  }
   if (this.userEvents[event]) {
     return this.userChatId;
   }
@@ -211,6 +221,9 @@ Organizer.prototype.adminOf = function (placeId) {
   return this.placesIds[placeId];
 };
 
+const newReservationTTL = 30*60*1000;
+const waiterReservationTTL = 120*60*1000;
+
 module.exports = {
   Game,
   GameDetails,
@@ -219,4 +232,6 @@ module.exports = {
   Place,
   Reservation,
   User,
+  newReservationTTL,
+  waiterReservationTTL,
 };

@@ -1,21 +1,23 @@
 const events = require('../utils/notifications');
 
 const complete = async (req, res) => {
+  req.log.info(req.body);
   res.status(200).send('OK');
-  
   const paySystem = req.params.paySystem;
   const amount = req.body.withdraw_amount;
   const label = req.body.label;
 
-  const organizerId = await req.dal.payment.findOrganizerByPaySystem(paySystem);
-  if (!organizerId) {
+  const organizer = await req.dal.payment.findOrganizerByPaySystem(paySystem);
+  console.log('!!!', organizer)
+  if (!organizer) {
     events.emit('payment.unknown.paysystem', { paySystem, label, amount, ip: req.ip });
+    // probably unauthorized attempt to emit payment
     return;
   }
 
   if (label.startsWith('RSV')) {
     const [, gameId, bookId] = label.split('|');
-    const paymentId = await req.dal.payment.addTransaction(organizerId, paySystem, amount, req.body);
+    const paymentId = await req.dal.payment.addTransaction(organizer.userId, paySystem, amount, req.body);
     
     const reservation = await req.dal.reservation.get(gameId, bookId);
     reservation.book();
@@ -25,6 +27,7 @@ const complete = async (req, res) => {
     events.emit('reservation.paid', { reservation });
     return;
   }
+  console.log('!!!!2')
 
   events.emit('payment.unknown', { paySystem, label, amount });
   req.dal.payment.addTransaction(0, paySystem, amount, req.body);

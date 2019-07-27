@@ -10,7 +10,7 @@
 
     <div v-else>
       <b-btn @click="back" class="btn-lg mb-3 rounded-0" block variant="warning">
-        <i class="left"></i>
+        <div class="arrow-left"><i class="left"></i></div>
         <span>Назад</span>
       </b-btn>
 

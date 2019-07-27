@@ -1,7 +1,15 @@
 .arrow {
-  position: absolute;
-  margin-left: 85%;
-  margin-top: 9px;
+  float: right;
+  margin-right: 8px;
+}
+
+.arrow-left {
+  float: left;
+  margin-left: 8px;
+}
+
+.arrow-text {
+  margin-left: 30px;
 }
 
 i {
@@ -17,6 +25,7 @@ i {
 }
 
 .left {
+  float: left important!;
   transform: translate(-10px,-2px) rotate(135deg);
   -webkit-transform: translate(-10px,-2px) rotate(135deg);
 }

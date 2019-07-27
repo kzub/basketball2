@@ -10,10 +10,12 @@
     <div v-else>
       <router-link to="/profile" tag="div">
         <b-btn v-if="user.auth" class="btn-lg rounded-0" block variant="warning">
-          {{ user.name }} <i class="right"></i>
+          {{ user.name }}
+        <div class="arrow"><i class="right"></i></div>
         </b-btn>
         <b-btn v-else class="btn-lg rounded-0" block variant="warning">
           Зарегистрироваться
+          <div class="arrow"><i class="right"></i></div>
         </b-btn>
       </router-link>
     </div>

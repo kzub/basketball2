@@ -128,12 +128,14 @@
             return
           }
           this.$store.commit('user', user)
+          this.back()
         })
       },
       onCodeError: function () {
         this.$root.$emit('bv::toggle::collapse', 'regStep1')
       },
       back: function() {
+        console.log('router back->>>')
         this.$router.back()
       }
     },

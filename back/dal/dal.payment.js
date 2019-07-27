@@ -11,11 +11,11 @@ const addTransaction = async (recipientId, paySystem, amount, rawData) => {
 };
 
 const findOrganizerIdByPaySystem = async (paySystem) => {
-  const organizerId = await execSQL.all(`SELECT organizerId FROM organizers
+  const organizers = await execSQL.all(`SELECT organizerId FROM organizers
     WHERE paySystem = '${paySystem}'`);
 
-  return organizerId[0] && organizerId[0].organizerId;
-}
+  return organizers[0] && organizers[0].organizerId;
+};
 
 const findOrganizerByPaySystem = async (paySystem) => {
   const organizerId = await findOrganizerIdByPaySystem(paySystem);

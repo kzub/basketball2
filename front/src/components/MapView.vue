@@ -9,13 +9,13 @@
     </div>
     <div v-else>
       <b-btn @click="back" class="btn-lg mb-4 rounded-0" block variant="warning">
-        <i class="left"></i>
+        <div class="arrow-left"><i class="left"></i></div>
         <span>Назад</span>
       </b-btn>
       <h4 class="my-3 card-text">{{ mxGameDetails.game.place.description }}</h4>
       <GmapMap
           :center="position"
-          :zoom="16"
+          :zoom="14"
           :options="{
             zoomControl: true,
             mapTypeControl: true,
@@ -23,9 +23,9 @@
             streetViewControl: false,
             rotateControl: false,
             fullscreenControl: true,
-            disableDefaultUi: true
+            disableDefaultUi: false
           }"
-          map-type-id="satellite"
+          map-type-id="hybrid"
           style="width: 100%; height: 400px;"
         >
           <GmapMarker
@@ -36,7 +36,7 @@
       </GmapMap>
 
       <hr/>
-      <p class="my-3 px-2 text-left">{{ mxGameDetails.game.place.howToGet }}</p>
+      <p class="my-3 px-2 text-left howtotext">{{ mxGameDetails.game.place.howToGet }}</p>
       <hr/>
       <b-btn @click="back" class="mt-2 mb-5 w-50" variant="success">
         OK
@@ -50,9 +50,6 @@
 
 import Vue from 'vue'
 import * as VueGoogleMaps from 'vue2-google-maps'
-
-// { lng: 37.384442, lat: 56.070685 }
-// {lat: 55.806767, lng: 37.588695}
 
 Vue.use(VueGoogleMaps, {
   load: {
@@ -100,6 +97,9 @@ export default {
 <style scoped>
 #map {
   height: 100%;
+}
+.howtotext {
+  word-break: break-all;
 }
 </style>
 

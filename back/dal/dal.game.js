@@ -21,7 +21,7 @@ const getGame = async (gameId) => {
     ) bkw ON g.gameId = bkw.gameId
     LEFT JOIN (
       SELECT notifyId, chatLink from notifications
-    ) ntf ON g.notifyId = ntf.notifyId    
+    ) ntf ON g.notifyId = ntf.notifyId
     WHERE g.gameId = ${gameId}`
   );
   if (games.length !== 1) {
@@ -39,16 +39,58 @@ const getGame = async (gameId) => {
   });
 };
 
+const addGame = async (game) => {
+  const res = await execSQL.run(`INSERT INTO games
+    (placeId, notifyId, date, timeStart, timeEnd, organizerId, playerSlots, waiterSlots, status,
+    paymentType, paymentAmount, paymentMessage, paymentGateAccount, paymentGateMessage)
+    VALUES (${game.place.placeId}, ${game.notifyId}, '${game.date}', '${game.timeStart}',
+    '${game.timeEnd}', ${game.organizer.userId}, ${game.playerSlots}, ${game.waiterSlots},
+    '${game.status}', '${game.paymentType}', ${game.paymentAmount}, '${game.paymentMessage}',
+    '${game.paymentGateAccount}', '${game.paymentGateMessage}')
+  `);
+
+  return res && res.lastID;
+};
+
+const updateGame = async (game) => {
+  let sql = `UPDATE games
+    SET `;
+
+  if (game.playerSlots) { sql += `playerSlots = ${game.playerSlots}, \n`; }
+  if (game.waiterSlots) { sql += `waiterSlots = ${game.waiterSlots}, \n`; }
+  if (game.paymentAmount !== null) { sql += `paymentAmount = ${game.paymentAmount}, \n`; }
+  if (game.paymentMessage !== null) { sql += `paymentMessage = ${game.paymentMessage}, \n`; }
+  if (game.status) { sql += `status = '${game.status}' \n`; }
+
+  sql += `WHERE gameId = ${game.gameId}`;
+
+  const res = await execSQL.run(sql);
+  return res && res.lastID;
+};
+
+
 const getGameOrganizerId = async (gameId) => {
-  const games = await execSQL.all(`SELECT organizerId FROM games g
-    WHERE g.gameId = ${gameId}`
+  const games = await execSQL.all(`SELECT organizerId FROM games
+    WHERE games.gameId = ${gameId}`
   );
   if (games.length !== 1) {
-    throw new Error(`getGame(): cannot find game with gameId:${gameId}`);
+    throw new Error(`getGameOrganizerId(): cannot find game with gameId:${gameId}`);
   }
 
   return games[0].organizerId;
 };
+
+const getGameNotifyId = async (gameId) => {
+  const games = await execSQL.all(`SELECT notifyId FROM games
+    WHERE games.gameId = ${gameId}`
+  );
+  if (games.length !== 1) {
+    throw new Error(`getGameNotifyId(): cannot find game with gameId:${gameId}`);
+  }
+
+  return games[0].notifyId;
+};
+
 
 const getGameDetails = async (gameId) => {
   const game = await getGame(gameId);
@@ -84,7 +126,7 @@ const getGamesList = async (props = {}) => {
     ) bkw ON g.gameId = bkw.gameId
     LEFT JOIN (
       SELECT notifyId, chatLink from notifications
-    ) ntf ON g.notifyId = ntf.notifyId 
+    ) ntf ON g.notifyId = ntf.notifyId
     WHERE date >= "${today.toJSON().slice(0,10)}"
     ORDER BY date,timeStart ASC`);
 
@@ -112,14 +154,14 @@ const moveWaiters = async (gameId, ttl) => {
   const bookIds = await execSQL.all(`SELECT bookId from bookings
     WHERE status = 'waiting'
     AND gameId = ${gameId}
-    ORDER by ts 
+    ORDER by ts
     LIMIT 1`);
 
   if (bookIds.length > 0) {
     const bookId = bookIds[0].bookId;
     const ttlDB = (ttl > 0) ? (Date.now() + ttl) : 0;
     const res = await execSQL.run(`UPDATE bookings SET status = 'reserved', expireAt = ${ttlDB}
-      WHERE bookId = ${bookId} AND 
+      WHERE bookId = ${bookId} AND
       (SELECT count(*) from bookings WHERE status IN ('booked', 'reserved') AND gameId = ${gameId}) <
       (SELECT playerSlots from games WHERE gameId = ${gameId})`);
 
@@ -127,7 +169,7 @@ const moveWaiters = async (gameId, ttl) => {
       return bookId;
     }
   }
-}; 
+};
 
 
 module.exports = {
@@ -139,11 +181,14 @@ module.exports = {
     dal = dalInstance;
 
     return {
-      getGamesList,
+      addGame,
       getGame,
       getGameDetails,
+      getGameNotifyId,
       getGameOrganizerId,
+      getGamesList,
       moveWaiters,
+      updateGame,
     };
   }
 };

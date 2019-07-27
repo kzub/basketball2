@@ -81,7 +81,11 @@ const auth = async (req, res) => {
   
   const authCookie = authLib.encode(user.userId);
   req.log.debug(`set auth '${authCookie}' for userId: ${user.userId}`);
-  res.cookie('auth', authCookie).status(200).send({
+  const options = {
+    expires: new Date(Date.now() + 1000*60*60*24*365*10),
+    httpOnly: true,
+  };
+  res.cookie('auth', authCookie, options).status(200).send({
     auth: true,
     ...user,
   });

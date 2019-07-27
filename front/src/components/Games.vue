@@ -38,6 +38,14 @@
             </div>
           </b-btn>
         </b-card>
+      </div>
+
+      <div v-if="games.length === 0">
+        <b-card no-body class="my-4 mx-4">
+          <b-btn class="noGames" block variant="secondary">
+            Игр пока нет
+          </b-btn>
+        </b-card>
       </div>      
     </div>
 
@@ -68,12 +76,18 @@ export default {
       if (game.status === 'settled') {
         return '' //'Игра запланирована'
       }
+      if (game.status === 'disabled') {
+        return 'выключена'
+      }
       return '(статус не определен)';
     },
     gameBorderColor: function (game) {
       let mode = '';
       if (game.status === 'poll') {
         mode += ' btn-secondary'
+      }
+      else if (game.status === 'disabled') {
+        mode += ' btn-danger'
       }
       if (this.$store.state.user && this.$store.state.user.userId === game.organizer.userId) {
         mode += ' userIsAdmin'
@@ -95,14 +109,13 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
+.noGames {
+  height: 100px;
+  font-size: 20px;
+}
 .userIsAdmin {
   /*border: 2px dotted #dc3545;*/
   border-left: 10px solid #dc3545 !important;
-}
-.pollMode {
-  /*border-left: 5px solid #dc3545;*/
-  background-color: #da7833;
-  border-color: #da7833;
 }
 
 </style>

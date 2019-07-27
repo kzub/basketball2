@@ -1,6 +1,5 @@
 const events = require('../utils/notifications');
-
-const newReservationTTL = 30*60*1000;
+const { newReservationTTL, waiterReservationTTL } = require('../dal/types');
 
 const book = async (req, res) => {
   const { gameId, slotType } = req.body;
@@ -17,7 +16,7 @@ const book = async (req, res) => {
   }
 
   if (bookId > 0) {
-    events.emit('reservation.new', { game, bookId, user });
+    events.emit('reservation.new', { game, bookId, user, slotType });
   }
 
   res.status(200).send({
@@ -78,15 +77,16 @@ const cancel = async (req, res) => {
   const user = await req.dal.user.getUser(req.userId);
   const game = await req.dal.game.getGame(gameId);
   const reservation = await req.dal.reservation.get(gameId, bookId);
-
+  const isWaiter = reservation.isWaiter();
   let ok = false;
   if (game.isAdmin(user) || reservation.isOwner(user)) {
     reservation.cancel();
     ok = await req.dal.reservation.update(reservation);
 
     if (ok) { 
-      events.emit('reservation.canceled', { reservation });
-      const promotedRsvId = await req.dal.game.moveWaiters(gameId);
+      const event = reservation.isPaid() ? 'reservation.canceled.paid' : 'reservation.canceled.unpaid';
+      events.emit(event, { reservation, isWaiter });
+      const promotedRsvId = await req.dal.game.moveWaiters(gameId, waiterReservationTTL);
       if (promotedRsvId) {
         const promotedReservation = await req.dal.reservation.get(gameId, promotedRsvId);
         events.emit('reservation.waiter.promoted', { reservation: promotedReservation });

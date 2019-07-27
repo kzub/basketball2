@@ -10,20 +10,37 @@
 
     <div v-else>
       <b-btn @click="back" class="btn-lg mb-3 rounded-0" block variant="warning">
-        <i class="left"></i>
+        <div class="arrow-left"><i class="left"></i></div>
         <span>Назад</span>
       </b-btn>
 
       <!-- game and payment info -->
       <GameInfo :game="mxGameDetails.game" show="place,time"/>
 
-      <div v-if="mxGameDetails.game.freePlayerSlots == 0" 
+      <div v-if="mxGameDetails.game.freePlayerSlots == 0"
            class="card-title btn-danger m-1 p-2 mx-2 rounded">
         Свободных мест нет
       </div>
 
       <div v-if="isAdmin" class="m-1 p-2 mx-2 rounded adminMode">
         Режим администратора
+      </div>
+      <div v-if="isAdmin" class="m-1 mx-2 mt-2 mb-4">
+        <b-button v-if="showAdminButtons('disable')"
+          @click="changeGameStatus('disabled')"
+          class="w-100 py-2" variant="danger">
+          Скрыть игру
+        </b-button>
+        <b-button v-if="showAdminButtons('settle')"
+          @click="changeGameStatus('settled')"
+          class="w-100 py-2 my-1" variant="danger">
+          Включить запись
+        </b-button>
+        <b-button v-if="showAdminButtons('poll')"
+          @click="changeGameStatus('poll')"
+          class="w-100 py-2 my-1" variant="danger">
+          Режим голосования
+        </b-button>
       </div>
 
       <div v-if="mxGameDetails.game.status === 'poll'" class="m-1 p-2 mx-2 rounded manualBookMode">
@@ -35,25 +52,27 @@
         <div v-for="(slot, index) in mxGameDetails.players" :key="'p'+index">
           <router-link class="d-flex" :to="goLink(mxGameDetails.game, slot)" tag="div">
             <b-button href="#" class="my-1 mx-3 slot" :variant="playerColor(slot)">
-              {{ slot.playerName }}
+              <div  v-if="modifyAllowed(slot)">
+                <span class="arrow-text">{{ slot.playerName }}</span>
+                <div class="arrow"><i class="right"></i></div>
+              </div>
+              <div v-else>{{ slot.playerName }}</div>
             </b-button>
-            <div v-if="modifyAllowed(slot)" class="arrow">
-              <i class="right"></i>
-            </div>
           </router-link>
         </div>
-        
+
         <div v-if="mxGameDetails.waiters.length">
           <hr/>
           <div class="text-left m-2">Список запасных:</div>
           <div v-for="(slot, index) in mxGameDetails.waiters" :key="'r'+index">
             <router-link class="d-flex" :to="goLink(mxGameDetails.game, slot)" tag="div">
               <b-button href="#" class="my-1 mx-3 slot" :variant="playerColor(slot)">
-                {{ slot.playerName }}
+                <div  v-if="modifyAllowed(slot)">
+                  <span class="arrow-text">{{ slot.playerName }}</span>
+                  <div class="arrow"><i class="right"></i></div>
+                </div>
+                <div v-else>{{ slot.playerName }}</div>
               </b-button>
-              <div v-if="modifyAllowed(slot)" class="arrow">
-                <i class="right"></i>
-              </div>
             </router-link>
           </div>
         </div>
@@ -71,7 +90,7 @@
             Как добраться
           </b-btn >
         </router-link>
-        <b-btn v-if="mxGameDetails.game.chatLink" 
+        <b-btn v-if="mxGameDetails.game.chatLink"
                :href="mxGameDetails.game.chatLink"
                class="mt-2" block variant="outline-secondary">
           Чат площаки
@@ -86,14 +105,12 @@
 <script>
 
 import GameUtils from '../mixins/game.js'
-import Organizer from './Organizer.vue'
 import GameInfo from './GameInfo.vue'
 
 export default {
   name: 'Game',
   mixins: [GameUtils],
   components: {
-    Organizer,
     GameInfo,
   },
   mounted: function(){
@@ -101,7 +118,7 @@ export default {
   },
   computed: {
     isAdmin () {
-      return this.$store.state.user && 
+      return this.$store.state.user &&
         this.$store.state.user.userId === this.mxGameDetails.game.organizer.userId
     },
     user () {
@@ -119,9 +136,31 @@ export default {
       if (slot.paymentStatus == 'unpaid') return 'warning'
       return 'danger'
     },
+    showAdminButtons (button) {
+      if (this.mxGameDetails.game.status === 'disabled' &&
+        ['poll', 'settle'].indexOf(button) >= 0) {
+        return true
+      }
+      else if (this.mxGameDetails.game.status === 'poll' &&
+        ['disable', 'settle'].indexOf(button) >= 0) {
+        return true
+      }
+      else if (this.mxGameDetails.game.status === 'settled' &&
+        ['disable', 'poll'].indexOf(button) >= 0) {
+        console.log('on', button)
+        return true
+      }
+      console.log(this.mxGameDetails.game.status)
+    },
     back: function() {
       this.$router.push({
         path: '/',
+      })
+    },
+    changeGameStatus (status) {
+      this.$store.dispatch('changeGameStatus', {
+        gameId: this.mxGameDetails.game.gameId,
+        status,
       })
     },
     modifyAllowed (slot) {
@@ -134,14 +173,14 @@ export default {
       if (!this.$store.state.user || !this.$store.state.user.auth) {
         return {
           path: '/profile',
-          query: { 
-            retUrl: '/game', 
+          query: {
+            retUrl: '/game',
             gameId: game.gameId,
             welcome: true,
           }
         }
       }
-      
+
       if (slot.status.startsWith('free4')) {
         return {
           path: '/book',
@@ -192,5 +231,5 @@ export default {
 }
 </style>
 <style>
-@import '../assets/backarrow.css'; 
+@import '../assets/backarrow.css';
 </style>

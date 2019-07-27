@@ -58,7 +58,6 @@ const deleteReservation = ({ commit, state }, { gameId, bookId }) => {
     })
 }
 
-
 const updateGamesData = ({ commit, state }) => {
   console.log('actions::updateGamesData')
   commit('setUpdatedFlag', false)
@@ -83,6 +82,23 @@ const updateGameData = ({ commit, state }, gameId) => {
     .get(`/api/game/${gameId}`)
     .then(response => {
       console.log(`/api/game/${gameId} response:`, response.data)
+      commit('gameDetails', response.data)
+      commit('setUpdatedFlag', true)
+    })
+    .catch(error => {
+      console.log('/api/games error:', error)
+      commit('gameDetails', undefined)
+      commit('setUpdatedFlag', true)
+    })
+}
+
+const changeGameStatus = ({ commit, state }, { gameId, status }) => {
+  console.log('actions::changeGameStatus', gameId)
+  commit('setUpdatedFlag', false)
+  return axios
+    .get(`/api/game/changeStatus/${gameId}/${status}`)
+    .then(response => {
+      console.log(`/api/game/changeStatus/${gameId}/${status} response:`, response.data)
       commit('gameDetails', response.data)
       commit('setUpdatedFlag', true)
     })
@@ -171,16 +187,17 @@ const init = ({ commit, state, dispatch }) => {
 }
 
 export default {
-  bookSlot,
-  updateGamesData,
-  updateGameData,
-  updateReservationName,
-  updateReservationPay,
-  deleteReservation,
   authUser,
+  bookSlot,
+  changeGameStatus,
+  deleteReservation,
   exitUser,
   getUserInfo,
+  init,
   sendCheckCode,
   setUserName,
-  init,
+  updateGameData,
+  updateGamesData,
+  updateReservationName,
+  updateReservationPay,
 }

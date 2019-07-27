@@ -1,7 +1,7 @@
 <template>
   <div>
     <b-btn @click="back" class="btn-lg mb-4 rounded-0" block variant="warning">
-      <i v-if="!newUser" i class="left"></i>
+      <div v-if="!newUser" class="arrow-left"><i class="left"></i></div>
       <span v-if="!newUser">Назад</span> &nbsp;
     </b-btn>
     <div v-if="!user || !user.auth" class="my-2">

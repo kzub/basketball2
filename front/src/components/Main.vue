@@ -5,9 +5,16 @@
     <Games :games="games"/>
 
     <hr/>
+    <router-link v-if="user && user.isOrganizer" to="/admin" tag="div">
+      <b-btn class="btn-lg mt-2 mb-3 rounded-0" block variant="danger">
+        Добавить игру<div class="arrow"><i class="right"></i></div>
+      </b-btn>
+    </router-link>
+
     <b-btn class="btn-lg mt-2 mb-3 rounded-0" block
     :href="link" variant="warning">
       Наш чат в телеграм
+      <div class="arrow"><i class="right"></i></div>
     </b-btn>
 
   </div>
@@ -25,11 +32,14 @@ export default {
     Auth,
   },
   computed: {
+    user () {
+      return this.$store.state.user
+    },
     games () {
       return this.$store.state.games
     },
     link () {
-      return 'tg://resolve?domain=playbasket'
+      return 'tg://resolve' + '?domain=playbasket'
     }
   },
   methods: {

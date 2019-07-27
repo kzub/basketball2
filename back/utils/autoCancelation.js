@@ -1,6 +1,7 @@
 const dal = require('../dal/dal');
 const events = require('../utils/notifications');
 const logger = require('../utils/logger');
+const { waiterReservationTTL } = require('../dal/types');
 
 const log = logger.create('AUTO_CANCEL');
 
@@ -12,7 +13,7 @@ const checkExpiredReservations = async () => {
     const ok = await dal.reservation.update(reservation);
     if (ok) { 
       events.emit('reservation.expired', { reservation });
-      const promotedRsvId = await dal.game.moveWaiters(reservation.gameId);
+      const promotedRsvId = await dal.game.moveWaiters(reservation.gameId, waiterReservationTTL);
       if (promotedRsvId) {
         const promotedReservation = await dal.reservation.get(reservation.gameId, promotedRsvId);
         events.emit('reservation.waiter.promoted', { reservation: promotedReservation });

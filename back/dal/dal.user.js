@@ -12,6 +12,7 @@ const getUsers = async (usersIds) => {
 
 const getUser = async (userId) => {
   const users = await execSQL.all(`SELECT * FROM users
+    LEFT JOIN organizers ON users.userId = organizers.organizerId
     WHERE userId = ${userId}`);
   return new User(users[0]);
 };
