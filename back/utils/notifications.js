@@ -76,7 +76,7 @@ emitter.on('reservation.new', async ({ game, user, slotType }) => {
 emitter.on('reservation.paid', async ({ reservation }) => {
   const game = await dal.game.getGame(reservation.gameId);
   const notify = await createNotification(game.notifyId, 'reservation.paid');
-  notify.send(`${reservation.playerName} оплатил место на игру в ${game.place.title}, в ${game.timeStart} ${utils.getBeautifulDate(game.date)}`);
+  notify.send(`${reservation.playerName} записался на игру в ${game.place.title}, в ${game.timeStart} ${utils.getBeautifulDate(game.date)}`);
 });
 
 emitter.on('reservation.expired', async ({ reservation }) => {
