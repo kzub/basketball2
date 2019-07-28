@@ -76,7 +76,7 @@ const changeStatus = async (req, res) => {
   }
 
   gameDetails.game.status = status;
-  await req.dal.game.updateGame(gameDetails.game);
+  await req.dal.game.updateGameStatus(gameDetails.game);
 
   events.emit('game.change.status', {
     game: gameDetails.game,

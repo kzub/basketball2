@@ -159,7 +159,7 @@ Reservation.prototype.setExpire = function (time) {
 };
 
 Reservation.prototype.makePaid = function (amount) {
-  if (typeof(amount) === 'number' && !isNaN(amount)) {
+  if (isFinite(amount)) {
     this.paymentAmount = amount;
   }
   this.paymentStatus = 'paid';
@@ -201,7 +201,7 @@ function Notification (obj) {
 }
 
 Notification.prototype.getChatId = function (event) {
-  if (event === '*') {
+  if (this.userEvents['*']) {
     return this.userChatId;
   }
   if (this.userEvents[event]) {

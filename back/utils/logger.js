@@ -1,7 +1,8 @@
 const winston = require('winston');
 const { format } = require('logform');
+const utils = require('./misc');
 
-const dev = true;
+const config = utils.getConfig();
 
 const consoleFormat = (name, req) => format.combine(
   format.colorize(),
@@ -32,38 +33,24 @@ const jsonFormat = (name, req) => format.combine(
   }),
 );
 
-const createLogger = (logFormat, transports, options) => {
-  return {
-    level: options.loglevel || 'info',
-    format: logFormat,
-    transports,
-    exitOnError: false,
-  };
-};
-
 const create = (name, req) => {
-  let logger;
-  if (dev) {
-    logger = winston.createLogger(
-      createLogger(
-        consoleFormat(name, req), 
-        new winston.transports.Console(),
-        {
-          loglevel: 'debug',
-        }
-      )
-    );
+  let format;
+  let transport;
+
+  if (config.logger.logfile) {
+    format = jsonFormat(name, req);
+    transport = new winston.transports.File({ filename: config.logger.logfile });
   } else {
-    logger = winston.createLogger(
-      createLogger(
-        jsonFormat(name, req),
-        new winston.transports.File({ filename: 'basket2.log' }),
-        {
-          
-        },
-      )
-    );
+    format = consoleFormat(name, req);
+    transport = new winston.transports.Console();
   }
+
+  const logger = winston.createLogger({
+    level: config.logger.loglevel || 'info',
+    format,
+    transports : [transport],
+    exitOnError: false,
+  });
 
   const publicLogger = {};
   for (let level in logger.levels) {

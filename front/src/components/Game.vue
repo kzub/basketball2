@@ -62,7 +62,7 @@
         <GameInfo class="" :game="mxGameDetails.game" show="organizer"/>
         <GameInfo class="" :game="mxGameDetails.game" show="payment"/>
       </div>
-      <div v-if="isAdmin" class="m-1 mx-2 mt-2 mb-4">
+      <div v-if="isAdmin" class="m-1 mx-2 mt-4 mb-4">
         <div class="m-1 p-2 mx-2 rounded adminMode">
           Режим администратора
         </div>
@@ -161,7 +161,6 @@ export default {
       }
       else if (this.mxGameDetails.game.status === 'settled' &&
         ['disable', 'poll'].indexOf(button) >= 0) {
-        console.log('on', button)
         return true
       }
       console.log(this.mxGameDetails.game.status)

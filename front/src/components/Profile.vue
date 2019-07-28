@@ -96,6 +96,7 @@ export default {
         if (!res || !res.ok) {
           this.$bvModal.show('err-change')
         } else {
+          this.back()
           this.wantChange = false
         }
       })

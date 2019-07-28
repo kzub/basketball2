@@ -52,22 +52,11 @@ const addGame = async (game) => {
   return res && res.lastID;
 };
 
-const updateGame = async (game) => {
-  let sql = `UPDATE games
-    SET `;
-
-  if (game.playerSlots) { sql += `playerSlots = ${game.playerSlots}, \n`; }
-  if (game.waiterSlots) { sql += `waiterSlots = ${game.waiterSlots}, \n`; }
-  if (game.paymentAmount !== null) { sql += `paymentAmount = ${game.paymentAmount}, \n`; }
-  if (game.paymentMessage !== null) { sql += `paymentMessage = ${game.paymentMessage}, \n`; }
-  if (game.status) { sql += `status = '${game.status}' \n`; }
-
-  sql += `WHERE gameId = ${game.gameId}`;
-
+const updateGameStatus = async (game) => {
+  let sql = `UPDATE games SET status = '${game.status}' WHERE gameId = ${game.gameId}`;
   const res = await execSQL.run(sql);
   return res && res.lastID;
 };
-
 
 const getGameOrganizerId = async (gameId) => {
   const games = await execSQL.all(`SELECT organizerId FROM games
@@ -188,7 +177,7 @@ module.exports = {
       getGameOrganizerId,
       getGamesList,
       moveWaiters,
-      updateGame,
+      updateGameStatus,
     };
   }
 };
