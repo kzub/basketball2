@@ -49,6 +49,10 @@ Game.prototype.isAdmin = function (user) {
   return this.organizer.userId === user.userId;
 };
 
+Game.prototype.isDisabled = function () {
+  return this.status === 'disabled';
+};
+
 Game.prototype.isPrepay =function  () {
   return this.paymentType === 'prepay';
 };

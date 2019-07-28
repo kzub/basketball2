@@ -1,6 +1,6 @@
 <template>
   <div>
-      <b-btn class="w-100" variant="primary">
+      <b-btn class="w-100 btn-lg mb-3 rounded-0" variant="primary">
         Информация
       </b-btn>
     <div class="d-flex flex-column px-2 m-3">

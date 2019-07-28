@@ -22,27 +22,6 @@
         Свободных мест нет
       </div>
 
-      <div v-if="isAdmin" class="m-1 p-2 mx-2 rounded adminMode">
-        Режим администратора
-      </div>
-      <div v-if="isAdmin" class="m-1 mx-2 mt-2 mb-4">
-        <b-button v-if="showAdminButtons('disable')"
-          @click="changeGameStatus('disabled')"
-          class="w-100 py-2" variant="danger">
-          Скрыть игру
-        </b-button>
-        <b-button v-if="showAdminButtons('settle')"
-          @click="changeGameStatus('settled')"
-          class="w-100 py-2 my-1" variant="danger">
-          Включить запись
-        </b-button>
-        <b-button v-if="showAdminButtons('poll')"
-          @click="changeGameStatus('poll')"
-          class="w-100 py-2 my-1" variant="danger">
-          Режим голосования
-        </b-button>
-      </div>
-
       <div v-if="mxGameDetails.game.status === 'poll'" class="m-1 p-2 mx-2 rounded manualBookMode">
         Предварительная запись
       </div>
@@ -83,6 +62,31 @@
         <GameInfo class="" :game="mxGameDetails.game" show="organizer"/>
         <GameInfo class="" :game="mxGameDetails.game" show="payment"/>
       </div>
+      <div v-if="isAdmin" class="m-1 mx-2 mt-2 mb-4">
+        <div class="m-1 p-2 mx-2 rounded adminMode">
+          Режим администратора
+        </div>
+        <div class="m-1 mx-2 mt-2 mb-4">
+          <b-button v-if="showAdminButtons('disable')"
+            v-b-modal.ackModal
+            @click="changeGameStatus('disabled')"
+            class="w-100 py-2 my-1" variant="danger">
+            Скрыть игру
+          </b-button>
+          <b-button v-if="showAdminButtons('settle')"
+            v-b-modal.ackModal
+            @click="changeGameStatus('settled')"
+            class="w-100 py-2 my-1" variant="danger">
+            Включить запись
+          </b-button>
+          <b-button v-if="showAdminButtons('poll')"
+            v-b-modal.ackModal
+            @click="changeGameStatus('poll')"
+            class="w-100 py-2 my-1" variant="danger">
+            Режим голосования
+          </b-button>
+        </div>
+      </div>
       <hr/>
       <div class="mt-4 mb-5 mx-3">
         <router-link :to="'/map?gameId=' + mxGameDetails.game.gameId">
@@ -95,8 +99,13 @@
                class="mt-2" block variant="outline-secondary">
           Чат площаки
         </b-btn>
-        <!-- </b-collapse>   -->
       </div>
+
+      <b-modal id="ackModal" title="Подтверждение" 
+        ok-variant="danger" ok-title="Да" cancel-title="Отмена"
+        @ok="actionConfirmed">
+        <p class="my-4">Сменить режим?</p>
+      </b-modal>
     </div>
 
   </div>
@@ -112,6 +121,11 @@ export default {
   mixins: [GameUtils],
   components: {
     GameInfo,
+  },
+  data: function () {
+    return {
+      action: ''
+    }
   },
   mounted: function(){
     this.$store.dispatch('updateGameData', this.mxLocationInfo.gameId);
@@ -158,9 +172,12 @@ export default {
       })
     },
     changeGameStatus (status) {
+      this.action = status
+    },
+    actionConfirmed () {
       this.$store.dispatch('changeGameStatus', {
         gameId: this.mxGameDetails.game.gameId,
-        status,
+        status: this.action,
       })
     },
     modifyAllowed (slot) {

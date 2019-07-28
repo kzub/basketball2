@@ -8,7 +8,17 @@ const get = async (req, res) => {
 
   const gameDetails = await req.dal.game.getGameDetails(req.params.gameId);
 
-  if (req.userId && req.userId === gameDetails.game.organizer.userId) {
+  if (!gameDetails || (gameDetails.game.isDisabled() && 
+      req.userId !== gameDetails.game.organizer.userId)) {
+    res.status(200).send({
+      error: true,
+      reason: 'game disabled or not exists',
+    });
+    return;
+  }
+
+  if (req.userId === gameDetails.game.organizer.userId) {
+    // add players personal data to the response
     const userlist = [].concat(
       gameDetails.players.map(p => p.userId),
       gameDetails.waiters.map(p => p.userId))

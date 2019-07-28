@@ -47,7 +47,7 @@ const createNotification = async (notifyId, event) => {
       send: async (text) => {
         try {
           log.info(text);
-          await telegram.send(notification.botToken, chatId, text);
+          await telegram.send(notification.botToken, chatId, `${text}, ${config.site}`);
         } catch (err) {
           log.error(`createNotification.send(): ${err}`);
         }
@@ -111,25 +111,25 @@ emitter.on('reservation.waiter.promoted', async ({ reservation }) => {
 emitter.on('reservation.admin.unpaid', async ({ reservation }) => {
   const game = await dal.game.getGame(reservation.gameId);
   const notify = await createNotification(game.notifyId, 'reservation.admin.unpaid');
-  notify.send(`Администратор пометил не оплаченной бронь ${reservation.playerName} в игре ${game.place.title}, в ${game.timeStart} ${utils.getBeautifulDate(game.date)}`);
+  notify.send(`Организатор пометил не оплаченной бронь ${reservation.playerName} в игре ${game.place.title}, в ${game.timeStart} ${utils.getBeautifulDate(game.date)}`);
 });
 
 emitter.on('reservation.admin.paid', async ({ reservation }) => {
   const game = await dal.game.getGame(reservation.gameId);
   const notify = await createNotification(game.notifyId, 'reservation.admin.paid');
-  notify.send(`Администратор пометил оплаченной бронь ${reservation.playerName} в игре ${game.place.title}, в ${game.timeStart} ${utils.getBeautifulDate(game.date)}`);
+  notify.send(`Организатор пометил оплаченной бронь ${reservation.playerName} в игре ${game.place.title}, в ${game.timeStart} ${utils.getBeautifulDate(game.date)}`);
 });
 
 const gameStatuses = {
   disabled: 'выключил',
   settled: 'открыл запись на',
-  poll: 'сделал предварительный опрос на',
+  poll: 'открыл предварительный опрос на',
 };
 
 emitter.on('game.change.status', async ({ game, status }) => {
   const notify = await createNotification(game.notifyId, 'game.change.status');
   const statusText = gameStatuses[status];
-  notify.send(`Администратор ${statusText} игру ${game.place.title}, в ${game.timeStart} ${utils.getBeautifulDate(game.date)}`);
+  notify.send(`Организатор ${statusText} игру ${game.place.title}, в ${game.timeStart} ${utils.getBeautifulDate(game.date)}`);
 });
 
 
