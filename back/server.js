@@ -17,6 +17,7 @@ const log = logger.create('SERVER');
 app.use(bodyParser.json()); // support json encoded bodies
 app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
 app.use(cookieParser());
+app.enable('trust proxy');
 
 app.use((req, res, next) => {
   const start = Date.now();
@@ -43,22 +44,3 @@ app.listen(config.server.port, config.server.host);
 log.info(`listen on: ${config.server.host}:${config.server.port}`);
 
 autoCancelation.startMonitoring();
-
-// const bot = require('./telegram_bot');
-// function makeError(msg) {
-//   printError.apply(this, arguments);
-//   return {
-//     error: msg
-//   };
-// }
-
-// function printError(msg) {
-//   bot.send('owner', `Error: ${msg}`);
-//   let args = [];
-//   for (let key in arguments) {
-//     args.push(arguments[key]);
-//   }
-//   args.unshift('Error:');
-//   console.log.apply(this, args);
-// }
-

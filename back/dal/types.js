@@ -10,7 +10,6 @@ const checkString = (str, required, msg) => {
 
 const checkNumber = (num, msg) => {
   if (typeof(num) !== 'number' || isNaN(num) || !isFinite(num)) {
-    console.log('TEST:', typeof(num), isNaN(num), !isFinite(num), num);
     throw new Error(msg);
   }
   return num;
@@ -150,7 +149,6 @@ Reservation.prototype.isPaid = function () {
 };
 
 Reservation.prototype.isWaiter = function () {
-  console.log('1!!!!!!!!', this);
   return this.status === 'waiting';
 };
 
@@ -160,7 +158,7 @@ Reservation.prototype.setExpire = function (time) {
 
 Reservation.prototype.makePaid = function (amount) {
   if (isFinite(amount)) {
-    this.paymentAmount = amount;
+    this.paymentAmount = Number(amount);
   }
   this.paymentStatus = 'paid';
 };

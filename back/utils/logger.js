@@ -26,6 +26,7 @@ const jsonFormat = (name, req) => format.combine(
       delete info.message;
     }
     return JSON.stringify({
+      reqId: req && req.id,
       userId: req && req.userId,
       name: name,
       ...info,

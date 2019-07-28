@@ -8,7 +8,6 @@ const complete = async (req, res) => {
   const label = req.body.label;
 
   const organizer = await req.dal.payment.findOrganizerByPaySystem(paySystem);
-  console.log('!!!', organizer)
   if (!organizer) {
     events.emit('payment.unknown.paysystem', { paySystem, label, amount, ip: req.ip });
     // probably unauthorized attempt to emit payment
@@ -27,7 +26,6 @@ const complete = async (req, res) => {
     events.emit('reservation.paid', { reservation });
     return;
   }
-  console.log('!!!!2')
 
   events.emit('payment.unknown', { paySystem, label, amount });
   req.dal.payment.addTransaction(0, paySystem, amount, req.body);
