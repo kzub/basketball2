@@ -15,34 +15,56 @@
       </b-btn>
     </div>
 
-    LALALA
+    В разработке.....
+    <form>
+      <div v-for="opt in newGameOptions" :key="opt.label">
+        <div v-if="opt.type==='number'">
+          {{opt.output}}
+          <label>{{opt.label}}</label><input v-model.number="opts[opt.output]" type="number"/>
+          
+        </div>
+      </div>
+    </form>
+    
+    <b-btn @click="click">click</b-btn>
   </div>
 </template>
 
 <script>
 export default {
-  name: 'Admin',
+  name: 'GameNew',
   props: {
   },
   mounted: function(){
-    this.$store.dispatch('updateGamesData')
+    const self = this;
+    this.$store.dispatch('updateNewGameOptions')
   },
   computed: {
-    isAdmin () {
-      return this.$store.state.user &&
-        this.$store.state.user.userId === this.mxGameDetails.game.organizer.userId
-    },
     user () {
       return this.$store.state.user
     },
     viewDataUpdated () {
       return this.$store.state.viewDataUpdated
     },
+    newGameOptions () {
+      return this.$store.state.newGameOptions
+    },
+    opts () {
+      return this.$store.state.newGameOptions.reduce((acc, item) => {
+        acc[item.output] = undefined
+        item.options && item.options.map(i => 
+          i.inputs && i.inputs.map(ii => acc[ii.output] = undefined))
+        return acc
+      }, {})
+    },
   },
   methods: {
-    back: function() {
+    back: function () {
       this.$router.back()
     },
+    click: function () {
+      console.log('HAHA', this.opts);
+    }
   },
 }
 </script>

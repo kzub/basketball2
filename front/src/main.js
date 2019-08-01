@@ -9,6 +9,7 @@ Vue.use(Vuex)
 
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
+import 'babel-polyfill';
 
 import Store from './store'
 import App from './App.vue'

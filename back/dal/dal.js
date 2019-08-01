@@ -33,8 +33,10 @@ db.run(`CREATE TABLE IF NOT EXISTS payments (
 
 db.run(`CREATE TABLE IF NOT EXISTS organizers (
   organizerId INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-  paySystem TEXT NOT NULL,
-  placesIds TEXT NOT NULL
+  placesIds TEXT NOT NULL,
+  paySystem TEXT,
+  paymentGateAccount TEXT,
+  paymentGateMessage TEXT
 )`);
 
 db.run(`CREATE TABLE IF NOT EXISTS places (

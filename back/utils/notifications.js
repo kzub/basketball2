@@ -11,7 +11,8 @@ const log = logger.create('NOTIFY');
 // --------------------- SITE ADMIN NOTIFICATIONS ------------------------
 const sendAdminMessage = async (msg, type) => {
   log[type](msg);
-  telegram.send(config.telegram.token, config.telegram.owner, `[ADMIN] ${msg}`);
+  const site = `\n${config.site}`;
+  telegram.send(config.telegram.token, config.telegram.owner, `[ADMIN] ${msg}${site}`);
 };
 
 emitter.on('user.sms', async ({ phone, code }) => {
@@ -44,10 +45,14 @@ const createNotification = async (notifyId, event) => {
     const notification = await dal.notification.getNotification(notifyId);
     const chatId = notification.getChatId(event);
     return {
-      send: async (text) => {
+      send: async (text, skipSite) => {
         try {
           log.info(text);
-          await telegram.send(notification.botToken, chatId, `${text}, ${config.site}`);
+          let site = `\n${config.site}`;
+          if (skipSite) {
+            site = '';
+          }
+          await telegram.send(notification.botToken, chatId, `${text}${site}`);
         } catch (err) {
           log.error(`createNotification.send(): ${err}`);
         }
@@ -67,6 +72,11 @@ const createNotification = async (notifyId, event) => {
 //   return game.notifyId;
 // };
 
+emitter.on('game.players.list', async ({ game, text }) => {
+  const notify = await createNotification(game.notifyId, 'reservation.new');
+  notify.send(text, true);
+});
+
 emitter.on('reservation.new', async ({ game, user, slotType }) => {
   const notify = await createNotification(game.notifyId, 'reservation.new');
   const slotMessage = slotType === 'player' ? 'забронировал место' : 'занял очередь запасных';
@@ -76,7 +86,7 @@ emitter.on('reservation.new', async ({ game, user, slotType }) => {
 emitter.on('reservation.paid', async ({ reservation }) => {
   const game = await dal.game.getGame(reservation.gameId);
   const notify = await createNotification(game.notifyId, 'reservation.paid');
-  notify.send(`${reservation.playerName} записался на игру в ${game.place.title}, в ${game.timeStart} ${utils.getBeautifulDate(game.date)}`);
+  notify.send(`${reservation.playerName} записался на игру в ${game.place.title}, в ${game.timeStart} ${utils.getBeautifulDate(game.date)}, свободных мест: ${game.freePlayerSlots}`);
 });
 
 emitter.on('reservation.expired', async ({ reservation }) => {
@@ -95,7 +105,7 @@ emitter.on('reservation.canceled.unpaid', async ({ reservation, isWaiter }) => {
 emitter.on('reservation.canceled.paid', async ({ reservation }) => {
   const game = await dal.game.getGame(reservation.gameId);
   const notify = await createNotification(game.notifyId, 'reservation.canceled.paid');
-  notify.send(`${reservation.playerName} отменил свою запись на игру в ${game.place.title}, в ${game.timeStart} ${utils.getBeautifulDate(game.date)}`);
+  notify.send(`${reservation.playerName} отменил свою запись на игру в ${game.place.title}, в ${game.timeStart} ${utils.getBeautifulDate(game.date)}, , свободных мест: ${game.freePlayerSlots}`);
 });
 
 emitter.on('reservation.waiter.promoted', async ({ reservation }) => {
@@ -105,19 +115,20 @@ emitter.on('reservation.waiter.promoted', async ({ reservation }) => {
   if (game.isPrepay()) {
     payTime = `, на оплату отведено ${utils.textMinutesTo(reservation.expireAt)}`;
   }
-  notify.send(`Запасной ${reservation.playerName} получил бронь в игре ${game.place.title}, в ${game.timeStart} ${utils.getBeautifulDate(game.date)}${payTime}`);
+  notify.send(`Запасной ${reservation.playerName} забронировал место в игре ${game.place.title}, в ${game.timeStart} ${utils.getBeautifulDate(game.date)}${payTime}`);
 });
 
 emitter.on('reservation.admin.unpaid', async ({ reservation }) => {
   const game = await dal.game.getGame(reservation.gameId);
   const notify = await createNotification(game.notifyId, 'reservation.admin.unpaid');
-  notify.send(`Организатор пометил не оплаченной бронь ${reservation.playerName} в игре ${game.place.title}, в ${game.timeStart} ${utils.getBeautifulDate(game.date)}`);
+  notify.send(`${game.organizer.name} пометил не оплаченной бронь ${reservation.playerName} в игре ${game.place.title}, в ${game.timeStart} ${utils.getBeautifulDate(game.date)}`);
 });
 
 emitter.on('reservation.admin.paid', async ({ reservation }) => {
   const game = await dal.game.getGame(reservation.gameId);
   const notify = await createNotification(game.notifyId, 'reservation.admin.paid');
-  notify.send(`Организатор пометил оплаченной бронь ${reservation.playerName} в игре ${game.place.title}, в ${game.timeStart} ${utils.getBeautifulDate(game.date)}`);
+  const playerName = game.organizer.name === reservation.playerName ? 'себя' : reservation.playerName;
+  notify.send(`${game.organizer.name} записал ${playerName} на игру ${game.place.title}, в ${game.timeStart} ${utils.getBeautifulDate(game.date)}, свободных мест: ${game.freePlayerSlots}`);
 });
 
 const gameStatuses = {
@@ -129,7 +140,7 @@ const gameStatuses = {
 emitter.on('game.change.status', async ({ game, status }) => {
   const notify = await createNotification(game.notifyId, 'game.change.status');
   const statusText = gameStatuses[status];
-  notify.send(`Организатор ${statusText} игру ${game.place.title}, в ${game.timeStart} ${utils.getBeautifulDate(game.date)}`);
+  notify.send(`${game.organizer.name} ${statusText} игру ${game.place.title}, в ${game.timeStart} ${utils.getBeautifulDate(game.date)}`);
 });
 
 

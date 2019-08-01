@@ -53,8 +53,10 @@ const smsLimiter = rateLimit({
 
 const init = (app) => {
   app.use(apiLimiter);
-  app.get('/api/game/:gameId', wrapper(game.get, false));
   app.get('/api/game/changeStatus/:gameId/:status', wrapper(game.changeStatus, true));
+  app.get('/api/game/details/:gameId', wrapper(game.get, false));
+  app.get('/api/game/options', wrapper(game.getOptions, true));
+  app.get('/api/game/sendPlayerList/:gameId', wrapper(game.sendPlayerList, true));
   app.get('/api/games', wrapper(games.list, false));
   app.get('/api/games/my', wrapper(games.my, true));
   app.get('/api/reservation/cancel/:gameId/:bookId/', wrapper(reservation.cancel, true));

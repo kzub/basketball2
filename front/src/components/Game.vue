@@ -22,7 +22,7 @@
         Свободных мест нет
       </div>
 
-      <div v-if="mxGameDetails.game.status === 'poll'" class="m-1 p-2 mx-2 rounded manualBookMode">
+      <div v-if="mxGameDetails.game.status === 'poll'" class="m-1 p-2 mx-2 rounded pollMode">
         Предварительная запись
       </div>
 
@@ -84,6 +84,11 @@
             @click="changeGameStatus('poll')"
             class="w-100 py-2 my-1" variant="danger">
             Режим голосования
+          </b-button>
+          <b-button
+            @click="sendPlayersList"
+            class="w-100 py-2 my-1" variant="warning">
+            Прислать список игроков
           </b-button>
         </div>
       </div>
@@ -163,7 +168,6 @@ export default {
         ['disable', 'poll'].indexOf(button) >= 0) {
         return true
       }
-      console.log(this.mxGameDetails.game.status)
     },
     back: function() {
       this.$router.push({
@@ -172,6 +176,11 @@ export default {
     },
     changeGameStatus (status) {
       this.action = status
+    },
+    sendPlayersList () {
+      this.$store.dispatch('sendPlayersList', {
+        gameId: this.mxGameDetails.game.gameId,
+      });
     },
     actionConfirmed () {
       this.$store.dispatch('changeGameStatus', {
@@ -237,7 +246,7 @@ export default {
   color: #dc3545;
 }
 
-.manualBookMode {
+.pollMode {
   border: 1px solid #6c757d;
   color: #6c757d;
 }

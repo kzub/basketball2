@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "axios": "^0.18.1",
+    "babel-polyfill": "^6.26.0",
     "bootstrap-vue": "^2.0.0-rc.22",
     "vue": "^2.6.10",
     "vue-router": "^3.0.6",
@@ -44,8 +45,9 @@
     }
   },
   "browserslist": [
-    "> 1%",
+    "> 0.5%",
     "last 2 versions",
-    "not ie <= 8"
+    "Firefox ESR",
+    "not dead"
   ]
 }

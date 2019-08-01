@@ -79,9 +79,9 @@ const updateGameData = ({ commit, state }, gameId) => {
   console.log('actions::updateGameData', gameId)
   commit('setUpdatedFlag', false)
   return axios
-    .get(`/api/game/${gameId}`)
+    .get(`/api/game/details/${gameId}`)
     .then(response => {
-      console.log(`/api/game/${gameId} response:`, response.data)
+      console.log(`/api/game/details/${gameId} response:`, response.data)
       commit('gameDetails', response.data)
       commit('setUpdatedFlag', true)
     })
@@ -91,6 +91,25 @@ const updateGameData = ({ commit, state }, gameId) => {
       commit('setUpdatedFlag', true)
     })
 }
+
+
+const updateNewGameOptions = ({ commit, state }) => {
+  console.log('actions::updateNewGameOptions')
+  commit('setUpdatedFlag', false)
+  return axios
+    .get(`/api/game/options`)
+    .then(response => {
+      console.log(`/api/game/options response:`, response.data)
+      commit('newGameOptions', response.data)
+      commit('setUpdatedFlag', true)
+    })
+    .catch(error => {
+      console.log('/api/games error:', error)
+      commit('newGameOptions', undefined)
+      commit('setUpdatedFlag', true)
+    })
+}
+
 
 const changeGameStatus = ({ commit, state }, { gameId, status }) => {
   console.log('actions::changeGameStatus', gameId)
@@ -103,8 +122,23 @@ const changeGameStatus = ({ commit, state }, { gameId, status }) => {
       commit('setUpdatedFlag', true)
     })
     .catch(error => {
-      console.log('/api/games error:', error)
+      console.log('/api/game/changeStatus/${gameId}/${status} error:', error)
       commit('gameDetails', undefined)
+      commit('setUpdatedFlag', true)
+    })
+}
+
+const sendPlayersList = ({ commit }, { gameId }) => {
+  console.log('actions::sendPlayersList', gameId)
+  commit('setUpdatedFlag', false)
+  return axios
+    .get(`/api/game/sendPlayerList/${gameId}`)
+    .then(response => {
+      console.log(`/api/game/sendPlayerList/${gameId} response:`, response.data)
+      commit('setUpdatedFlag', true)
+    })
+    .catch(error => {
+      console.log('/api/game/sendPlayerList/${gameId} error:', error)
       commit('setUpdatedFlag', true)
     })
 }
@@ -195,9 +229,11 @@ export default {
   getUserInfo,
   init,
   sendCheckCode,
+  sendPlayersList,
   setUserName,
   updateGameData,
   updateGamesData,
+  updateNewGameOptions,
   updateReservationName,
   updateReservationPay,
 }

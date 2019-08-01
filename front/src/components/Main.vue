@@ -5,7 +5,7 @@
     <Games :games="games"/>
 
     <hr/>
-    <router-link v-if="user && user.isOrganizer" to="/admin" tag="div">
+    <router-link v-if="user && user.isOrganizer" to="/game/new" tag="div">
       <b-btn class="btn-lg mt-2 mb-3 rounded-0" block variant="danger">
         Добавить игру<div class="arrow"><i class="right"></i></div>
       </b-btn>
