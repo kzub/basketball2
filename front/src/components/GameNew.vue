@@ -1,5 +1,5 @@
 <template>
-  <div class="hello">
+  <div>
     <div v-if="!viewDataUpdated" class="my-2">
       <div class="d-flex justify-content-center">
         <div class="spinner-border" role="status">
@@ -15,29 +15,33 @@
       </b-btn>
     </div>
 
-    В разработке.....
+    <div class="btn-danger p-2">Разел в разработке...</div><br><br>
     <form>
-      <div v-for="opt in newGameOptions" :key="opt.label">
-        <div v-if="opt.type==='number'">
-          {{opt.output}}
-          <label>{{opt.label}}</label><input v-model.number="opts[opt.output]" type="number"/>
-          
-        </div>
-      </div>
+      <b-container class="px-1">
+        <GameOptions v-for="option in newGameOptions" :option="option" :storage="choosedOptions"/>
+      </b-container>
     </form>
-    
-    <b-btn @click="click">click</b-btn>
+
+    <b-btn class="w-75 mt-4 mb-5" variant="primary" @click="click">Создать</b-btn>
   </div>
 </template>
 
 <script>
+import GameOptions from './GameOptions.vue'
+
 export default {
   name: 'GameNew',
-  props: {
+  props: [],
+  components: {
+    GameOptions,
   },
   mounted: function(){
-    const self = this;
-    this.$store.dispatch('updateNewGameOptions')
+    this.$store.dispatch('getNewGameOptions')
+  },
+  data: function () {
+    return {
+      choosedOptions: {},
+    }
   },
   computed: {
     user () {
@@ -49,21 +53,14 @@ export default {
     newGameOptions () {
       return this.$store.state.newGameOptions
     },
-    opts () {
-      return this.$store.state.newGameOptions.reduce((acc, item) => {
-        acc[item.output] = undefined
-        item.options && item.options.map(i => 
-          i.inputs && i.inputs.map(ii => acc[ii.output] = undefined))
-        return acc
-      }, {})
-    },
   },
   methods: {
     back: function () {
       this.$router.back()
     },
     click: function () {
-      console.log('HAHA', this.opts);
+
+      console.log('HAHA', this.choosedOptions);
     }
   },
 }

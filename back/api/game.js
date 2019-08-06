@@ -72,11 +72,12 @@ const getOptions = async (req, res) => {
       label: 'Площадка для игры',
       output: 'placeId',
       type: 'options',
-      options: [{
-        label: 'Манхетен',
+      options: [
+      {
+        text: 'Манхетен',
         value: 1,
       },{
-        label: 'Образцова',
+        text: 'Образцова',
         value: 2,
       }],
     },{
@@ -88,10 +89,10 @@ const getOptions = async (req, res) => {
       output: 'timeStart',
       type: 'options',
       options: [{
-        label: '09-00',
+        text: '09-00',
         value: '09-00',
       },{
-        label: '09-15',
+        text: '09-15',
         value: '09-15',
       }],
     },{
@@ -99,10 +100,10 @@ const getOptions = async (req, res) => {
       output: 'timeEnd',
       type: 'options',
       options: [{
-        label: '09-00',
+        text: '09-00',
         value: '09-00',
       },{
-        label: '09-15',
+        text: '09-15',
         value: '09-15',
       }],
     },{
@@ -118,13 +119,13 @@ const getOptions = async (req, res) => {
       output: 'notifyId',
       type: 'options',
       options: [{
-        label: 'Группа Playbasket, режим предоплаты',
+        text: 'Группа Playbasket, режим предоплаты',
         value: 1,
       },{
-        label: 'Группа Playbasket, все события',
+        text: 'Группа Playbasket, все события',
         value: 2,
       },{
-        label: 'Тестовый чат, все события',
+        text: 'Тестовый чат, все события',
         value: 3,
       }],
     },{
@@ -132,25 +133,34 @@ const getOptions = async (req, res) => {
       output: 'paymentType',
       type: 'options',
       options: [{
-        label: 'Предоплата на 12313123',
-        value: 'prepay-12313123',
-        inputs: [{
-          label: "Сумма к предоплате каждому участнику",
-          type: "number",
-          output: "paymentAmount",
-        }],
+        text: 'Предоплата на 12313123',
+        value: {
+          selected: 'prepay',
+          inputs: [{
+            hidden: true,
+            output: 'paymentAccount',
+            value: '12313123',
+            type: "text",
+          },{
+            label: "Сумма к предоплате каждому участнику",
+            output: "paymentAmount",
+            type: "number",
+          }],
+        },
       },{
-        label: 'Ручной',
-        value: 'shared',
-        inputs: [{
-          label: "Сумма к оплате со всех",
-          type: "number",
-          output: "paymentAmount",
-        },{
-          label: "Сообщение куда и как переводить деньги",
-          type: "text",
-          output: "paymentMessage",
-        }],
+        text: 'Делится на всех',
+        value: {
+          selected: 'shared',
+          inputs: [{
+            label: "Сумма к оплате со всех",
+            output: "paymentAmount",
+            type: "number",
+          },{
+            label: "Сообщение куда и как переводить деньги",
+            output: "paymentMessage",
+            type: "text",
+          }],
+        },
       }],
     },
   ];

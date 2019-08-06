@@ -93,8 +93,8 @@ const updateGameData = ({ commit, state }, gameId) => {
 }
 
 
-const updateNewGameOptions = ({ commit, state }) => {
-  console.log('actions::updateNewGameOptions')
+const getNewGameOptions = ({ commit, state }) => {
+  console.log('actions::getNewGameOptions')
   commit('setUpdatedFlag', false)
   return axios
     .get(`/api/game/options`)
@@ -233,7 +233,7 @@ export default {
   setUserName,
   updateGameData,
   updateGamesData,
-  updateNewGameOptions,
+  getNewGameOptions,
   updateReservationName,
   updateReservationPay,
 }

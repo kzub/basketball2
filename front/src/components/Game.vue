@@ -102,7 +102,7 @@
         <b-btn v-if="mxGameDetails.game.chatLink"
                :href="mxGameDetails.game.chatLink"
                class="mt-2" block variant="outline-secondary">
-          Чат площаки
+          Чат площадки
         </b-btn>
       </div>
 

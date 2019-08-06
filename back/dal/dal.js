@@ -62,6 +62,7 @@ db.run(`CREATE TABLE IF NOT EXISTS verifications (
 
 db.run(`CREATE TABLE IF NOT EXISTS notifications (
   notifyId INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+  label TEXT NOT NULL,
   organizerId INTEGER NOT NULL,
   chatLink TEXT,
   userEvents TEXT,

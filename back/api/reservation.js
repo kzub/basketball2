@@ -46,11 +46,11 @@ const changePay = async (req, res) => {
   } else {
     if (reservation.isPaid()) {
       reservation.makeUnpaid();
-      events.emit('reservation.admin.unpaid', { reservation });
+      events.emit('reservation.admin.make.unpaid', { reservation });
     } else {
       reservation.makePaid();
       reservation.setExpire(0);
-      events.emit('reservation.admin.paid', { reservation });
+      events.emit('reservation.admin.make.paid', { reservation });
     }
     ok = await req.dal.reservation.update(reservation);
   }
@@ -78,13 +78,20 @@ const cancel = async (req, res) => {
   const game = await req.dal.game.getGame(gameId);
   const reservation = await req.dal.reservation.get(gameId, bookId);
   const isWaiter = reservation.isWaiter();
+  const isGameAdmin = game.isAdmin(user);
+
   let ok = false;
-  if (game.isAdmin(user) || reservation.isOwner(user)) {
+  if (isGameAdmin || reservation.isOwner(user)) {
     reservation.cancel();
     ok = await req.dal.reservation.update(reservation);
 
     if (ok) { 
-      const event = reservation.isPaid() ? 'reservation.canceled.paid' : 'reservation.canceled.unpaid';
+      let event;
+      if (isGameAdmin) {
+        event = reservation.isPaid() ? 'reservation.admin.cancel.paid' : 'reservation.admin.cancel.unpaid';
+      } else {
+        event = reservation.isPaid() ? 'reservation.canceled.paid' : 'reservation.canceled.unpaid';
+      }
       events.emit(event, { reservation, isWaiter });
       const promotedRsvId = await req.dal.game.moveWaiters(gameId, waiterReservationTTL);
       if (promotedRsvId) {

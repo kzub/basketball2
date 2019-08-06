@@ -30,13 +30,14 @@ const send = async (token, chatId, msg) => {
 };
 
 const getUpdates = (token) => {
+  if (!token) { throw new Error('no token'); }
   botCmd(token, 'getUpdates',{
     offset: -1
   }).then( r => {
     console.log(r);
   });
 };
-// getUpdates();
+// getUpdates(config.telegram.token);
 
 module.exports = {
   send,
