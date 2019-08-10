@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div v-if="!viewDataUpdated" class="my-2">
+    <div v-if="!viewDataUpdated" class="my-4 p-4">
       <div class="d-flex justify-content-center">
         <div class="spinner-border" role="status">
           <span class="sr-only">Загружается...</span>
@@ -8,21 +8,31 @@
       </div>
     </div>
 
-    <div v-else>
+    <div v-else-if="!hideInputs">
       <b-btn @click="back" class="btn-lg mb-3 rounded-0" block variant="warning">
         <div class="arrow-left"><i class="left"></i></div>
         <span>Назад</span>
       </b-btn>
+    
+
+      <h4 class="my-4">
+        Новая игра
+      </h4>
+      <form @submit="onCreate">
+        <b-container class="px-1">
+          <GameOptions v-for="option in newGameOptions" :option="option" :storage="choosedOptions"/>
+        </b-container>
+        
+        <b-btn class="w-75 mt-4 mb-5" variant="primary" type="submit">Создать</b-btn>
+      </form>
     </div>
 
-    <div class="btn-danger p-2">Разел в разработке...</div><br><br>
-    <form>
-      <b-container class="px-1">
-        <GameOptions v-for="option in newGameOptions" :option="option" :storage="choosedOptions"/>
-      </b-container>
-    </form>
-
-    <b-btn class="w-75 mt-4 mb-5" variant="primary" @click="click">Создать</b-btn>
+    <!-- error window -->
+    <div>
+      <b-modal id="errNewGame" title="Ошибка" ok-variant="danger" ok-title="ОК" cancel-variant="hidden">
+        <p class="my-4">Возникла ошибка в процессе создания игры</p>
+      </b-modal>
+    </div>
   </div>
 </template>
 
@@ -41,6 +51,7 @@ export default {
   data: function () {
     return {
       choosedOptions: {},
+      hideInputs: false,
     }
   },
   computed: {
@@ -58,9 +69,39 @@ export default {
     back: function () {
       this.$router.back()
     },
-    click: function () {
+    onCreate: function (evt) {
+      evt.preventDefault()
+      const self = this;
 
-      console.log('HAHA', this.choosedOptions);
+      const choosedOptions = Object.entries(this.choosedOptions)
+      const options = {}
+
+      for (const [key, value] of choosedOptions) {
+        if (value.inputResults) {
+          options[key] = value.selected
+          for (const [inpKey, inpVal] of Object.entries(value.inputResults)) {
+            options[inpKey] = inpVal
+          }
+        } else {
+          options[key] = value
+        }
+      }
+
+      self.hideInputs = true // after game being created inputs are shown, but transition to new game screen is not started yet
+      self.$store.dispatch('addGame', options)
+      .then(function(result){
+        if (result && result.ok) {
+          self.$router.push({
+            path: '/game',
+            query: {
+              gameId: result.gameId,
+            },
+          })
+        } else {
+          self.hideInputs = false
+          self.$bvModal.show('errNewGame')
+        }
+      })
     }
   },
 }

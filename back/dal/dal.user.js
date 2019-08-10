@@ -1,4 +1,4 @@
-const { User, Organizer } = require('./types');
+const { User, OrganizerSettings } = require('./types');
 
 let log; // eslint-disable-line
 let dal; // eslint-disable-line
@@ -12,7 +12,7 @@ const getUsers = async (usersIds) => {
 
 const getUser = async (userId) => {
   const users = await execSQL.all(`SELECT * FROM users
-    LEFT JOIN organizers ON users.userId = organizers.organizerId
+    LEFT JOIN organizersPlaces ON users.userId = organizersPlaces.organizerId
     WHERE userId = ${userId}`);
   return new User(users[0]);
 };
@@ -67,10 +67,13 @@ const createVerificationCode = async (phone) => {
 
 
 const findOrganizerByUserId = async (userId) => {
-  const organizerId = await execSQL.all(`SELECT * FROM organizers
+  const places = await execSQL.all(`SELECT * FROM organizersPlaces
     WHERE organizerId = ${userId}`);
 
-  return organizerId[0] && new Organizer(organizerId[0]);
+  const yandexMoneys = await execSQL.all(`SELECT * FROM organizersYM
+    WHERE organizerId = ${userId}`);
+
+  return new OrganizerSettings(userId, places, yandexMoneys);
 };
 
 module.exports = {

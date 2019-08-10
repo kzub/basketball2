@@ -15,8 +15,8 @@ const complete = async (req, res) => {
   }
 
   if (label && label.startsWith('RSV')) {
-    const [, gameId, bookId] = label.split('|');
-    const paymentId = await req.dal.payment.addTransaction(organizer.userId, paySystem, amount, req.body);
+    const [, gameId, bookId, userId] = label.split('|');
+    const paymentId = await req.dal.payment.addTransaction(organizer.userId, paySystem, amount, gameId, bookId, userId, req.body);
     
     const reservation = await req.dal.reservation.get(gameId, bookId);
     reservation.book();

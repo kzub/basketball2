@@ -7,7 +7,7 @@
     <div v-if="!user || !user.auth" class="my-2">
       <div v-if="wentFromGame" class="mb-4">
         <b-card-body class="m-2 size-4 warningText">
-          Для продолжения бронирования необходимо зарегистрироваться и забронивароть место еще раз
+          Для продолжения необходимо зарегистрироваться
         </b-card-body>
       </div>
       <Register/>
@@ -95,9 +95,11 @@ export default {
       .then(res => {
         if (!res || !res.ok) {
           this.$bvModal.show('err-change')
+        } else if (this.$router.currentRoute.query.retUrl) {
+          this.$router.push(this.$router.currentRoute.query.retUrl)
         } else {
-          this.back()
           this.wantChange = false
+          this.back()
         }
       })
     },

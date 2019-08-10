@@ -3,7 +3,7 @@ const request = require('request-promise-native');
 const utils = require('../utils/misc');
 
 const config = utils.getConfig();
-const log = logger.create('SERVER');
+const log = logger.create('TELEGRAM');
 
 const botCmd = async (token, method, params) => {
   const url = `${config.telegram.host}/bot${token}/${method}`;

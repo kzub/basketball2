@@ -44,15 +44,39 @@ const changePay = async (req, res) => {
     reason = 'real payment cannot be canceled';
     req.log.error(`Game admin try to change real payment status for ${gameId}/${bookId}`);
   } else {
+    let event;
     if (reservation.isPaid()) {
       reservation.makeUnpaid();
-      events.emit('reservation.admin.make.unpaid', { reservation });
+      event = 'reservation.admin.make.unpaid';
     } else {
       reservation.makePaid();
       reservation.setExpire(0);
-      events.emit('reservation.admin.make.paid', { reservation });
+      event = 'reservation.admin.make.paid';
     }
     ok = await req.dal.reservation.update(reservation);
+    events.emit(event, { reservation });
+  }
+
+  res.status(200).send({ ok, reason });
+};
+
+const changeStatus = async (req, res) => {
+  const { gameId, bookId } = req.params;
+  const user = await req.dal.user.getUser(req.userId);
+  const game = await req.dal.game.getGame(gameId);
+  const reservation = await req.dal.reservation.get(gameId, bookId);
+
+  let ok = false;
+  let reason;
+
+  if (!game.isAdmin(user)) {
+    reason = 'you are not game admin';
+    req.log.error(`Not a game admin try to change game status for ${gameId}/${bookId}`);
+  } else {
+    reservation.book();
+    reservation.setExpire(0);
+    ok = await req.dal.reservation.update(reservation);
+    events.emit('reservation.admin.make.book', { reservation });
   }
 
   res.status(200).send({ ok, reason });
@@ -106,6 +130,7 @@ const cancel = async (req, res) => {
 module.exports = {
   book,
   cancel,
-  setPlayer,
   changePay,
+  changeStatus,
+  setPlayer,
 };

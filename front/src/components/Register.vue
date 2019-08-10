@@ -47,7 +47,6 @@
                             label-for="confirmationCode"
                             description="Код отправлен в смс на ваш номер">
                 <b-form-input id="confirmationCode"
-                              ref="focusThis"
                               type="number"
                               v-model="form.code"
                               required
@@ -129,6 +128,10 @@
           }
           this.$store.commit('user', user)
           if (user.name) {
+            if (this.$router.currentRoute.query.retUrl) {
+              this.$router.push(this.$router.currentRoute.query.retUrl)
+              return
+            } 
             this.back()
           }
         })

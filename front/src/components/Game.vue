@@ -79,12 +79,12 @@
             class="w-100 py-2 my-1" variant="danger">
             Включить запись
           </b-button>
-          <b-button v-if="showAdminButtons('poll')"
+          <!-- <b-button v-if="showAdminButtons('poll')"
             v-b-modal.ackModal
             @click="changeGameStatus('poll')"
             class="w-100 py-2 my-1" variant="danger">
             Режим голосования
-          </b-button>
+          </b-button> -->
           <b-button
             @click="sendPlayersList"
             class="w-100 py-2 my-1" variant="warning">
@@ -195,21 +195,32 @@ export default {
       return (this.user && this.user.userId == slot.userId) || this.isAdmin
     },
     goLink (game, slot) {
+      let freeSlotType;
+      if (slot.status.startsWith('free4')) {
+        freeSlotType = slot.status.slice(5)
+      }
+
       if (!this.$store.state.user || !this.$store.state.user.auth) {
+        let retUrl;
+        if (freeSlotType) {
+          retUrl = `/book?gameId=${game.gameId}&slotType=${freeSlotType}`
+        } else {
+          retUrl = `/game?gameId=${game.gameId}`
+        }
+
         return {
           path: '/profile',
           query: {
-            retUrl: '/game',
-            gameId: game.gameId,
+            retUrl,
             welcome: true,
           }
         }
       }
 
-      if (slot.status.startsWith('free4')) {
+      if (freeSlotType) {
         return {
           path: '/book',
-          query: { gameId: game.gameId, slotType: slot.status.slice(5) }
+          query: { gameId: game.gameId, slotType: freeSlotType }
         }
       }
 

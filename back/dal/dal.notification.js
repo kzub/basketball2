@@ -18,6 +18,13 @@ const getSystemAdminNotification = async () => {
   return new Notification(notification[0]);
 };
 
+const getNotificationsForOrganizerId = async (organizerId) => {
+  const notifications = 
+    await execSQL.all(`SELECT * FROM notifications WHERE organizerId = ${organizerId}`);
+
+  return notifications.map(n => new Notification(n));
+};
+
 module.exports = {
   init: (driver, dalInstance) => {
     if (!driver) { throw new Error(`${__filename}: undefined DAL driver`); }
@@ -28,6 +35,7 @@ module.exports = {
 
     return {
       getNotification,
+      getNotificationsForOrganizerId,
       getSystemAdminNotification,
     };
   }

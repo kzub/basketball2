@@ -2,16 +2,16 @@ let log; // eslint-disable-line
 let dal; // eslint-disable-line
 let execSQL;
 
-const addTransaction = async (recipientId, paySystem, amount, rawData) => {
+const addTransaction = async (recipientId, paySystem, amount, gameId, bookId, userId, rawData) => {
   const res = await execSQL.run(`INSERT INTO 
-    payments (ts, recipientId, paySystem, amount, rawData)
-    VALUES (${Date.now()}, ${recipientId}, '${paySystem}', ${amount}, '${JSON.stringify(rawData)}')`);
+    payments (ts, recipientId, paySystem, amount, gameId, bookId, userId, rawData)
+    VALUES (${Date.now()}, ${recipientId}, '${paySystem}', ${amount}, ${gameId}, ${bookId}, ${userId}, '${JSON.stringify(rawData)}')`);
   
   return res && res.lastID;
 };
 
 const findOrganizerIdByPaySystem = async (paySystem) => {
-  const organizers = await execSQL.all(`SELECT organizerId FROM organizers
+  const organizers = await execSQL.all(`SELECT organizerId FROM organizersYM
     WHERE paySystem = '${paySystem}'`);
 
   return organizers[0] && organizers[0].organizerId;
@@ -23,6 +23,13 @@ const findOrganizerByPaySystem = async (paySystem) => {
     const user = dal.user.getUser(organizerId);
     return user;
   }
+};
+
+const getPrepayMethodsByOrganizerId = async (organizerId) => {
+  const prepays = await execSQL.all(`SELECT paymentGateAccount, paymentGateMessage 
+    FROM organizersYM WHERE organizerId = '${organizerId}'`);
+
+  return prepays;
 };
 
 module.exports = {
@@ -37,6 +44,7 @@ module.exports = {
       addTransaction,
       findOrganizerByPaySystem,
       findOrganizerIdByPaySystem,
+      getPrepayMethodsByOrganizerId,
     };
   }
 };

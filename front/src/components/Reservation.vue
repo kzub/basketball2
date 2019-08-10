@@ -67,10 +67,15 @@
                    @click="changePay" class="my-1" variant="warning">
               Пометить не оплаченным
             </b-btn>
-            <b-btn v-else
-                   @click="changePay" class="my-1" variant="success">
+            <b-btn v-if="mxBookInfo.paymentStatus !== 'paid'"
+              @click="changePay" class="my-1" variant="success">
               Пометить оплаченым
             </b-btn>
+            <b-btn v-if="mxBookInfo.paymentStatus !== 'paid' && mxBookInfo.status === 'reserved'" 
+              @click="setBooked" class="my-1" variant="warning">
+              Записать без оплаты
+            </b-btn>
+            
           </div>
 
           <b-btn v-b-modal.ackModal class="my-1" variant="danger">Удалить запись</b-btn>
@@ -90,21 +95,17 @@
                 :amount="mxGameDetails.game.paymentAmount"
                 :label="paymentId"/>
             </div>
-            <b-btn v-if="mxGameDetails.game.status == 'settled' &&
+            <!-- <b-btn v-if="mxGameDetails.game.status == 'settled' &&
                          mxGameDetails.game.paymentType === 'shared' &&
                          mxBookInfo.paymentStatus !== 'paid'"
                    @click="informAboutPayment" class="my-1" variant="success">
               Сообщить об оплате
-            </b-btn>
+            </b-btn> -->
             <b-btn v-b-modal.chgName class="my-1" variant="primary">
               Изменить имя
             </b-btn>
-            <b-btn v-if="(mxGameDetails.game.paymentType === 'prepay' &&
-                         mxBookInfo.paymentStatus !== 'paid')  ||
-                         (mxGameDetails.game.paymentType === 'shared' &&
-                         mxGameDetails.game.status !== 'settled')"
-                         class="my-1" variant="danger" v-b-modal.ackModal>
-                Отказаться от записи
+            <b-btn class="my-1" variant="danger" v-b-modal.ackModal>
+              Отказаться от записи
             </b-btn>
           </div>
           <hr/>
@@ -144,7 +145,6 @@
 
 import DateTime from '../mixins/datetime.js'
 import GameUtils from '../mixins/game.js'
-import Organizer from './Organizer.vue'
 import GameInfo from './GameInfo.vue'
 import PayButton from './PayButton.vue'
 
@@ -154,12 +154,11 @@ export default {
   name: 'Reservation',
   mixins: [DateTime, GameUtils],
   components: {
-    Organizer,
     GameInfo,
     PayButton,
   },
   mounted: function () {
-    const { commit, state } = this.$store
+    const { commit } = this.$store
     const self = this;
     intervalId = setInterval(function() {
       if (self.mxBookInfo && self.mxBookInfo.expireAt) {
@@ -169,7 +168,7 @@ export default {
   },
   destroyed: function () {
     clearInterval(intervalId)
-    this.$store.state.reservationExpire = undefined
+    this.$store.commit('setReservationExpire', undefined)
   },
   computed: {
     reservationExpire: function() {
@@ -194,7 +193,7 @@ export default {
              this.mxBookInfo.status !== 'waiting'
     },
     paymentId: function () {
-      return ['RSV', this.mxBookInfo.gameId, this.mxBookInfo.bookId].join('|')
+      return ['RSV', this.mxBookInfo.gameId, this.mxBookInfo.bookId, this.user.userId].join('|')
     },
     bookingPhone: function () {
       if (this.$store.state.gameDetails && this.$store.state.gameDetails.users) {
@@ -203,9 +202,6 @@ export default {
         return user && user.phone
       }
       return this.$store.state.user && this.$store.state.user.phone
-    },
-    isCancelable: function () {
-      return !(this.game.paymentType === 'prepay' && this.mxBookInfo.paymentStatus === 'paid')
     },
     user () {
       return this.$store.state.user
@@ -227,17 +223,16 @@ export default {
       this.$store.dispatch('updateReservationPay', {
         ...this.mxLocationInfo,
       })
-      // .then(this.back)
     },
-    makePayment: function() {
-      console.log('makePayment');
+    setBooked: function() {
+      this.$store.dispatch('updateReservationStatus', {
+        ...this.mxLocationInfo,
+      }).then(() => {
+        this.$store.commit('setReservationExpire', undefined)
+      })
     },
     informAboutPayment: function() {
-      console.log('informAboutPayment');
-    },
-    onPaySubmit: function (evt) {
-      console.log('change', evt)
-      evt.preventDefault()
+      // console.log('informAboutPayment');
     },
     handleChangeOk: function() {
       if(!this.form.name) {

@@ -25,18 +25,25 @@ db.run(`CREATE TABLE IF NOT EXISTS bookings (
 db.run(`CREATE TABLE IF NOT EXISTS payments (
   ts INTEGER NOT NULL,
   paymentId INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-  recipientId INTEGER NOT NULL DEFAULT 0,
+  recipientId INTEGER,
   paySystem TEXT NOT NULL,
-  amount INT,
+  amount INTEGER,
+  gameId INTEGER,
+  bookId INTEGER,
+  userId INTEGER,
   rawData TEXT NOT NULL DEFAULT '{}'
 )`);
 
-db.run(`CREATE TABLE IF NOT EXISTS organizers (
-  organizerId INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-  placesIds TEXT NOT NULL,
-  paySystem TEXT,
-  paymentGateAccount TEXT,
-  paymentGateMessage TEXT
+db.run(`CREATE TABLE IF NOT EXISTS organizersPlaces (
+  organizerId INTEGER NOT NULL,
+  placeId INTEGER NOT NULL
+)`);
+
+db.run(`CREATE TABLE IF NOT EXISTS organizersYM (
+  organizerId INTEGER NOT NULL,
+  paySystem TEXT NOT NULL,
+  paymentGateAccount TEXT NOT NULL,
+  paymentGateMessage TEXT NOT NULL
 )`);
 
 db.run(`CREATE TABLE IF NOT EXISTS places (

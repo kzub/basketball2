@@ -2,7 +2,7 @@ const checkString = (str, required, msg) => {
   if (required && (typeof(str) !== 'string' || !str.length)) {
     throw new Error(msg);
   }
-  else if (str && typeof(str) !== 'string') {
+  if (str && typeof(str) !== 'string') {
     throw new Error(msg); 
   }
   return str;
@@ -186,7 +186,7 @@ Reservation.prototype.book = function () {
 function Notification (obj) {
   this.notifyId    = checkNumber(obj.notifyId, 'Notification constructor: bad notifyId');
   this.organizerId = checkNumber(obj.organizerId, 'Notification constructor: bad organizerId');
-  
+
   this.botToken    = checkString(obj.botToken, true, 'Notification constructor: bad botToken');
   this.adminChatId = checkString(obj.adminChatId, true, 'Notification constructor: bad adminChatId');
   this.userChatId  = checkString(obj.userChatId, true, 'Notification constructor: bad userChatId');
@@ -196,6 +196,8 @@ function Notification (obj) {
       acc[elm] = true;
       return acc;
     }, {});
+  this.chatLink = checkString(obj.chatLink, true, 'Notification constructor: bad chatLink');
+  this.label    = checkString(obj.label, true, 'Notification constructor: bad label');
 }
 
 Notification.prototype.getChatId = function (event) {
@@ -208,19 +210,24 @@ Notification.prototype.getChatId = function (event) {
   return this.adminChatId;
 };
 
-function Organizer (obj) {
-  this.organizerId = checkNumber(obj.organizerId, 'Organizer constructor: bad organizerId');
-  this.paySystem   = checkString(obj.paySystem, false, 'Notification constructor: bad paySystem');
-  this.placesIds   = checkString(obj.placesIds, true, 'Notification constructor: bad placesIds')
-    .split(',')
-    .reduce((acc, elm) => {
-      acc[elm] = true;
-      return acc;
-    }, {});
+function OrganizerSettings (organizerId, places, yandexMoneys) {
+  this.organizerId = checkNumber(organizerId, 'OrganizerSettings constructor: bad organizerId');
+  this.YMs = yandexMoneys.map(ym => {
+    return {
+      paySystem: checkString(ym.paySystem, true, 'OrganizerSettings constructor: bad paySystem'),
+      paymentGateAccount: checkString(ym.paymentGateAccount, true, 'OrganizerSettings constructor: bad paymentGateAccount'),
+      paymentGateMessage: checkString(ym.paymentGateMessage, true, 'OrganizerSettings constructor: bad paymentGateMessage'),
+    };
+  });
+  this.placesIds = places.map(p => checkNumber(p.placeId, 'OrganizerSettings constructor: bad placeId'));
 }
 
-Organizer.prototype.adminOf = function (placeId) {
-  return this.placesIds[placeId];
+OrganizerSettings.prototype.adminOf = function (placeId) {
+  return this.placesIds.indexOf(placeId) >= 0;
+};
+
+OrganizerSettings.prototype.allowedPlaces = function () {
+  return this.placesIds.slice();
 };
 
 const newReservationTTL = 30*60*1000;
@@ -229,11 +236,11 @@ const waiterReservationTTL = 120*60*1000;
 module.exports = {
   Game,
   GameDetails,
+  newReservationTTL,
   Notification,
-  Organizer,
+  OrganizerSettings,
   Place,
   Reservation,
   User,
-  newReservationTTL,
   waiterReservationTTL,
 };

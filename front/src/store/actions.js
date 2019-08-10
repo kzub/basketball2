@@ -43,6 +43,22 @@ const updateReservationPay = ({ commit, state }, { gameId, bookId }) => {
     })
 }
 
+const updateReservationStatus = ({ commit, state }, { gameId, bookId }) => {
+  console.log('actions::updateReservationStatus', gameId, bookId, name)
+  commit('setUpdatedFlag', false)
+  return axios
+    .get(`/api/reservation/changeStatus/${gameId}/${bookId}`)
+    .then(response => {
+      console.log('/api/reservation/changeStatus response:', response.data)
+      updateGameData({ commit, state }, gameId)
+      // commit('setUpdatedFlag', true)
+    })
+    .catch(error => {
+      console.log('/api/reservation/changePay error:', error)
+      commit('setUpdatedFlag', true)
+    })
+}
+
 const deleteReservation = ({ commit, state }, { gameId, bookId }) => {
   console.log('actions::deleteReservation', gameId, bookId)
   commit('setUpdatedFlag', false)
@@ -92,6 +108,21 @@ const updateGameData = ({ commit, state }, gameId) => {
     })
 }
 
+const addGame = ({ commit }, options) => {
+  console.log('actions::addGame', options)
+  commit('setUpdatedFlag', false)
+  return axios
+    .post(`/api/game/add/`, options)
+    .then(response => {
+      console.log(`/api/game/add response:`, response.data)
+      commit('setUpdatedFlag', true)
+      return response.data
+    })
+    .catch(error => {
+      console.log('/api/game/add error:', error)
+      commit('setUpdatedFlag', true)
+    })
+}
 
 const getNewGameOptions = ({ commit, state }) => {
   console.log('actions::getNewGameOptions')
@@ -221,11 +252,13 @@ const init = ({ commit, state, dispatch }) => {
 }
 
 export default {
+  addGame,
   authUser,
   bookSlot,
   changeGameStatus,
   deleteReservation,
   exitUser,
+  getNewGameOptions,
   getUserInfo,
   init,
   sendCheckCode,
@@ -233,7 +266,7 @@ export default {
   setUserName,
   updateGameData,
   updateGamesData,
-  getNewGameOptions,
   updateReservationName,
   updateReservationPay,
+  updateReservationStatus,
 }

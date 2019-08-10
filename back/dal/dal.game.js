@@ -39,14 +39,23 @@ const getGame = async (gameId) => {
   });
 };
 
+const optionalText = (text) => {
+  if (text === undefined) {
+    return 'null';
+  }
+  return `'${text}'`;
+};
+
 const addGame = async (game) => {
   const res = await execSQL.run(`INSERT INTO games
     (placeId, notifyId, date, timeStart, timeEnd, organizerId, playerSlots, waiterSlots, status,
     paymentType, paymentAmount, paymentMessage, paymentGateAccount, paymentGateMessage)
     VALUES (${game.place.placeId}, ${game.notifyId}, '${game.date}', '${game.timeStart}',
     '${game.timeEnd}', ${game.organizer.userId}, ${game.playerSlots}, ${game.waiterSlots},
-    '${game.status}', '${game.paymentType}', ${game.paymentAmount}, '${game.paymentMessage}',
-    '${game.paymentGateAccount}', '${game.paymentGateMessage}')
+    '${game.status}', '${game.paymentType}', ${game.paymentAmount}, 
+    ${optionalText(game.paymentMessage)},
+    ${optionalText(game.paymentGateAccount)},
+    ${optionalText(game.paymentGateMessage)})
   `);
 
   return res && res.lastID;

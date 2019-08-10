@@ -38,6 +38,23 @@ const textMinutesTo = (timestamp) => {
   return `${minutes} ${dictMinutes[minutes % 10]}`;
 };
 
+const zeroPad = (time) => {
+  if (time < 10) {
+    return `0${time}`;
+  }
+  return `${time}`;
+};
+
+const generateTimeOptions = () => {
+  const table = [];
+  for (let hour = 0; hour < 24; hour++) {
+    for(let minutes = 0; minutes < 60; minutes += 15) {
+      table.push(`${zeroPad(hour)}:${zeroPad(minutes)}`);
+    }
+  }
+  return table;
+};
+
 const getBeautifulDate = (ts) => {
   const date = new Date(ts);
   const weekDay = dictDays[date.getDay()];
@@ -90,6 +107,7 @@ module.exports = {
   dateDayAndMonth,
   dateWeekDay,
   eq,
+  generateTimeOptions,
   getBeautifulDate,
   getConfig,
   getGameSettingsOld,

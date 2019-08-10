@@ -1,4 +1,4 @@
-const { Place } = require('./types');
+const { Place, Organizer } = require('./types');
 
 let log; // eslint-disable-line
 let dal; // eslint-disable-line
