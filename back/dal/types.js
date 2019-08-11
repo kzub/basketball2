@@ -185,7 +185,6 @@ Reservation.prototype.book = function () {
 
 function Notification (obj) {
   this.notifyId    = checkNumber(obj.notifyId, 'Notification constructor: bad notifyId');
-  this.organizerId = checkNumber(obj.organizerId, 'Notification constructor: bad organizerId');
 
   this.botToken    = checkString(obj.botToken, true, 'Notification constructor: bad botToken');
   this.adminChatId = checkString(obj.adminChatId, true, 'Notification constructor: bad adminChatId');

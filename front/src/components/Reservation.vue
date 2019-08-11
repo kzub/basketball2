@@ -71,7 +71,9 @@
               @click="changePay" class="my-1" variant="success">
               Пометить оплаченым
             </b-btn>
-            <b-btn v-if="mxBookInfo.paymentStatus !== 'paid' && mxBookInfo.status === 'reserved'" 
+            <b-btn v-if="mxBookInfo.paymentStatus !== 'paid' &&
+                         mxBookInfo.status === 'reserved' &&
+                         mxGameDetails.game.paymentType === 'prepay'" 
               @click="setBooked" class="my-1" variant="warning">
               Записать без оплаты
             </b-btn>

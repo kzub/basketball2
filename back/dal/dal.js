@@ -23,10 +23,10 @@ db.run(`CREATE TABLE IF NOT EXISTS bookings (
 )`);
 
 db.run(`CREATE TABLE IF NOT EXISTS payments (
-  ts INTEGER NOT NULL,
+  ts INTEGER,
   paymentId INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
   recipientId INTEGER,
-  paySystem TEXT NOT NULL,
+  paySystem TEXT,
   amount INTEGER,
   gameId INTEGER,
   bookId INTEGER,
@@ -37,6 +37,11 @@ db.run(`CREATE TABLE IF NOT EXISTS payments (
 db.run(`CREATE TABLE IF NOT EXISTS organizersPlaces (
   organizerId INTEGER NOT NULL,
   placeId INTEGER NOT NULL
+)`);
+
+db.run(`CREATE TABLE IF NOT EXISTS organizersNotifications (
+  organizerId INTEGER NOT NULL,
+  notifyId INTEGER NOT NULL
 )`);
 
 db.run(`CREATE TABLE IF NOT EXISTS organizersYM (
@@ -70,7 +75,6 @@ db.run(`CREATE TABLE IF NOT EXISTS verifications (
 db.run(`CREATE TABLE IF NOT EXISTS notifications (
   notifyId INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
   label TEXT NOT NULL,
-  organizerId INTEGER NOT NULL,
   chatLink TEXT,
   userEvents TEXT,
   userChatId TEXT NOT NULL,

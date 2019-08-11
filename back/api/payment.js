@@ -21,6 +21,7 @@ const complete = async (req, res) => {
     const reservation = await req.dal.reservation.get(gameId, bookId);
     reservation.book();
     reservation.makePaid(amount);
+    reservation.setExpire(0);
     reservation.paymentId = paymentId;
     await req.dal.reservation.update(reservation);
     events.emit('reservation.paid', { reservation });
@@ -28,7 +29,7 @@ const complete = async (req, res) => {
   }
 
   events.emit('payment.unknown', { paySystem, label, amount });
-  req.dal.payment.addTransaction(0, paySystem, amount, req.body);
+  req.dal.payment.addTransaction(0, paySystem, amount, 0, 0, 0, req.body);
 };
 
 

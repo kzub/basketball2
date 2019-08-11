@@ -19,8 +19,12 @@ const getSystemAdminNotification = async () => {
 };
 
 const getNotificationsForOrganizerId = async (organizerId) => {
+  const allowedNotifications = 
+    await execSQL.all(`SELECT * FROM organizersNotifications WHERE organizerId = ${organizerId}`);
+
+  const ids = allowedNotifications.map(n => n.notifyId).join();
   const notifications = 
-    await execSQL.all(`SELECT * FROM notifications WHERE organizerId = ${organizerId}`);
+    await execSQL.all(`SELECT * FROM notifications WHERE notifyId IN (${ids})`);
 
   return notifications.map(n => new Notification(n));
 };
