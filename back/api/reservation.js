@@ -16,6 +16,11 @@ const book = async (req, res) => {
   }
 
   if (bookId > 0) {
+    if (slotType === 'player') {
+      game.freePlayerSlots--;
+    } else {
+      game.freeWaiterSlots--;
+    }
     events.emit('reservation.new', { game, bookId, user, slotType });
   }
 

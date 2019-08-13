@@ -80,7 +80,7 @@ emitter.on('game.players.list', async ({ game, text }) => {
 emitter.on('reservation.new', async ({ game, user, slotType }) => {
   const notify = await createNotification(game.notifyId, 'reservation.new');
   const slotMessage = slotType === 'player' ? 'забронировал место' : 'занял очередь запасных';
-  notify.send(`${user.name} ${slotMessage} на игру в ${game.place.title}, в ${game.timeStart} ${utils.getBeautifulDate(game.date)}`);
+  notify.send(`${user.name} ${slotMessage} на игру в ${game.place.title}, в ${game.timeStart} ${utils.getBeautifulDate(game.date)}, свободных мест: ${game.freePlayerSlots}`);
 });
 
 emitter.on('reservation.paid', async ({ reservation }) => {
