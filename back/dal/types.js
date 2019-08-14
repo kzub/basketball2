@@ -15,6 +15,15 @@ const checkNumber = (num, msg) => {
   return num;
 };
 
+const checkDate = (str, required, msg) => {
+  const date = checkString(str, required, msg);
+  let check = new Date(date);
+  if (isNaN(check.valueOf())) {
+    throw new Error(msg);
+  }
+  return check.toJSON().slice(0,10);
+};
+
 function Game (obj) {
   this.gameId             = checkNumber(obj.gameId, 'Game constructor: bad gameId');
   this.playerSlots        = checkNumber(obj.playerSlots, 'Game constructor: bad playerSlots');
@@ -26,7 +35,7 @@ function Game (obj) {
   this.paymentAmount      = checkNumber(obj.paymentAmount, 'Game constructor: bad paymentAmount');
   this.notifyId           = checkNumber(obj.notifyId, 'Game constructor: bad notifyId');
   
-  this.date               = checkString(obj.date, true, 'Game constructor: bad date');
+  this.date               = checkDate(obj.date, true, 'Game constructor: bad date');
   this.timeStart          = checkString(obj.timeStart, true, 'Game constructor: bad timeStart');
   this.timeEnd            = checkString(obj.timeEnd, true, 'Game constructor: bad timeEnd');
   this.status             = checkString(obj.status, true, 'Game constructor: bad status');

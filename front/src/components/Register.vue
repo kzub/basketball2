@@ -23,7 +23,7 @@
                             description="Для связи, в случае каких-либо изменений">
                 <div class="d-flex flex-row">
                   <b-form-input id="userPhone"
-                              type="number"
+                              type="text"
                               v-model="form.phone"
                               required
                               placeholder="Введите телефон">
@@ -47,7 +47,7 @@
                             label-for="confirmationCode"
                             description="Код отправлен в смс на ваш номер">
                 <b-form-input id="confirmationCode"
-                              type="number"
+                              type="text"
                               v-model="form.code"
                               required
                               placeholder="">
@@ -63,7 +63,7 @@
 
     <div>
       <b-modal id="err-check-phone" title="Ошибка" ok-variant="danger" ok-title="ОК" cancel-variant="hidden">
-        <h5 class="my-4 text">Не удалось отправить смс, превышено разрешенное число попыток, неверный номер телефона или проблемы с интернетом</h5>
+        <h5 class="my-4 text">Не удалось отправить смс, превышено разрешенное число попыток, неверный номер телефона или проблемы с интернетом. Введите номер телефона в формате: 89161112233.</h5>
       </b-modal>
     </div>
 

@@ -22,7 +22,7 @@ const formatPhone = phoneNumber => {
   if (phone[0] === '8') { // 89154443322 -> 79154443322
     phone = '7' + phone.slice(1); 
   }
-  else if (phone[0] !== '+') { // 9154443322 -> 79154443322
+  else if (phone[0] !== '+' && phone[0] !== '7') { // 9154443322 -> 79154443322
     phone = '7' + phone;
   }
   phone = phone.replace(/[()\W\-+]/g, ''); // +7(915)444-44-33 -> 79154443322

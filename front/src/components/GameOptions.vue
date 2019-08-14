@@ -15,6 +15,7 @@
         {{option.label}}
         <b-form-input required
           :type="option.type"
+          :placeholder="option.placeholder"
           v-model="storage[option.output]"
         >
         </b-form-input>
@@ -30,6 +31,7 @@
             :disabled="input.disabled"
             :hidden="input.hidden"
             :type="input.type"
+            :placeholder="input.placeholder"
             :value="checkInputStorage(option.output, input.output, input.value)"
             v-model="storage[option.output].inputResults[input.output]"
           >

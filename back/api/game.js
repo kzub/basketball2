@@ -41,7 +41,7 @@ const get = async (req, res) => {
 // ---------- admin parts -----------------------
 const add = async (req, res) => {
   const newGame = req.body;
-
+  req.log.info(`/game/add: ${JSON.stringify(newGame)}`);
   const organizerSettings = await req.dal.user.findOrganizerByUserId(req.userId);
   const place = await req.dal.place.getPlace(newGame.placeId);
   const user = await req.dal.user.getUser(req.userId);
@@ -122,6 +122,7 @@ const getOptions = async (req, res) => {
 
   options.push({
     label: 'Дата',
+    placeholder: 'yyyy-mm-dd',
     output: 'date',
     type: 'date',
   });
