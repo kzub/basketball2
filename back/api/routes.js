@@ -59,6 +59,8 @@ const init = (app) => {
   app.get('/api/game/sendPlayerList/:gameId', wrapper(game.sendPlayerList, true));
   app.get('/api/games', wrapper(games.list, false));
   app.get('/api/games/my', wrapper(games.my, true));
+  app.get('/api/payment/getAllOrganizerYMs/', wrapper(payment.getAllOrganizerYMs, true));
+  app.get('/api/payment/getOrganizerYM/:organizerId/:account', wrapper(payment.getOrganizerYM, false));
   app.get('/api/reservation/cancel/:gameId/:bookId/', wrapper(reservation.cancel, true));
   app.get('/api/reservation/changePay/:gameId/:bookId/', wrapper(reservation.changePay, true));
   app.get('/api/reservation/changeStatus/:gameId/:bookId/', wrapper(reservation.changeStatus, true));

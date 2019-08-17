@@ -3,10 +3,10 @@ let dal; // eslint-disable-line
 let execSQL;
 
 const addTransaction = async (recipientId, paySystem, amount, gameId, bookId, userId, rawData) => {
-  const res = await execSQL.run(`INSERT INTO 
+  const res = await execSQL.run(`INSERT INTO
     payments (ts, recipientId, paySystem, amount, gameId, bookId, userId, rawData)
     VALUES (${Date.now()}, ${recipientId}, '${paySystem}', ${amount}, ${gameId}, ${bookId}, ${userId}, '${JSON.stringify(rawData)}')`);
-  
+
   return res && res.lastID;
 };
 
@@ -26,10 +26,19 @@ const findOrganizerByPaySystem = async (paySystem) => {
 };
 
 const getPrepayMethodsByOrganizerId = async (organizerId) => {
-  const prepays = await execSQL.all(`SELECT paymentGateAccount, paymentGateMessage 
+  const prepays = await execSQL.all(`SELECT paymentGateAccount, paymentGateMessage
     FROM organizersYM WHERE organizerId = '${organizerId}'`);
 
   return prepays;
+};
+
+const getPaymentReciever = async (organizerId) => {
+  const data = await execSQL.all(`SELECT userId, name, paymentGateAccount, paymentGateMessage
+    FROM organizersYM
+    LEFT JOIN users ON organizersYM.organizerId = users.userId
+    WHERE organizersYM.organizerId = ${organizerId}`);
+
+  return data;
 };
 
 module.exports = {
@@ -44,6 +53,7 @@ module.exports = {
       addTransaction,
       findOrganizerByPaySystem,
       findOrganizerIdByPaySystem,
+      getPaymentReciever,
       getPrepayMethodsByOrganizerId,
     };
   }

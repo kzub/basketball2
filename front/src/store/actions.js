@@ -1,18 +1,17 @@
 import axios from 'axios'
 
-const bookSlot = ({ commit, state }, bookInfo) => {
+const bookSlot = ({ state }, bookInfo) => {
   console.log('actions::bookSlot', bookInfo)
   return axios.post(`/api/reservation/book?userId=${state.user.userId}&gameId=${bookInfo.gameId}`, { ...bookInfo })
   .then((result) => {
     console.log('/api/book result:', result.data)
-    // commit('bookSlot', result.data.bookId)
     return result.data
   }).catch(err => {
     console.log('woho err:', err.message)
   })
 }
 
-const updateReservationName = ({ commit, state }, { gameId, bookId, name }) => {
+const updateReservationName = ({ commit }, { gameId, bookId, name }) => {
   console.log('actions::updateReservationName', gameId, bookId, name)
   commit('setUpdatedFlag', false)
   return axios
@@ -59,7 +58,7 @@ const updateReservationStatus = ({ commit, state }, { gameId, bookId }) => {
     })
 }
 
-const deleteReservation = ({ commit, state }, { gameId, bookId }) => {
+const deleteReservation = ({ commit }, { gameId, bookId }) => {
   console.log('actions::deleteReservation', gameId, bookId)
   commit('setUpdatedFlag', false)
   return axios
@@ -74,7 +73,7 @@ const deleteReservation = ({ commit, state }, { gameId, bookId }) => {
     })
 }
 
-const updateGamesData = ({ commit, state }) => {
+const updateGamesData = ({ commit }) => {
   console.log('actions::updateGamesData')
   commit('setUpdatedFlag', false)
   return axios
@@ -91,7 +90,41 @@ const updateGamesData = ({ commit, state }) => {
     })
 }
 
-const updateGameData = ({ commit, state }, gameId) => {
+const updateFreePaymentInfo = ({ commit }, params) => {
+  console.log('actions::updateFreePaymentInfo', params)
+  commit('setUpdatedFlag', false)
+  return axios
+    .get(`/api/payment/getOrganizerYM/${params.organizerId}/${params.account}`)
+    .then(response => {
+      console.log(`/api/payment/getOrganizerYM/${params.organizerId}/${params.account} response:`, response.data)
+      commit('freePayment', response.data)
+      commit('setUpdatedFlag', true)
+    })
+    .catch(error => {
+      console.log(`/api/payment/getOrganizerYM/${params.organizerId}/${params.account} error:`, error)
+      commit('freePayment', undefined)
+      commit('setUpdatedFlag', true)
+    })
+}
+
+const updateFreePaymentList = ({ commit }) => {
+  console.log('actions::updateFreePaymentList')
+  commit('setUpdatedFlag', false)
+  return axios
+    .get(`/api/payment/getAllOrganizerYMs`)
+    .then(response => {
+      console.log(`/api/payment/getAllOrganizerYMs response:`, response.data)
+      commit('freePaymentList', response.data)
+      commit('setUpdatedFlag', true)
+    })
+    .catch(error => {
+      console.log(`/api/payment/getAllOrganizerYMs error:`, error)
+      commit('freePaymentList', undefined)
+      commit('setUpdatedFlag', true)
+    })
+}
+
+const updateGameData = ({ commit }, gameId) => {
   console.log('actions::updateGameData', gameId)
   commit('setUpdatedFlag', false)
   return axios
@@ -102,7 +135,7 @@ const updateGameData = ({ commit, state }, gameId) => {
       commit('setUpdatedFlag', true)
     })
     .catch(error => {
-      console.log('/api/games error:', error)
+      console.log(`/api/game/details/${gameId} error:`, error)
       commit('gameDetails', undefined)
       commit('setUpdatedFlag', true)
     })
@@ -124,7 +157,7 @@ const addGame = ({ commit }, options) => {
     })
 }
 
-const getNewGameOptions = ({ commit, state }) => {
+const getNewGameOptions = ({ commit }) => {
   console.log('actions::getNewGameOptions')
   commit('setUpdatedFlag', false)
   return axios
@@ -142,7 +175,7 @@ const getNewGameOptions = ({ commit, state }) => {
 }
 
 
-const changeGameStatus = ({ commit, state }, { gameId, status }) => {
+const changeGameStatus = ({ commit }, { gameId, status }) => {
   console.log('actions::changeGameStatus', gameId)
   commit('setUpdatedFlag', false)
   return axios
@@ -174,7 +207,7 @@ const sendPlayersList = ({ commit }, { gameId }) => {
     })
 }
 
-const getUserInfo = ({ commit, state }) => {
+const getUserInfo = ({ commit }) => {
   console.log('actions::getUserInfo')
   return axios
     .get(`/api/user/get`)
@@ -189,7 +222,7 @@ const getUserInfo = ({ commit, state }) => {
     })
 }
 
-const sendCheckCode = ({ commit, state }, phone) => {
+const sendCheckCode = ({ state }, phone) => {
   console.log(`actions::sendCheckCode ${phone}`)
   return axios
     .get(`/api/user/sendCheckCode/${phone}`)
@@ -202,7 +235,7 @@ const sendCheckCode = ({ commit, state }, phone) => {
     })
 }
 
-const authUser = ({ commit, state }, { phone, code }) => {
+const authUser = ({ state }, { phone, code }) => {
   console.log(`actions::authUser ${phone} ${code}`)
   return axios
     .get(`/api/user/auth/${phone}/${code}`)
@@ -215,7 +248,7 @@ const authUser = ({ commit, state }, { phone, code }) => {
     })
 }
 
-const exitUser = ({ commit, state }) => {
+const exitUser = ({ commit }) => {
   console.log(`actions::exitUser`)
   return axios
     .get(`/api/user/exit`)
@@ -228,7 +261,7 @@ const exitUser = ({ commit, state }) => {
     })
 }
 
-const setUserName = ({ commit, state }, name) => {
+const setUserName = ({ commit }, name) => {
   console.log(`actions::setUserName ${name}`)
   return axios
     .get(`/api/user/set/${name}`)
@@ -245,7 +278,7 @@ const setUserName = ({ commit, state }, name) => {
 }
 
 
-const init = ({ commit, state, dispatch }) => {
+const init = ({ dispatch }) => {
   console.log('actions::init')
   dispatch('getUserInfo')
   // .then(dispatch('updateGamesData'))
@@ -264,6 +297,8 @@ export default {
   sendCheckCode,
   sendPlayersList,
   setUserName,
+  updateFreePaymentInfo,
+  updateFreePaymentList,
   updateGameData,
   updateGamesData,
   updateReservationName,

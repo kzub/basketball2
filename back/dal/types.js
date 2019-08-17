@@ -129,8 +129,11 @@ function User (obj) {
   this.userId = checkNumber(obj.userId, 'User constructor: bad userId');
   this.name = checkString(obj.name, false, 'User constructor: bad name');
   this.phone = checkString(obj.phone, true, 'User constructor: bad phone');
-  if (obj.organizerId) {
+  if (obj.isOrganizer) {
     this.isOrganizer = true;
+  }
+  if (obj.hasYM) {
+    this.hasYM = true;
   }
   this.phone = `+${this.phone}`;
 }

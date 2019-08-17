@@ -12,6 +12,7 @@ import VueRouter from 'vue-router'
 
 import Book from './components/Book.vue'
 import FreePayment from './components/FreePayment.vue'
+import FreePaymentList from './components/FreePaymentList.vue'
 import Game from './components/Game.vue'
 import GameNew from './components/GameNew.vue'
 import Main from './components/Main.vue'
@@ -25,6 +26,7 @@ const router = new VueRouter({
     { path: '/', component: Main },
     { path: '/book', component: Book },
     { path: '/fp', component: FreePayment},
+    { path: '/fpList', component: FreePaymentList},
     { path: '/game', component: Game },
     { path: '/game/new', component: GameNew },
     { path: '/map', component: MapView},

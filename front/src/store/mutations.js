@@ -1,5 +1,5 @@
-import axios from 'axios'
-
+const freePayment = (state, p) => state.freePayment = p
+const freePaymentList = (state, p) => state.freePaymentList = p
 const gameDetails = (state, p) => state.gameDetails = p
 const games = (state, p) => state.games = p
 const newGameOptions = (state, p) => state.newGameOptions = p
@@ -17,6 +17,8 @@ const setUpdatedFlag = (state, p) => {
 }
 
 export default {
+  freePayment,
+  freePaymentList,
   gameDetails,
   games,
   newGameOptions,

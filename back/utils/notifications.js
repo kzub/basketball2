@@ -39,6 +39,14 @@ emitter.on('payment.unknown.paysystem', async ({ paySystem, label, amount, ip })
   sendAdminMessage(`unknown payment system: ${paySystem}, ${label}, ${amount}, ${ip}`, 'warn');
 });
 
+emitter.on('payment.custom', async ({ amount, payerName, receiverName }) => {
+  let fromWhom = '';
+  if (payerName) {
+    fromWhom = ` от ${payerName}`;
+  }
+  sendAdminMessage(`Получен платеж ${amount}р. для ${receiverName} ${fromWhom}`, 'info');
+});
+
 // --------------------- GAME ADMIN NOTIFICATIONS ------------------------
 const createNotification = async (notifyId, event) => {
   try {
@@ -66,11 +74,6 @@ const createNotification = async (notifyId, event) => {
     };
   }
 };
-
-// const getNotifyIdByReservation = async (reservation) => {
-//   const game = await dal.game.getGameNotifyId(reservation.gameId);
-//   return game.notifyId;
-// };
 
 emitter.on('game.players.list', async ({ game, text }) => {
   const notify = await createNotification(game.notifyId, 'game.players.list');

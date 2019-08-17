@@ -12,7 +12,14 @@ const getUsers = async (usersIds) => {
 
 const getUser = async (userId) => {
   const users = await execSQL.all(`SELECT * FROM users
-    LEFT JOIN organizersPlaces ON users.userId = organizersPlaces.organizerId
+    LEFT JOIN (
+      SELECT organizerId, 1 isOrganizer FROM organizersPlaces
+      WHERE organizerId = ${userId}
+    ) Places ON users.userId = Places.organizerId
+    LEFT JOIN (
+      SELECT organizerId, 1 hasYM FROM organizersYM
+      WHERE organizerId = ${userId}
+    ) YMs ON users.userId = YMs.organizerId
     WHERE userId = ${userId}`);
   return new User(users[0]);
 };
@@ -50,8 +57,8 @@ const getVerificationCode = async (phone) => {
   return code[0];
 };
 
-const deleteVerificationCode = async (phone) => 
-  execSQL.run(`DELETE FROM verifications 
+const deleteVerificationCode = async (phone) =>
+  execSQL.run(`DELETE FROM verifications
     WHERE phone = ${phone} OR ttl < ${Date.now()}`);
 
 
