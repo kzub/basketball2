@@ -160,9 +160,10 @@ const moveWaiters = async (gameId, ttl) => {
     const ttlDB = (ttl > 0) ? (Date.now() + ttl) : 0;
     const res = await execSQL.run(`UPDATE bookings SET status = 'reserved', expireAt = ${ttlDB}
       WHERE bookId = ${bookId} AND
-      (SELECT count(*) from bookings WHERE status IN ('booked', 'reserved') AND gameId = ${gameId}) <
-      (SELECT playerSlots from games WHERE gameId = ${gameId})`);
-
+      (SELECT playerSlots from games WHERE gameId = ${gameId}) - 
+      (SELECT count(*) from bookings WHERE status IN ('booked', 'reserved') AND gameId = ${gameId}) = 1`);
+      // если игра не полная, а есть отмена, не нужно записывать ожидающего в играющего
+      // он это может сделать и сам
     if (res && res.changes == 1) {
       return bookId;
     }
