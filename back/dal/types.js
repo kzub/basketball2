@@ -242,7 +242,7 @@ OrganizerSettings.prototype.allowedPlaces = function () {
 };
 
 const newReservationTTL = 30*60*1000;
-const waiterReservationTTL = 120*60*1000;
+const waiterReservationTTL = 240*60*1000;
 
 module.exports = {
   Game,
