@@ -164,6 +164,10 @@ Reservation.prototype.isWaiter = function () {
   return this.status === 'waiting';
 };
 
+Reservation.prototype.isCanceled = function () {
+  return this.status === 'canceled';
+};
+
 Reservation.prototype.setExpire = function (time) {
   this.expireAt = time;
 };
