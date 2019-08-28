@@ -160,6 +160,10 @@ Reservation.prototype.isPaid = function () {
   return this.paymentStatus === 'paid';
 };
 
+Reservation.prototype.isPlayer = function () {
+  return this.status === 'reserved';
+};
+
 Reservation.prototype.isWaiter = function () {
   return this.status === 'waiting';
 };

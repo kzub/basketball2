@@ -106,6 +106,7 @@ const cancel = async (req, res) => {
   const user = await req.dal.user.getUser(req.userId);
   const game = await req.dal.game.getGame(gameId);
   const reservation = await req.dal.reservation.get(gameId, bookId);
+  const isPlayer = reservation.isPlayer(); 
   const isWaiter = reservation.isWaiter();
   const isGameAdmin = game.isAdmin(user);
 
@@ -122,11 +123,13 @@ const cancel = async (req, res) => {
         event = reservation.isPaid() ? 'reservation.canceled.paid' : 'reservation.canceled.unpaid';
       }
       events.emit(event, { reservation, isWaiter });
-      const ttl = game.isPrepay() ? waiterReservationTTL : 0;
-      const promotedRsvId = await req.dal.game.moveWaiters(gameId, ttl);
-      if (promotedRsvId) {
-        const promotedReservation = await req.dal.reservation.get(gameId, promotedRsvId);
-        events.emit('reservation.waiter.promoted', { reservation: promotedReservation });
+      if (isPlayer) {
+        const ttl = game.isPrepay() ? waiterReservationTTL : 0;
+        const promotedRsvId = await req.dal.game.moveWaiters(gameId, ttl);
+        if (promotedRsvId) {
+          const promotedReservation = await req.dal.reservation.get(gameId, promotedRsvId);
+          events.emit('reservation.waiter.promoted', { reservation: promotedReservation });
+        }
       }
     }
   }
