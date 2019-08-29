@@ -110,7 +110,7 @@ const cancel = async (req, res) => {
   const isGameAdmin = game.isAdmin(user);
 
   let ok = false;
-  if (isGameAdmin || reservation.isOwner(user)) {
+  if ((isGameAdmin || reservation.isOwner(user)) && !reservation.isCanceled()) {
     reservation.cancel();
     ok = await req.dal.reservation.update(reservation);
 
