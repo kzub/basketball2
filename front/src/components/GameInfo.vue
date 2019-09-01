@@ -19,7 +19,7 @@
 
     <div v-if="visible('payment')">
       <div v-if="game.paymentType == 'prepay'">
-        Стоимость: {{ game.paymentAmount }} р.
+        Стоимость: {{ game.paymentAmount }} рублей, предоплата.
       </div>
       <div v-else-if="game.paymentType == 'shared'">
         Стоимость зала: {{ game.paymentAmount }} р. <br>

@@ -122,11 +122,14 @@ const cancel = async (req, res) => {
         event = reservation.isPaid() ? 'reservation.canceled.paid' : 'reservation.canceled.unpaid';
       }
       events.emit(event, { reservation, isWaiter });
-      const ttl = game.isPrepay() ? waiterReservationTTL : 0;
-      const promotedRsvId = await req.dal.game.moveWaiters(gameId, ttl);
-      if (promotedRsvId) {
-        const promotedReservation = await req.dal.reservation.get(gameId, promotedRsvId);
-        events.emit('reservation.waiter.promoted', { reservation: promotedReservation });
+
+      if (!isWaiter) {
+        const ttl = game.isPrepay() ? waiterReservationTTL : 0;
+        const promotedRsvId = await req.dal.game.moveWaiters(gameId, ttl);
+        if (promotedRsvId) {
+          const promotedReservation = await req.dal.reservation.get(gameId, promotedRsvId);
+          events.emit('reservation.waiter.promoted', { reservation: promotedReservation });
+        }
       }
     }
   }
