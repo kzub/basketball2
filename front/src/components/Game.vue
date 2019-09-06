@@ -87,7 +87,7 @@
           </b-button> -->
           <b-button
             @click="sendPlayersList"
-            class="w-100 py-2 my-1" variant="warning">
+            class="w-100 py-2 my-1" variant="success">
             Прислать список игроков
           </b-button>
         </div>
@@ -95,13 +95,13 @@
       <hr/>
       <div class="mt-4 mb-5 mx-3">
         <router-link :to="'/map?gameId=' + mxGameDetails.game.gameId">
-          <b-btn class="mt-2" block variant="outline-secondary">
+          <b-btn class="mt-2" block variant="warning">
             Как добраться
           </b-btn >
         </router-link>
         <b-btn v-if="mxGameDetails.game.chatLink"
                :href="mxGameDetails.game.chatLink"
-               class="mt-2" block variant="outline-secondary">
+               class="mt-2" block variant="warning">
           Чат площадки
         </b-btn>
       </div>
