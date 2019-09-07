@@ -27,11 +27,12 @@
               </div>
               <div class="d-flex flex-column align-items-end">
                 <div>
-                  <div class="badge px-2 py-1 mt-2" :class="game.freePlayerSlots == 0 ? 'badge-danger' : 'badge-light'">
-                    {{game.freePlayerSlots}}
+                  <div class="badge px-2 mt-2" :class="game.freePlayerSlots == 0 ? 'badge-danger' : 'badge-light'">
+                    <UserIcon/>
+                    <span class="player-count">{{game.playerSlots - game.freePlayerSlots}} из {{game.playerSlots}}</span>
                   </div>
                 </div>
-                <div class="badge p-2 mt-2 badge-light w-100">
+                <div class="badge p-2 mt-2 mb-1 badge-light w-100 place-title">
                   {{ game.place.title }}
                 </div>
               </div>
@@ -55,6 +56,7 @@
 <script>
 
 import DateTime from '../mixins/datetime.js'
+import UserIcon from './UserIcon.vue'
 
 export default {
   name: 'Games',
@@ -62,6 +64,7 @@ export default {
   mixins: [DateTime],
   mounted () {
     this.$store.dispatch('updateGamesData')
+    this.UserIcon = UserIcon
   },
   computed: {
     viewDataUpdated () {
@@ -102,6 +105,7 @@ export default {
     },
   },
   components: {
+    UserIcon,
   },
 }
 
@@ -116,6 +120,16 @@ export default {
 .userIsAdmin {
   /*border: 2px dotted #dc3545;*/
   border-left: 10px solid #dc3545 !important;
+}
+
+.player-count {
+  font-size: 14px;
+  line-height: 14px;
+  vertical-align: sub;
+}
+
+.place-title {
+  font-size: 14px;
 }
 
 </style>
