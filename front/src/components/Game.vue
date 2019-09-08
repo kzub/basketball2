@@ -96,7 +96,7 @@
       <div class="mt-4 mb-5 mx-3">
         <router-link :to="'/map?gameId=' + mxGameDetails.game.gameId">
           <b-btn class="mt-2" block variant="warning">
-            Как добраться
+            Место проведения
           </b-btn >
         </router-link>
         <b-btn v-if="mxGameDetails.game.chatLink"

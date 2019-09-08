@@ -36,11 +36,12 @@
       </GmapMap>
 
       <hr/>
-      <p class="my-3 px-2 text-left howtotext">{{ mxGameDetails.game.place.howToGet }}</p>
-      <hr/>
-      <b-btn @click="back" class="mt-2 mb-5 w-50" variant="success">
-        OK
-      </b-btn>
+      <p class="my-3 px-2 howtotext">{{ mxGameDetails.game.place.howToGet }}</p>
+      <!-- <hr/>
+      <div class="images">
+        <img src="https://i.kinja-img.com/gawker-media/image/upload/s--bE3CSBPC--/c_scale,f_auto,fl_progressive,q_80,w_800/l0oxmaf9swngq4ladnoa.jpg"/>
+      </div> -->
+      <br/><br/><br/>
     </div>
     
   </div>
@@ -64,6 +65,9 @@ export default {
   name: 'MapView',
   mixins: [GameUtils],
   components: {
+  },
+  mounted: function() {
+    window.scrollTo(0, 0)
   },
   computed: {
     lng: function () {
@@ -97,9 +101,13 @@ export default {
 <style scoped>
 #map {
   height: 100%;
+  width: 100%;
 }
 .howtotext {
-  word-break: break-all;
+  text-align: justify;
+}
+.images {
+  width: 100%;
 }
 </style>
 
