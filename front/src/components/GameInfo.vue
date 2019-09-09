@@ -23,7 +23,17 @@
       </div>
       <div v-else-if="game.paymentType == 'shared'">
         Стоимость зала: {{ game.paymentAmount }} р. <br>
-        Делится на всех участников
+        Делится на всех участников <b-badge class="paymentInfoButton" v-b-modal.payinfo>?</b-badge>
+        <b-modal id="payinfo" cancel-variant="hidden" title="Расчет" class="flex">
+          <div v-for="index in game.playerSlots" :key="'p'+index" class="justify-content-center">
+            <h6>
+              <b-badge>{{index}}</b-badge>
+              <span class="playerPaymentAmount">{{Math.ceil(game.paymentAmount/index)}} р.</span>
+            </h6>
+          </div>
+        </b-modal>
+
+
       </div>
       <div v-if="game.paymentMessage">
         <hr/>
@@ -56,6 +66,12 @@ export default {
 </script>
 
 <style scoped>
-
+.playerPaymentAmount {
+  padding: 0px 15px;
+}
+.paymentInfoButton {
+  margin: 0px 0px 0px 10px;
+  padding: 5px 8px;
+}
 </style>
 
