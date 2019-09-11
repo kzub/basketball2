@@ -167,7 +167,7 @@ emitter.on('reservation.admin.cancel.paid', async ({ reservation }) => {
 });
 
 const gameStatuses = {
-  disabled: 'выключил',
+  disabled: 'отменил',
   settled: 'открыл запись на',
   poll: 'открыл предварительный опрос на',
 };

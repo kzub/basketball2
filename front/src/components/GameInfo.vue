@@ -22,18 +22,12 @@
         Стоимость: {{ game.paymentAmount }} рублей, предоплата.
       </div>
       <div v-else-if="game.paymentType == 'shared'">
-        Стоимость зала: {{ game.paymentAmount }} р. <br>
-        Делится на всех участников <b-badge class="paymentInfoButton" v-b-modal.payinfo>?</b-badge>
+        Стоимость зала: {{ game.paymentAmount }} рублей <br>
+        <a class="dotted" v-b-modal.payinfo>Делится на всех участников</a>
+
         <b-modal id="payinfo" cancel-variant="hidden" title="Расчет" class="flex">
-          <div v-for="index in game.playerSlots" :key="'p'+index" class="justify-content-center">
-            <h6>
-              <b-badge>{{index}}</b-badge>
-              <span class="playerPaymentAmount">{{Math.ceil(game.paymentAmount/index)}} р.</span>
-            </h6>
-          </div>
+          <b-table small borderless striped :items="calculations"></b-table>
         </b-modal>
-
-
       </div>
       <div v-if="game.paymentMessage">
         <hr/>
@@ -57,18 +51,34 @@ export default {
   },
   methods: {
     visible: function(place) {
-      return this.show.indexOf(place) > -1;
+      return this.show.indexOf(place) > -1
     },
   },
   computed: {
+    calculations: function() {
+      let items = [];
+      for (let index = 1; index <= this.game.playerSlots; index++) {
+        const current = index == this.game.usedPlayerSlots;
+        items.push({
+          'Игроков': index,
+          'Стоимость, ₽': Math.ceil(this.game.paymentAmount / index),
+          _rowVariant : current && 'primary',
+        })
+      }
+      return items
+    }
   },
 }
 </script>
 
 <style scoped>
-.playerPaymentAmount {
-  padding: 0px 15px;
+.dotted {
+  border: 2px dotted #007bff;
+  border-style: none none dotted;
+  color: #007bff !important;
+  /*background-color: #fff;*/
 }
+
 .paymentInfoButton {
   margin: 0px 0px 0px 10px;
   padding: 5px 8px;
