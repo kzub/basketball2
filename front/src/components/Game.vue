@@ -190,7 +190,7 @@ export default {
     },
     modifyAllowed (slot) {
       if (slot.status.startsWith('free')) {
-        return false
+        return true
       }
       return (this.user && this.user.userId == slot.userId) || this.isAdmin
     },

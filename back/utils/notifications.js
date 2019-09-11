@@ -108,7 +108,7 @@ emitter.on('reservation.canceled.unpaid', async ({ reservation, isWaiter }) => {
 emitter.on('reservation.canceled.paid', async ({ reservation }) => {
   const game = await dal.game.getGame(reservation.gameId);
   const notify = await createNotification(game.notifyId, 'reservation.canceled.paid');
-  notify.send(`${reservation.playerName} отменил свою запись на игру в ${game.place.title}, в ${game.timeStart} ${utils.getBeautifulDate(game.date)}, , свободных мест: ${game.freePlayerSlots}`);
+  notify.send(`${reservation.playerName} отменил свою запись на игру в ${game.place.title}, в ${game.timeStart} ${utils.getBeautifulDate(game.date)}, свободных мест: ${game.freePlayerSlots}`);
 });
 
 emitter.on('reservation.waiter.promoted', async ({ reservation }) => {
