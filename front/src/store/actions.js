@@ -73,11 +73,18 @@ const deleteReservation = ({ commit }, { gameId, bookId }) => {
     })
 }
 
-const updateGamesData = ({ commit }) => {
-  console.log('actions::updateGamesData')
+const updateGamesData = ({ commit }, params) => {
+  console.log('actions::updateGamesData', params)
+  const myGamesOnly = params && params.showMyGames
+  let gamesUrl = '/api/games'
+
+  if (myGamesOnly) {
+    gamesUrl += '/my'
+  }
+  commit('myGamesOnly', myGamesOnly)
   commit('setUpdatedFlag', false)
   return axios
-    .get(`/api/games`)
+    .get(gamesUrl)
     .then(response => {
       console.log('/api/games response:', response.data)
       commit('games', response.data)

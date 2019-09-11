@@ -2,6 +2,7 @@ const freePayment = (state, p) => state.freePayment = p
 const freePaymentList = (state, p) => state.freePaymentList = p
 const gameDetails = (state, p) => state.gameDetails = p
 const games = (state, p) => state.games = p
+const myGamesOnly = (state, p) => state.myGamesOnly = p
 const newGameOptions = (state, p) => state.newGameOptions = p
 const reservationDetails = (state, p) => state.reservationDetails = p
 const returnInfo = (state, p) => state.returnInfo = { ...state.returnInfo, ...p }
@@ -21,6 +22,7 @@ export default {
   freePaymentList,
   gameDetails,
   games,
+  myGamesOnly,
   newGameOptions,
   reservationDetails,
   returnInfo,

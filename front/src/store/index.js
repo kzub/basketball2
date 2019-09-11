@@ -8,6 +8,7 @@ const Store = (Vuex) => {
       freePaymentList: undefined,
       gameDetails: undefined,
       games: [],
+      myGamesOnly: false,
       newGameOptions: undefined,
       place: undefined,
       reservationDetails: undefined,

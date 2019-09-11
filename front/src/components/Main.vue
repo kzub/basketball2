@@ -17,6 +17,11 @@
       </b-btn>
     </router-link>
 
+    <b-btn v-if="user && user.isOrganizer" @click="showPastGames" class="btn-lg mt-2 mb-3 rounded-0" block variant="secondary">
+      <span v-if="myGamesOnly">Все текущие игры</span>
+      <span v-else>Мои последние игры</span>
+    </b-btn>
+
     <b-btn class="btn-lg mt-2 mb-3 rounded-0" block
     :href="link" variant="warning">
       Наш чат в телеграм
@@ -46,9 +51,17 @@ export default {
     },
     link () {
       return 'tg://resolve' + '?domain=playbasket'
-    }
+    },
+    myGamesOnly () {
+      return this.$store.state.myGamesOnly
+    },
   },
   methods: {
+    showPastGames: function() {
+      this.$store.dispatch('updateGamesData', {
+        showMyGames: !this.myGamesOnly,
+      })
+    },
   },
 }
 </script>

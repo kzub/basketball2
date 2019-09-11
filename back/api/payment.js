@@ -41,7 +41,6 @@ const complete = async (req, res) => {
       amount,
       payerName: user && user.name,
       receiverName: organizer.name,
-      receiverId: organizer.userId,
     });
     return;
   }

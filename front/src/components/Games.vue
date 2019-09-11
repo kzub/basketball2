@@ -63,7 +63,9 @@ export default {
   props: ['games'],
   mixins: [DateTime],
   mounted () {
-    this.$store.dispatch('updateGamesData')
+    this.$store.dispatch('updateGamesData', {
+      showMyGames: this.$store.state.myGamesOnly,
+    })
     this.UserIcon = UserIcon
   },
   computed: {
