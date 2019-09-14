@@ -7,20 +7,21 @@
     <hr/>
     <router-link v-if="user && user.isOrganizer" to="/game/new" tag="div">
       <b-btn class="btn-lg mt-2 mb-3 rounded-0" block variant="danger">
-        Добавить игру<div class="arrow"><i class="right"></i></div>
+        Добавить игру <div class="arrow"><i class="right"></i></div>
       </b-btn>
     </router-link>
 
     <router-link v-if="user && user.hasYM" to="/fpList" tag="div">
       <b-btn class="btn-lg mt-2 mb-3 rounded-0" block variant="secondary">
-        Ссылка на оплату<div class="arrow"><i class="right"></i></div>
+        Ссылка на оплату <div class="arrow"><i class="right"></i></div>
       </b-btn>
     </router-link>
 
-    <b-btn v-if="user && user.isOrganizer" @click="showPastGames" class="btn-lg mt-2 mb-3 rounded-0" block variant="secondary">
-      <span v-if="myGamesOnly">Все текущие игры</span>
-      <span v-else>Мои последние игры</span>
-    </b-btn>
+    <router-link v-if="user && user.isOrganizer" to="/myGames" tag="div">
+      <b-btn class="btn-lg mt-2 mb-3 rounded-0" block variant="secondary">
+        Мои последние игры <div class="arrow"><i class="right"></i></div>
+      </b-btn>
+    </router-link>
 
     <b-btn class="btn-lg mt-2 mb-3 rounded-0" block
     :href="link" variant="warning">
@@ -57,11 +58,6 @@ export default {
     },
   },
   methods: {
-    showPastGames: function() {
-      this.$store.dispatch('updateGamesData', {
-        showMyGames: !this.myGamesOnly,
-      })
-    },
   },
 }
 </script>

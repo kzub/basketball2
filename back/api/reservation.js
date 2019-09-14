@@ -42,7 +42,7 @@ const changePay = async (req, res) => {
   let ok = false;
   let reason;
 
-  if (!game.isAdmin(user)) {
+  if (!game.isAdminUser(user)) {
     reason = 'you are not game admin';
     req.log.error(`Not a game admin try to change payment status for ${gameId}/${bookId}`);
   } else if (reservation.realPaymentComplete()) {
@@ -65,7 +65,7 @@ const changePay = async (req, res) => {
   res.status(200).send({ ok, reason });
 };
 
-const changeStatus = async (req, res) => {
+const clearExpire = async (req, res) => {
   const { gameId, bookId } = req.params;
   const user = await req.dal.user.getUser(req.userId);
   const game = await req.dal.game.getGame(gameId);
@@ -74,7 +74,7 @@ const changeStatus = async (req, res) => {
   let ok = false;
   let reason;
 
-  if (!game.isAdmin(user)) {
+  if (!game.isAdminUser(user)) {
     reason = 'you are not game admin';
     req.log.error(`Not a game admin try to change game status for ${gameId}/${bookId}`);
   } else {
@@ -94,7 +94,7 @@ const setPlayer = async (req, res) => {
   const reservation = await req.dal.reservation.get(gameId, bookId);
 
   let ok = false;
-  if (game.isAdmin(user) || reservation.isOwner(user)) {
+  if (game.isAdminUser(user) || reservation.isOwnerUser(user)) {
     reservation.playerName = name;
     ok = await req.dal.reservation.update(reservation);
   }
@@ -107,32 +107,52 @@ const cancel = async (req, res) => {
   const game = await req.dal.game.getGame(gameId);
   const reservation = await req.dal.reservation.get(gameId, bookId);
   const isWaiter = reservation.isWaiter();
-  const isGameAdmin = game.isAdmin(user);
+  const isGameAdmin = game.isAdminUser(user);
 
-  let ok = false;
-  if ((isGameAdmin || reservation.isOwner(user)) && !reservation.isCanceled()) {
-    reservation.cancel();
-    ok = await req.dal.reservation.update(reservation);
-
-    if (ok) { 
-      let event;
-      if (isGameAdmin) {
-        event = reservation.isPaid() ? 'reservation.admin.cancel.paid' : 'reservation.admin.cancel.unpaid';
-      } else {
-        event = reservation.isPaid() ? 'reservation.canceled.paid' : 'reservation.canceled.unpaid';
-      }
-      events.emit(event, { reservation, isWaiter });
-
-      if (!isWaiter) {
-        const ttl = game.isPrepay() ? waiterReservationTTL : 0;
-        const promotedRsvId = await req.dal.game.moveWaiters(gameId, ttl);
-        if (promotedRsvId) {
-          const promotedReservation = await req.dal.reservation.get(gameId, promotedRsvId);
-          events.emit('reservation.waiter.promoted', { reservation: promotedReservation });
-        }
-      }
-    }
+  if ((!isGameAdmin && !reservation.isOwnerUser(user)) || reservation.isCanceled()) {
+    res.status(200).send({ ok: false });
+    return;
   }
+
+  reservation.cancel();
+  const ok = await req.dal.reservation.update(reservation);
+  if (!ok) {
+    res.status(200).send({ ok: false });
+    return;
+  }
+
+  let event;
+  if (isGameAdmin) {
+    event = reservation.isPaid() ? 'reservation.admin.cancel.paid' : 'reservation.admin.cancel.unpaid';
+  } else {
+    event = reservation.isPaid() ? 'reservation.canceled.paid' : 'reservation.canceled.unpaid';
+  }
+  events.emit(event, { reservation, isWaiter });
+
+  if (isWaiter) {
+    res.status(200).send({ ok });
+    return;
+  }
+
+  const ttl = game.isPrepay() ? waiterReservationTTL : 0;
+  const promotedRsvId = await req.dal.game.moveWaiters(gameId, ttl);
+  if (promotedRsvId) {
+    const promotedReservation = await req.dal.reservation.get(gameId, promotedRsvId);
+    events.emit('reservation.waiter.promoted', { reservation: promotedReservation });
+  }
+
+  if (0 && game.isRefundable() && reservation.realPaymentComplete()) {
+    req.log.debug('REFUNDABLE');
+    await req.dal.payment.addCredits(reservation.userId, reservation.paymentId, reservation.paymentAmount);
+    events.emit('user.credits.added', {
+      amount: reservation.paymentAmount,
+      paymentId: reservation.paymentId,
+      user,
+    });
+  } else {
+    req.log.debug('NOT REFUNDABLE');
+  }
+
   res.status(200).send({ ok });
 };
 
@@ -140,6 +160,6 @@ module.exports = {
   book,
   cancel,
   changePay,
-  changeStatus,
+  clearExpire,
   setPlayer,
 };

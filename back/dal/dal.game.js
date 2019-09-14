@@ -106,9 +106,12 @@ const getGameDetails = async (gameId) => {
 };
 
 const getGamesList = async (props = {}) => {
-  const today = utils.getStartOfTheDate();
-  if (props.showLastMonth) {
-    today.setHours(-24*30);
+  let condition = `date >= "${utils.getStartOfTheDate().toJSON().slice(0,10)}"`;
+  let order = 'date ASC, timeStart ASC';
+
+  if (props.organizerId) {
+    condition = `organizerId = ${props.organizerId}`;
+    order = 'date DESC, timeStart DESC LIMIT 5';
   }
 
   let games = await execSQL.all(`SELECT g.*, usedPlayerSlots, usedWaiterSlots, chatLink FROM games g
@@ -125,8 +128,8 @@ const getGamesList = async (props = {}) => {
     LEFT JOIN (
       SELECT notifyId, chatLink from notifications
     ) ntf ON g.notifyId = ntf.notifyId
-    WHERE date >= "${today.toJSON().slice(0,10)}"
-    ORDER BY date,timeStart ASC`);
+    WHERE ${condition}
+    ORDER BY ${order}`);
 
   const organizerIds = Object.keys(games.reduce((acc, val) => {
     acc[val.organizerId] = true;

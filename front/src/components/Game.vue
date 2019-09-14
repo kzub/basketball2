@@ -106,7 +106,7 @@
         </b-btn>
       </div>
 
-      <b-modal id="ackModal" title="Подтверждение" 
+      <b-modal id="ackModal" title="Подтверждение"
         ok-variant="danger" ok-title="Да" cancel-title="Отмена"
         @ok="actionConfirmed">
         <p class="my-4">Сменить режим?</p>
@@ -170,6 +170,12 @@ export default {
       }
     },
     back: function() {
+      if (this.$store.state.myGamesOnly) {
+        this.$router.push({
+          path: '/myGames',
+        })
+        return
+      }
       this.$router.push({
         path: '/',
       })

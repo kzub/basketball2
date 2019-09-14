@@ -26,14 +26,14 @@ const updateReservationName = ({ commit }, { gameId, bookId, name }) => {
     })
 }
 
-const updateReservationPay = ({ commit, state }, { gameId, bookId }) => {
-  console.log('actions::updateReservationPay', gameId, bookId, name)
+const changeReservationPay = ({ commit, state }, { gameId, bookId }) => {
+  console.log('actions::changeReservationPay', gameId, bookId, name)
   commit('setUpdatedFlag', false)
   return axios
     .get(`/api/reservation/changePay/${gameId}/${bookId}`)
     .then(response => {
       console.log('/api/reservation/changePay response:', response.data)
-      updateGameData({ commit, state }, gameId)
+      return updateGameData({ commit, state }, gameId)
       // commit('setUpdatedFlag', true)
     })
     .catch(error => {
@@ -42,18 +42,18 @@ const updateReservationPay = ({ commit, state }, { gameId, bookId }) => {
     })
 }
 
-const updateReservationStatus = ({ commit, state }, { gameId, bookId }) => {
-  console.log('actions::updateReservationStatus', gameId, bookId, name)
+const clearReservationExpire = ({ commit, state }, { gameId, bookId }) => {
+  console.log('actions::clearReservationExpire', gameId, bookId, name)
   commit('setUpdatedFlag', false)
   return axios
-    .get(`/api/reservation/changeStatus/${gameId}/${bookId}`)
+    .get(`/api/reservation/clearExpire/${gameId}/${bookId}`)
     .then(response => {
-      console.log('/api/reservation/changeStatus response:', response.data)
-      updateGameData({ commit, state }, gameId)
+      console.log('/api/reservation/clearExpire response:', response.data)
+      return updateGameData({ commit, state }, gameId)
       // commit('setUpdatedFlag', true)
     })
     .catch(error => {
-      console.log('/api/reservation/changePay error:', error)
+      console.log('/api/reservation/clearExpire error:', error)
       commit('setUpdatedFlag', true)
     })
 }
@@ -303,12 +303,12 @@ export default {
   init,
   sendCheckCode,
   sendPlayersList,
+  clearReservationExpire,
+  changeReservationPay,
   setUserName,
   updateFreePaymentInfo,
   updateFreePaymentList,
   updateGameData,
   updateGamesData,
   updateReservationName,
-  updateReservationPay,
-  updateReservationStatus,
 }

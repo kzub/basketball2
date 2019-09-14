@@ -41,6 +41,36 @@ const getPaymentReciever = async (organizerId) => {
   return data;
 };
 
+const getPayment = async (paymentId) => {
+  const data = await execSQL.all(`SELECT *
+    FROM payments
+    WHERE paymentId = ${paymentId}`);
+
+  return data.pop();
+};
+
+const getCreditors = async (organizerId) => {
+  const data = await execSQL.all(`SELECT creditId, date, userId, credits.paymentId, amount, status, recipientId
+    FROM credits
+    LEFT JOIN (
+      SELECT paymentId, recipientId
+      FROM payments
+      WHERE recipientId = ${organizerId}
+    ) p ON p.paymentId = credits.paymentId
+    WHERE recipientId = ${organizerId}
+    AND status = "open"`);
+
+  return data;
+};
+
+const addCredits = async (userId, paymentId, paymentAmount) => {
+  const res = await execSQL.run(`INSERT INTO
+    credits (date, userId, paymentId, amount, status)
+    VALUES ('${new Date().toJSON()}', ${userId}, ${paymentId}, ${paymentAmount}, 'open')`);
+
+  return res && res.lastID;
+};
+
 module.exports = {
   init: (driver, dalInstance) => {
     if (!driver) { throw new Error(`${__filename}: undefined DAL driver`); }
@@ -50,9 +80,12 @@ module.exports = {
     dal = dalInstance;
 
     return {
+      addCredits,
       addTransaction,
       findOrganizerByPaySystem,
       findOrganizerIdByPaySystem,
+      getCreditors,
+      getPayment,
       getPaymentReciever,
       getPrepayMethodsByOrganizerId,
     };

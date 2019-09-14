@@ -65,19 +65,19 @@
           <div v-if="!isPaymentGatewayUsed" class="d-flex flex-column">
             <b-btn v-if="mxBookInfo.paymentStatus === 'paid'"
                    @click="changePay" class="my-1" variant="warning">
-              Пометить не оплаченным
+              Не оплачено
             </b-btn>
             <b-btn v-if="mxBookInfo.paymentStatus !== 'paid'"
               @click="changePay" class="my-1" variant="success">
-              Пометить оплаченым
+              Оплачено
             </b-btn>
             <b-btn v-if="mxBookInfo.paymentStatus !== 'paid' &&
                          mxBookInfo.status === 'reserved' &&
-                         mxGameDetails.game.paymentType === 'prepay'" 
-              @click="setBooked" class="my-1" variant="warning">
-              Записать без оплаты
+                         mxGameDetails.game.paymentType === 'prepay'"
+              @click="clearExpire" class="my-1" variant="warning">
+              Убрать лимит на оплату
             </b-btn>
-            
+
           </div>
 
           <b-btn v-b-modal.ackModal class="my-1" variant="danger">Удалить запись</b-btn>
@@ -195,7 +195,8 @@ export default {
              this.mxBookInfo.status !== 'waiting'
     },
     paymentId: function () {
-      return ['RSV', this.mxBookInfo.gameId, this.mxBookInfo.bookId, this.user.userId].join('|')
+      return this.user && this.mxBookInfo &&
+        ['RSV', this.mxBookInfo.gameId, this.mxBookInfo.bookId, this.user.userId].join('|')
     },
     bookingPhone: function () {
       if (this.$store.state.gameDetails && this.$store.state.gameDetails.users) {
@@ -222,12 +223,12 @@ export default {
       })
     },
     changePay: function() {
-      this.$store.dispatch('updateReservationPay', {
+      this.$store.dispatch('changeReservationPay', {
         ...this.mxLocationInfo,
       })
     },
-    setBooked: function() {
-      this.$store.dispatch('updateReservationStatus', {
+    clearExpire: function() {
+      this.$store.dispatch('clearReservationExpire', {
         ...this.mxLocationInfo,
       }).then(() => {
         this.$store.commit('setReservationExpire', undefined)

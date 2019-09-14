@@ -3,7 +3,7 @@ const checkString = (str, required, msg) => {
     throw new Error(msg);
   }
   if (str && typeof(str) !== 'string') {
-    throw new Error(msg); 
+    throw new Error(msg);
   }
   return str;
 };
@@ -34,14 +34,14 @@ function Game (obj) {
   this.freeWaiterSlots    = checkNumber(this.waiterSlots - this.usedWaiterSlots, 'Game constructor: bad freeWaiterSlots');
   this.paymentAmount      = checkNumber(obj.paymentAmount, 'Game constructor: bad paymentAmount');
   this.notifyId           = checkNumber(obj.notifyId, 'Game constructor: bad notifyId');
-  
+
   this.date               = checkDate(obj.date, true, 'Game constructor: bad date');
   this.timeStart          = checkString(obj.timeStart, true, 'Game constructor: bad timeStart');
   this.timeEnd            = checkString(obj.timeEnd, true, 'Game constructor: bad timeEnd');
   this.status             = checkString(obj.status, true, 'Game constructor: bad status');
   this.paymentType        = checkString(obj.paymentType, true, 'Game constructor: bad paymentType');
   this.chatLink           = checkString(obj.chatLink, true, 'Game constructor: bad chatLink');
-  
+
   this.paymentMessage     = checkString(obj.paymentMessage, false, 'Game constructor: bad paymentMessage');
   this.paymentGateMessage = checkString(obj.paymentGateMessage, false, 'Game constructor: bad paymentGateMessage');
   this.paymentGateAccount = checkString(obj.paymentGateAccount, false, 'Game constructor: bad paymentGateAccount');
@@ -53,16 +53,34 @@ function Game (obj) {
   if (!(this.organizer instanceof User)) throw new Error('Game constructor: organizer not instanceof User');
 }
 
-Game.prototype.isAdmin = function (user) {
+Game.prototype.isAdminUser = function (user) {
   return this.organizer.userId === user.userId;
+};
+
+Game.prototype.isAdminUserId = function (userId) {
+  return this.organizer.userId === userId;
 };
 
 Game.prototype.isDisabled = function () {
   return this.status === 'disabled';
 };
 
-Game.prototype.isPrepay =function  () {
+Game.prototype.isPrepay = function () {
   return this.paymentType === 'prepay';
+};
+
+Game.prototype.isRefundable = function () {
+  if (this.paymentType === 'prepay') {
+    const tsGameStart = (new Date(`${this.date}T${this.timeStart}:00+0300`)).valueOf();
+    const hoursToGameBegin = Math.ceil((tsGameStart - Date.now())/1000/60/60);
+    return hoursToGameBegin > 24;
+  }
+  return false;
+};
+
+Game.prototype.isTimePassed = function () {
+  const tsGameEnd = (new Date(`${this.date}T${this.timeEnd}:00+0300`)).valueOf();
+  return Date.now() > tsGameEnd;
 };
 
 Game.prototype.freeSlotExists = function (slotType) {
@@ -119,7 +137,7 @@ function Place (obj) {
   this.placeId     = checkNumber(obj.placeId, 'Place constructor: bad placeId');
   this.lng         = checkNumber(obj.lng, 'Place constructor: bad lng');
   this.lat         = checkNumber(obj.lat, 'Place constructor: bad lat');
-  
+
   this.title       = checkString(obj.title, true, 'Place constructor: bad title');
   this.description = checkString(obj.description, true, 'Place constructor: bad description');
   this.howToGet    = checkString(obj.howToGet, true, 'Place constructor: bad howToGet');
@@ -146,13 +164,13 @@ function Reservation (obj) {
   this.paymentAmount = checkNumber(obj.paymentAmount, 'Reservation constructor: bad paymentAmount');
   this.expireAt      = checkNumber(obj.expireAt || 0, 'Reservation constructor: bad expireAt');
   this.paymentId     = obj.paymentId && checkNumber(obj.paymentId, 'Reservation constructor: bad paymentId');
-  
+
   this.playerName    = checkString(obj.playerName, true, 'Reservation constructor: bad playerName');
   this.paymentStatus = checkString(obj.paymentStatus, true, 'Reservation constructor: bad paymentStatus');
   this.status        = checkString(obj.status, true, 'Reservation constructor: bad status');
 }
 
-Reservation.prototype.isOwner = function (user) {
+Reservation.prototype.isOwnerUser = function (user) {
   return user.userId === this.userId;
 };
 

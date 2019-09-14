@@ -60,11 +60,11 @@ import UserIcon from './UserIcon.vue'
 
 export default {
   name: 'Games',
-  props: ['games'],
+  props: ['games', 'myGamesOnly'],
   mixins: [DateTime],
   mounted () {
     this.$store.dispatch('updateGamesData', {
-      showMyGames: this.$store.state.myGamesOnly,
+      showMyGames: this.myGamesOnly,
     })
     this.UserIcon = UserIcon
   },

@@ -88,8 +88,26 @@ const getAllOrganizerYMs = async (req, res) => {
   });
 };
 
+const getCreditors = async (req, res) => {
+  const creditors = await req.dal.payment.getCreditors(req.userId);
+  const userNames = await req.dal.user.getUsers(creditors.map(c => c.userId));
+
+  const creditorsWithName = creditors.map(creditor => {
+    return {
+      ...creditor,
+      name: userNames.filter(user => user.userId == creditor.userId).pop().name,
+    };
+  });
+
+  res.status(200).send({
+    ok: true,
+    creditors: creditorsWithName,
+  });
+}
+
 module.exports = {
   complete,
   getAllOrganizerYMs,
+  getCreditors,
   getOrganizerYM,
 };

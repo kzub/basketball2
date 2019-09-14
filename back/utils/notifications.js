@@ -39,12 +39,22 @@ emitter.on('payment.unknown.paysystem', async ({ paySystem, label, amount, ip })
   sendAdminMessage(`unknown payment system: ${paySystem}, ${label}, ${amount}, ${ip}`, 'warn');
 });
 
+// TODO помечать в платежных системах какой notifyId нужен для уведомлений
 emitter.on('payment.custom', async ({ amount, payerName, receiverName }) => {
   let fromWhom = '';
   if (payerName) {
     fromWhom = ` от ${payerName}`;
   }
   sendAdminMessage(`Получен платеж ${amount}р. для ${receiverName} ${fromWhom}`, 'info');
+});
+
+// TODO брать в платежных системах по organizotr какой notifyId нужен для уведомлений
+emitter.on('user.credits.added', async ({ user, amount, paymentId }) => {
+  // const payment = await dal.payment.getPayment(paymentId);
+  // const receiver = await dal.user.getUser(payment.recipientId);
+  //  надо уточнитьс recipientId
+
+  // sendAdminMessage(`Начислено ${amount} кредитов для ${user.name} (${user.phone}) на счёт организатора ${receiver.name}`, 'info');
 });
 
 // --------------------- GAME ADMIN NOTIFICATIONS ------------------------
@@ -81,6 +91,9 @@ emitter.on('game.players.list', async ({ game, text }) => {
 });
 
 emitter.on('reservation.new', async ({ game, user, slotType }) => {
+  if (game.isDisabled() || game.isTimePassed()) {
+    return;
+  }
   const notify = await createNotification(game.notifyId, 'reservation.new');
   const slotMessage = slotType === 'player' ? 'забронировал место' : 'занял очередь запасных';
   notify.send(`${user.name} ${slotMessage} на игру в ${game.place.title}, в ${game.timeStart} ${utils.getBeautifulDate(game.date)}, свободных мест: ${game.freePlayerSlots}`);
@@ -94,12 +107,18 @@ emitter.on('reservation.paid', async ({ reservation }) => {
 
 emitter.on('reservation.expired', async ({ reservation }) => {
   const game = await dal.game.getGame(reservation.gameId);
+  if (game.isDisabled() || game.isTimePassed()) {
+    return;
+  }
   const notify = await createNotification(game.notifyId, 'reservation.expired');
   notify.send(`Бронь ${reservation.playerName} истекла на игру в ${game.place.title}, в ${game.timeStart} ${utils.getBeautifulDate(game.date)}`);
 });
 
 emitter.on('reservation.canceled.unpaid', async ({ reservation, isWaiter }) => {
   const game = await dal.game.getGame(reservation.gameId);
+  if (game.isDisabled() || game.isTimePassed()) {
+    return;
+  }
   const notify = await createNotification(game.notifyId, 'reservation.canceled.unpaid');
   const slotMessage = isWaiter ? 'свою очередь запасного' : 'свою бронь';
   notify.send(`${reservation.playerName} отменил ${slotMessage} на игру в ${game.place.title}, в ${game.timeStart} ${utils.getBeautifulDate(game.date)}`);
@@ -107,12 +126,18 @@ emitter.on('reservation.canceled.unpaid', async ({ reservation, isWaiter }) => {
 
 emitter.on('reservation.canceled.paid', async ({ reservation }) => {
   const game = await dal.game.getGame(reservation.gameId);
+  if (game.isDisabled() || game.isTimePassed()) {
+    return;
+  }
   const notify = await createNotification(game.notifyId, 'reservation.canceled.paid');
   notify.send(`${reservation.playerName} отменил свою запись на игру в ${game.place.title}, в ${game.timeStart} ${utils.getBeautifulDate(game.date)}, свободных мест: ${game.freePlayerSlots}`);
 });
 
 emitter.on('reservation.waiter.promoted', async ({ reservation }) => {
   const game = await dal.game.getGame(reservation.gameId);
+  if (game.isDisabled() || game.isTimePassed()) {
+    return;
+  }
   const notify = await createNotification(game.notifyId, 'reservation.waiter.promoted');
   let payTime = '';
   if (game.isPrepay()) {
@@ -123,18 +148,27 @@ emitter.on('reservation.waiter.promoted', async ({ reservation }) => {
 
 emitter.on('reservation.admin.make.unpaid', async ({ reservation }) => {
   const game = await dal.game.getGame(reservation.gameId);
+  if (game.isDisabled() || game.isTimePassed()) {
+    return;
+  }
   const notify = await createNotification(game.notifyId, 'reservation.admin.make.unpaid');
   notify.send(`${game.organizer.name} пометил не оплаченной бронь ${reservation.playerName} в игре ${game.place.title}, в ${game.timeStart} ${utils.getBeautifulDate(game.date)}`);
 });
 
 emitter.on('reservation.admin.make.paid', async ({ reservation }) => {
   const game = await dal.game.getGame(reservation.gameId);
+  if (game.isDisabled() || game.isTimePassed()) {
+    return;
+  }
   const notify = await createNotification(game.notifyId, 'reservation.admin.make.paid');
   notify.send(`${game.organizer.name} пометил оплаченной бронь ${reservation.playerName} на игру ${game.place.title}, в ${game.timeStart} ${utils.getBeautifulDate(game.date)}, свободных мест: ${game.freePlayerSlots}`);
 });
 
 emitter.on('reservation.admin.make.book', async ({ reservation }) => {
   const game = await dal.game.getGame(reservation.gameId);
+  if (game.isDisabled() || game.isTimePassed()) {
+    return;
+  }
   const notify = await createNotification(game.notifyId, 'reservation.admin.make.book');
   let slotMessage = `записал ${reservation.playerName}`;
   if (game.organizer.name === reservation.playerName) {
@@ -145,6 +179,9 @@ emitter.on('reservation.admin.make.book', async ({ reservation }) => {
 
 emitter.on('reservation.admin.cancel.unpaid', async ({ reservation, isWaiter }) => {
   const game = await dal.game.getGame(reservation.gameId);
+  if (game.isDisabled() || game.isTimePassed()) {
+    return;
+  }
   const notify = await createNotification(game.notifyId, 'reservation.admin.cancel.unpaid');
   let slotMessage = `отменил бронь ${reservation.playerName}`;
   if (isWaiter) {
@@ -177,6 +214,5 @@ emitter.on('game.change.status', async ({ game, status }) => {
   const statusText = gameStatuses[status];
   notify.send(`${game.organizer.name} ${statusText} игру ${game.place.title}, в ${game.timeStart} ${utils.getBeautifulDate(game.date)}`);
 });
-
 
 module.exports = emitter;

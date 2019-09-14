@@ -60,10 +60,11 @@ const init = (app) => {
   app.get('/api/games', wrapper(games.list, false));
   app.get('/api/games/my', wrapper(games.my, true));
   app.get('/api/payment/getAllOrganizerYMs/', wrapper(payment.getAllOrganizerYMs, true));
+  app.get('/api/payment/getCreditors', wrapper(payment.getCreditors, true));
   app.get('/api/payment/getOrganizerYM/:organizerId/:account', wrapper(payment.getOrganizerYM, false));
   app.get('/api/reservation/cancel/:gameId/:bookId/', wrapper(reservation.cancel, true));
   app.get('/api/reservation/changePay/:gameId/:bookId/', wrapper(reservation.changePay, true));
-  app.get('/api/reservation/changeStatus/:gameId/:bookId/', wrapper(reservation.changeStatus, true));
+  app.get('/api/reservation/clearExpire/:gameId/:bookId/', wrapper(reservation.clearExpire, true));
   app.get('/api/reservation/setPlayer/:gameId/:bookId/:name', wrapper(reservation.setPlayer, true));
   app.get('/api/user/auth/:phone/:code', wrapper(user.auth, false));
   app.get('/api/user/exit', wrapper(user.exit, true));

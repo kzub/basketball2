@@ -1,7 +1,10 @@
 const list = async (req, res) => {
   const gamesList = await req.dal.game.getGamesList();
   const showList = gamesList.filter(game => {
-    if (game.status === 'disabled' && game.organizer.userId !== req.userId) {
+    if (game.isDisabled() && !game.isAdminUserId(req.userId)) {
+      return false;
+    }
+    if (game.isTimePassed()) {
       return false;
     }
     return true;
@@ -11,10 +14,8 @@ const list = async (req, res) => {
 };
 
 const my = async (req, res) => {
-  const gamesList = await req.dal.game.getGamesList({ showLastMonth: true });
-  const showList = gamesList.filter(game => game.organizer.userId === req.userId);
-
-  res.status(200).send(showList);
+  const gamesList = await req.dal.game.getGamesList({ organizerId: req.userId });
+  res.status(200).send(gamesList.reverse());
 };
 
 module.exports = {
