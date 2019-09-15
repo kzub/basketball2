@@ -50,7 +50,9 @@ const getPayment = async (paymentId) => {
 };
 
 const getCreditors = async (organizerId) => {
-  const data = await execSQL.all(`SELECT creditId, date, userId, credits.paymentId, amount, status, recipientId
+  const data = await execSQL.all(`SELECT transactionId,date,userId,amount,reasonType,reasonId,comment
+
+    creditId, date, userId, credits.paymentId, amount, status, recipientId
     FROM credits
     LEFT JOIN (
       SELECT paymentId, recipientId

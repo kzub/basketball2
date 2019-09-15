@@ -19,11 +19,13 @@
 
     <div v-if="visible('payment')">
       <div v-if="game.paymentType == 'prepay'">
-        Стоимость: {{ game.paymentAmount }} рублей, предоплата.
+        Предоплата <br>
+        Стоимость: {{ game.paymentAmount }} рублей
       </div>
       <div v-else-if="game.paymentType == 'shared'">
+        Оплата после игры <br>
         Стоимость зала: {{ game.paymentAmount }} рублей <br>
-        <a class="dotted" v-b-modal.payinfo>Делится на всех участников</a>
+        <a class="dotted" v-b-modal.payinfo>Делится на всех пришедших</a>
 
         <b-modal id="payinfo" cancel-variant="hidden" title="Расчет" class="flex">
           <b-table small borderless striped :items="calculations"></b-table>

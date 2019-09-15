@@ -17,12 +17,17 @@
       <h3 class="py-3">
         Ссылка для оплаты
       </h3>
+      <p>
+        Если нужно перевести денег на ваш Яндекс кошелек, дайте эту ссылку участнику
+      </p>
 
       <div v-for="fp in freePaymentList.YMs" :key="fp.paymentGateAccount">
         <h5 class="btn-secondary py-3"> Перевод на {{fp.paymentGateAccount}} </h5>
-        <h6 class="p-2 text-left">
-          {{link(fp)}}
-        </h6>
+        <a :href="link(fp)">
+          <h6 class="p-2 text-left">
+            {{link(fp)}}
+          </h6>
+        </a>
         <hr/>
       </div>
       
@@ -33,11 +38,11 @@
 <script>
 
 export default {
-  name: 'FreePaymentList',
+  name: 'FreePaymentLinks',
   components: {
   },
   mounted: function () {
-    this.$store.dispatch('updateFreePaymentList');
+    this.$store.dispatch('updateFreePaymentLinks');
   },
   data: function () {
     return {

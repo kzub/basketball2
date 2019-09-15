@@ -23,12 +23,6 @@
       </b-btn>
     </router-link>
 
-    <b-btn class="btn-lg mt-2 mb-3 rounded-0" block
-    :href="link" variant="warning">
-      Наш чат в телеграм
-      <div class="arrow"><i class="right"></i></div>
-    </b-btn>
-
   </div>
 </template>
 
@@ -49,9 +43,6 @@ export default {
     },
     games () {
       return this.$store.state.games
-    },
-    link () {
-      return 'tg://resolve' + '?domain=playbasket'
     },
     myGamesOnly () {
       return this.$store.state.myGamesOnly

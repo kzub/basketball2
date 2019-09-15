@@ -114,8 +114,8 @@ const updateFreePaymentInfo = ({ commit }, params) => {
     })
 }
 
-const updateFreePaymentList = ({ commit }) => {
-  console.log('actions::updateFreePaymentList')
+const updateFreePaymentLinks = ({ commit }) => {
+  console.log('actions::updateFreePaymentLinks')
   commit('setUpdatedFlag', false)
   return axios
     .get(`/api/payment/getAllOrganizerYMs`)
@@ -307,7 +307,7 @@ export default {
   changeReservationPay,
   setUserName,
   updateFreePaymentInfo,
-  updateFreePaymentList,
+  updateFreePaymentLinks,
   updateGameData,
   updateGamesData,
   updateReservationName,

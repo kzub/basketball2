@@ -35,6 +35,13 @@
                           v-model="form.amount"
                           placeholder="Сумма перевода">
             </b-form-input>
+            <b-form-input id="senderName"
+                          v-if="!user || !user.auth"
+                          class="mt-3"
+                          type="text"
+                          v-model="form.sender"
+                          placeholder="Фамилия и имя отправителя">
+            </b-form-input>
           </b-form>
           <PayButton
             :account="freePayment.paymentGateAccount"
@@ -69,12 +76,13 @@ export default {
     return {
       form: {
         amount: undefined,
+        sender: '',
       }
     }
   },
   computed: {
     paymentId: function () {
-      return ['FP', this.user && this.user.userId].join('|')
+      return ['FP', this.user && this.user.userId, this.form.sender.slice(0, 20)].join('|')
     },
     freePayment: function () {
       return this.$store.state.freePayment

@@ -29,7 +29,7 @@ const complete = async (req, res) => {
   }
 
   if (label && label.startsWith('FP')) {
-    const [, userId] = label.split('|');
+    const [, userId, sender] = label.split('|');
     await req.dal.payment.addTransaction(organizer.userId, paySystem, amount, 0, 0, userId || 0, req.body);
     let user;
 
@@ -39,7 +39,7 @@ const complete = async (req, res) => {
 
     events.emit('payment.custom', {
       amount,
-      payerName: user && user.name,
+      payerName: (user && user.name) || sender,
       receiverName: organizer.name,
     });
     return;
@@ -103,7 +103,7 @@ const getCreditors = async (req, res) => {
     ok: true,
     creditors: creditorsWithName,
   });
-}
+};
 
 module.exports = {
   complete,

@@ -47,6 +47,10 @@
             Игр пока нет
           </b-btn>
         </b-card>
+
+        <b-btn class="btn-lg mt-2 mb-3 rounded-0" block :href="chatLink" variant="warning">
+          Наш чат в телеграм <div class="arrow"><i class="right"></i></div>
+        </b-btn>
       </div>      
     </div>
 
@@ -71,7 +75,10 @@ export default {
   computed: {
     viewDataUpdated () {
       return this.$store.state.viewDataUpdated
-    }
+    },
+    chatLink () {
+      return ['tg', '://', 'resolve', '?domain', '=playbasket'].join('')
+    },
   },
   methods: {
     gameType: function (game) {
