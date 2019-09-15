@@ -99,9 +99,13 @@ const getCreditors = async (req, res) => {
     };
   });
 
+  creditorsWithName.sort((a, b) => {
+    return b.amount - a.amount;
+  });
+
   res.status(200).send({
     ok: true,
-    creditors: creditorsWithName,
+    creditorsList: creditorsWithName,
   });
 };
 

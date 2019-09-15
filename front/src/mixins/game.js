@@ -31,7 +31,7 @@ const mxBookInfo = function () {
   const book = players || waiters
 
   if (!book) {
-    console.log('no book found by id:', bookId)
+    console.log('no book found by id:', bookId) // eslint-disable-line
     this.$router.push('/')
     return
   }
@@ -40,7 +40,7 @@ const mxBookInfo = function () {
 }
 
 export default {
-	computed: {
+  computed: {
     mxLocationInfo,
     mxGameDetails,
     mxBookInfo,

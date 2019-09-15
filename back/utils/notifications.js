@@ -49,13 +49,13 @@ emitter.on('payment.custom', async ({ amount, payerName, receiverName }) => {
 });
 
 // TODO брать в платежных системах по organizotr какой notifyId нужен для уведомлений
-emitter.on('user.credits.added', async ({ user, amount, paymentId }) => {
+/* emitter.on('user.credits.added', async ({ user, amount, paymentId }) => {
   // const payment = await dal.payment.getPayment(paymentId);
   // const receiver = await dal.user.getUser(payment.recipientId);
   //  надо уточнитьс recipientId
 
   // sendAdminMessage(`Начислено ${amount} кредитов для ${user.name} (${user.phone}) на счёт организатора ${receiver.name}`, 'info');
-});
+ }); */
 
 // --------------------- GAME ADMIN NOTIFICATIONS ------------------------
 const createNotification = async (notifyId, event) => {
@@ -100,6 +100,7 @@ emitter.on('reservation.new', async ({ game, user, slotType }) => {
 });
 
 emitter.on('reservation.paid', async ({ reservation }) => {
+  // отправляем сообщение в любом случае, потому что это оплаченная деньгами бронь
   const game = await dal.game.getGame(reservation.gameId);
   const notify = await createNotification(game.notifyId, 'reservation.paid');
   notify.send(`${reservation.playerName} записался на игру в ${game.place.title}, в ${game.timeStart} ${utils.getBeautifulDate(game.date)}, свободных мест: ${game.freePlayerSlots}`);
@@ -195,6 +196,9 @@ emitter.on('reservation.admin.cancel.unpaid', async ({ reservation, isWaiter }) 
 
 emitter.on('reservation.admin.cancel.paid', async ({ reservation }) => {
   const game = await dal.game.getGame(reservation.gameId);
+  if (game.isDisabled() || game.isTimePassed()) {
+    return;
+  }
   const notify = await createNotification(game.notifyId, 'reservation.admin.cancel.paid');
   let slotMessage = `отменил запись ${reservation.playerName}`;
   if (game.organizer.name === reservation.playerName) {
@@ -210,6 +214,9 @@ const gameStatuses = {
 };
 
 emitter.on('game.change.status', async ({ game, status }) => {
+  if (game.isTimePassed()) {
+    return;
+  }
   const notify = await createNotification(game.notifyId, 'game.change.status');
   const statusText = gameStatuses[status];
   notify.send(`${game.organizer.name} ${statusText} игру ${game.place.title}, в ${game.timeStart} ${utils.getBeautifulDate(game.date)}`);

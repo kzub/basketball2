@@ -9,6 +9,7 @@ const returnInfo = (state, p) => state.returnInfo = { ...state.returnInfo, ...p 
 const setReservationExpire = (state, p) => state.reservationExpire = p
 const user = (state, p) => state.user = p
 const userName = (state, p) => state.user.name = p
+const creditors = (state, p) => state.creditors = p
 
 const setUpdatedFlag = (state, p) => {
   if (typeof p !== 'boolean') {
@@ -18,6 +19,7 @@ const setUpdatedFlag = (state, p) => {
 }
 
 export default {
+  creditors,
   freePayment,
   freePaymentList,
   gameDetails,

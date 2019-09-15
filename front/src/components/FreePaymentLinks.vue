@@ -1,5 +1,10 @@
 <template>
   <div>
+    <b-btn @click="back" class="btn-lg mb-3 rounded-0" block variant="warning">
+      <div class="arrow-left"><i class="left"></i></div>
+      <span>Назад</span>
+    </b-btn>
+
     <div v-if="!viewDataUpdated || !freePaymentList || !freePaymentList.YMs || !user" class="my-2">
       <div class="d-flex justify-content-center">
         <div class="spinner-border" role="status">
@@ -7,22 +12,17 @@
         </div>
       </div>
     </div>
-
     <div v-else>
-      <b-btn @click="back" class="btn-lg mb-3 rounded-0" block variant="warning">
-        <div class="arrow-left"><i class="left"></i></div>
-        <span>Назад</span>
-      </b-btn>
-
       <h3 class="py-3">
-        Ссылка для оплаты
+        Ссылка на оплату
       </h3>
       <p>
-        Если нужно перевести денег на ваш Яндекс кошелек, дайте эту ссылку участнику
+        Если нужно перевести денег на ваш Яндекс кошелек, передайте эту ссылку отправителю
       </p>
 
       <div v-for="fp in freePaymentList.YMs" :key="fp.paymentGateAccount">
         <h5 class="btn-secondary py-3"> Перевод на {{fp.paymentGateAccount}} </h5>
+        Ссылка:
         <a :href="link(fp)">
           <h6 class="p-2 text-left">
             {{link(fp)}}

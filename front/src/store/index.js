@@ -4,6 +4,7 @@ import actions from './actions'
 const Store = (Vuex) => {
   return new Vuex.Store({
     state: {
+      creditors: undefined,
       freePayment: undefined,
       freePaymentList: undefined,
       gameDetails: undefined,

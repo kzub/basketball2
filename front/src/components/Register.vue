@@ -3,7 +3,7 @@
     <div role="tablist">
 
       <b-card no-body class="mb-1">
-        <b-btn class="p-2 rounded-0" block href="#" v-b-toggle.regStep1 variant="secondary">
+        <b-btn class="p-2 rounded-0" block v-b-toggle.regStep1 variant="secondary">
           Номер телефона
         </b-btn>
 
@@ -37,7 +37,7 @@
       </b-card>
 
       <b-card no-body class="mb-1">
-        <b-btn class="p-2 rounded-0" block href="#" disabled v-b-toggle.regStep2 variant="secondary">Подтверждение</b-btn>
+        <b-btn class="p-2 rounded-0" block disabled v-b-toggle.regStep2 variant="secondary">Подтверждение</b-btn>
 
         <b-collapse id="regStep2" accordion="reg-accordion" role="tabpanel">
           <b-card-body>

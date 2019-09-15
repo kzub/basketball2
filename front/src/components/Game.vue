@@ -1,19 +1,18 @@
 <template>
   <div>
-    <div v-if="!viewDataUpdated || !mxGameDetails" class="my-2">
+    <b-btn @click="back" class="btn-lg mb-3 rounded-0" block variant="warning">
+      <div class="arrow-left"><i class="left"></i></div>
+      <span>Назад</span>
+    </b-btn>
+
+    <div v-if="!viewDataUpdated || !mxGameDetails || !user" class="my-2">
       <div class="d-flex justify-content-center flex-wrap-reverse loader">
         <div class="spinner-border" role="status">
           <span class="sr-only">Загружается...</span>
         </div>
       </div>
     </div>
-
     <div v-else>
-      <b-btn @click="back" class="btn-lg mb-3 rounded-0" block variant="warning">
-        <div class="arrow-left"><i class="left"></i></div>
-        <span>Назад</span>
-      </b-btn>
-
       <!-- game and payment info -->
       <GameInfo :game="mxGameDetails.game" show="place,time"/>
 
@@ -22,15 +21,11 @@
         Свободных мест нет
       </div>
 
-      <div v-if="mxGameDetails.game.status === 'poll'" class="m-1 p-2 mx-2 rounded pollMode">
-        Предварительная запись
-      </div>
-
       <div>
         <div class="text-left m-2">Список игроков:</div>
         <div v-for="(slot, index) in mxGameDetails.players" :key="'p'+index">
           <router-link class="d-flex" :to="goLink(mxGameDetails.game, slot)" tag="div">
-            <b-button href="#" class="my-1 mx-3 slot" :variant="playerColor(slot)">
+            <b-button class="my-1 mx-3 slot" :variant="playerColor(slot)">
               <div  v-if="modifyAllowed(slot)">
                 <span class="arrow-text">{{ slot.playerName }}</span>
                 <div class="arrow"><i class="right"></i></div>
@@ -45,7 +40,7 @@
           <div class="text-left m-2">Список запасных:</div>
           <div v-for="(slot, index) in mxGameDetails.waiters" :key="'r'+index">
             <router-link class="d-flex" :to="goLink(mxGameDetails.game, slot)" tag="div">
-              <b-button href="#" class="my-1 mx-3 slot" :variant="playerColor(slot)">
+              <b-button class="my-1 mx-3 slot" :variant="playerColor(slot)">
                 <div  v-if="modifyAllowed(slot)">
                   <span class="arrow-text">{{ slot.playerName }}</span>
                   <div class="arrow"><i class="right"></i></div>
@@ -79,12 +74,6 @@
             class="w-100 py-2 my-1" variant="danger">
             Включить запись
           </b-button>
-          <!-- <b-button v-if="showAdminButtons('poll')"
-            v-b-modal.ackModal
-            @click="changeGameStatus('poll')"
-            class="w-100 py-2 my-1" variant="danger">
-            Режим голосования
-          </b-button> -->
           <b-button
             @click="sendPlayersList"
             class="w-100 py-2 my-1" variant="success">
@@ -157,15 +146,11 @@ export default {
     },
     showAdminButtons (button) {
       if (this.mxGameDetails.game.status === 'disabled' &&
-        ['poll', 'settle'].indexOf(button) >= 0) {
-        return true
-      }
-      else if (this.mxGameDetails.game.status === 'poll' &&
-        ['disable', 'settle'].indexOf(button) >= 0) {
+        ['settle'].indexOf(button) >= 0) {
         return true
       }
       else if (this.mxGameDetails.game.status === 'settled' &&
-        ['disable', 'poll'].indexOf(button) >= 0) {
+        ['disable'].indexOf(button) >= 0) {
         return true
       }
     },
@@ -206,14 +191,13 @@ export default {
         freeSlotType = slot.status.slice(5)
       }
 
-      if (!this.$store.state.user || !this.$store.state.user.auth) {
+      if (!this.$store.state.user.auth) {
         let retUrl;
         if (freeSlotType) {
           retUrl = `/book?gameId=${game.gameId}&slotType=${freeSlotType}`
         } else {
           retUrl = `/game?gameId=${game.gameId}`
         }
-
         return {
           path: '/profile',
           query: {
@@ -236,7 +220,6 @@ export default {
           query: { gameId: game.gameId, bookId: slot.bookId }
         }
       }
-
       // do nothing
       return {
         path: '/game',
@@ -261,11 +244,6 @@ export default {
 .adminMode {
   border: 1px solid #dc3545;
   color: #dc3545;
-}
-
-.pollMode {
-  border: 1px solid #6c757d;
-  color: #6c757d;
 }
 
 .loader {

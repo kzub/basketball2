@@ -2,6 +2,9 @@
   <div>
     <Auth/>
 
+    <b-card-body class="p-2 m-2">
+      <h3>Текущие игры</h3>
+    </b-card-body>
     <Games :games="games"/>
 
     <div v-if="user && user.isOrganizer">
@@ -15,6 +18,12 @@
       <router-link v-if="user.hasYM" to="/fpList" tag="div">
         <b-btn class="btn-lg mt-2 mb-3 rounded-0" block variant="secondary">
           Ссылка на оплату <div class="arrow"><i class="right"></i></div>
+        </b-btn>
+      </router-link>
+
+      <router-link v-if="user.hasYM" to="/credits" tag="div">
+        <b-btn class="btn-lg mt-2 mb-3 rounded-0" block variant="secondary">
+          Возвраты и предоплата <div class="arrow"><i class="right"></i></div>
         </b-btn>
       </router-link>
 

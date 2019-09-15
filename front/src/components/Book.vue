@@ -31,7 +31,6 @@
         <b-btn v-else class="my-1" @click="bookSlot" variant="primary">
           Забронировать
         </b-btn>
-          <span v-else="isWaiter">Забронировать</span>
       </div>
       <div v-else class="spinner-border mt-5" role="status">
         <span class="sr-only">Бронирую...</span>
@@ -51,9 +50,7 @@
 
 import DateTime from '../mixins/datetime.js'
 import GameUtils from '../mixins/game.js'
-import Organizer from './Organizer.vue'
 import GameInfo from './GameInfo.vue'
-import axios from 'axios'
 
 export default {
   name: 'Book',
@@ -86,24 +83,27 @@ export default {
     bookSlot: function() {
       this.booking = true
       const { mxLocationInfo } = this
+      const newBooking = {}
 
       this.$store.dispatch('bookSlot', { ...mxLocationInfo })
       .then((data) => {
         if (data.result === 'ok') {
-          this.$store.dispatch('updateGameData', mxLocationInfo.gameId);
-          this.$router.push({
-            path: '/reservation',
-            query: {
-              gameId: data.gameId,
-              bookId: data.bookId,
-            }
-          });
-          return;
+          newBooking.gameId = data.gameId
+          newBooking.bookId = data.bookId
+          return this.$store.dispatch('updateGameData', mxLocationInfo.gameId)
         }
         throw new Error('Cannot book')
       })
-      .catch(error => {
-        // console.log('/api/v2/book error:', error)
+      .then(() => {
+        this.$router.push({
+          path: '/reservation',
+          query: {
+            gameId: newBooking.gameId,
+            bookId: newBooking.bookId,
+          }
+        });
+      })
+      .catch(() => {
         this.$refs.errModal.show()
       })
       .finally(() => this.booking = false)

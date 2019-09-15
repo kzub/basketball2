@@ -141,16 +141,17 @@ const cancel = async (req, res) => {
     events.emit('reservation.waiter.promoted', { reservation: promotedReservation });
   }
 
-  if (0 && game.isRefundable() && reservation.realPaymentComplete()) {
-    req.log.debug('REFUNDABLE');
-    await req.dal.payment.addCredits(reservation.userId, reservation.paymentId, reservation.paymentAmount);
+  if (game.isRefundable() && reservation.realPaymentComplete()) {
+    req.log.debug('reservation is REFUNDABLE');
+    // userId, organizerId, amount, sourceType, sourceId, comment
+    await req.dal.payment.addCreditTransaction(reservation.userId, game.organizer.userId, reservation.paymentAmount, 'reservation.cancel', reservation.bookId);
     events.emit('user.credits.added', {
+      userId: reservation.userId,
+      organizerId: game.organizer.userId,
       amount: reservation.paymentAmount,
-      paymentId: reservation.paymentId,
-      user,
     });
   } else {
-    req.log.debug('NOT REFUNDABLE');
+    req.log.debug('reservation is NOT REFUNDABLE');
   }
 
   res.status(200).send({ ok });

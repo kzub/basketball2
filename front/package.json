@@ -10,7 +10,7 @@
   "dependencies": {
     "axios": "^0.18.1",
     "babel-polyfill": "^6.26.0",
-    "bootstrap-vue": "^2.0.0-rc.22",
+    "bootstrap-vue": "^2.0.1",
     "vue": "^2.6.10",
     "vue-router": "^3.0.6",
     "vue2-google-maps": "^0.10.6",

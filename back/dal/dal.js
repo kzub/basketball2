@@ -34,16 +34,16 @@ db.run(`CREATE TABLE IF NOT EXISTS payments (
   rawData TEXT NOT NULL DEFAULT '{}'
 )`);
 
-// db.run(`CREATE TABLE IF NOT EXISTS credits (
-//   transactionId INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-//   date DATETIME NOT NULL,
-//   userId INTEGER NOT NULL,
-//   organizerId INTEGER NOT NULL,
-//   amount INTEGER NOT NULL,
-//   reasonType TEXT NOT NULL,
-//   reasonId INTEGER,
-//   comment TEXT
-// )`);
+db.run(`CREATE TABLE IF NOT EXISTS credits (
+  transactionId INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+  date DATETIME NOT NULL,
+  userId INTEGER NOT NULL,
+  organizerId INTEGER NOT NULL,
+  amount INTEGER NOT NULL,
+  sourceType TEXT NOT NULL,
+  sourceId INTEGER,
+  comment TEXT
+)`);
 
 db.run(`CREATE TABLE IF NOT EXISTS organizersPlaces (
   organizerId INTEGER NOT NULL,
@@ -125,12 +125,22 @@ const promiseSQL = (dalLog, cmd, query, ...rest) => {
   });
 };
 
+const maybeText = (text) => {
+  if (text === null) {
+    return null;
+  }
+  return `'${text}'`;
+};
+
 const execSQL = (name) => {
   const dalLog = logger.create(name);
   return {
     methods: {
       all: async (...rest) => (await promiseSQL(dalLog, 'all', ...rest)).result,
       run: async (...rest) => (await promiseSQL(dalLog, 'run', ...rest)).statement,
+    },
+    utils: {
+      maybeText,
     },
     dalLog,
   };

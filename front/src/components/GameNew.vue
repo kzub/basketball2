@@ -1,5 +1,10 @@
 <template>
   <div>
+    <b-btn @click="back" class="btn-lg mb-3 rounded-0" block variant="warning">
+      <div class="arrow-left"><i class="left"></i></div>
+      <span>Назад</span>
+    </b-btn>
+
     <div v-if="!viewDataUpdated" class="my-4 p-4">
       <div class="d-flex justify-content-center">
         <div class="spinner-border" role="status">
@@ -7,20 +12,13 @@
         </div>
       </div>
     </div>
-
     <div v-else-if="!hideInputs">
-      <b-btn @click="back" class="btn-lg mb-3 rounded-0" block variant="warning">
-        <div class="arrow-left"><i class="left"></i></div>
-        <span>Назад</span>
-      </b-btn>
-    
-
-      <h4 class="my-4">
+      <h3 class="my-4">
         Новая игра
-      </h4>
+      </h3>
       <form @submit="onCreate">
         <b-container class="px-1">
-          <GameOptions v-for="option in newGameOptions" :option="option" :storage="choosedOptions"/>
+          <GameOptions v-for="option in newGameOptions" :option="option" :storage="choosedOptions" v-bind:key="option.label"/>
         </b-container>
         
         <b-btn class="w-75 mt-4 mb-5" variant="primary" type="submit">Создать</b-btn>

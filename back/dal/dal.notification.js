@@ -13,7 +13,7 @@ const getNotification = async (notifyId) => {
 
 const getSystemAdminNotification = async () => {
   const notification = 
-    await execSQL.all(`SELECT * FROM notifications WHERE notifyId = 1`);
+    await execSQL.all('SELECT * FROM notifications WHERE notifyId = 1');
 
   return new Notification(notification[0]);
 };

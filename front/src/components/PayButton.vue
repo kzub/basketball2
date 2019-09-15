@@ -10,9 +10,9 @@
       <input name="label" type="hidden" :value="label">
       <input name="successURL" type="hidden" :value="successURL">
 
-	    <b-btn type="submit" class="my-1 w-100" variant="success">
-	      Оплатить
-	    </b-btn>
+      <b-btn type="submit" class="my-1 w-100" variant="success">
+        Оплатить
+      </b-btn>
     </b-form>
 
   </div>
@@ -24,7 +24,7 @@ export default {
   props: ['account','message','amount','label'],
   computed: {
     successURL: function () {
-    	return document.location.host + '/#/success'
+      return document.location.host + '/#/success'
     },
   },
   methods: {

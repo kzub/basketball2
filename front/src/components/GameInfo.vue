@@ -19,13 +19,16 @@
 
     <div v-if="visible('payment')">
       <div v-if="game.paymentType == 'prepay'">
-        Предоплата <br>
-        Стоимость: {{ game.paymentAmount }} рублей
+        <div class="mb-2">Предоплата (<a class="dotted" v-b-modal.payReturnInfo>условия возврата</a>) </div>
+        <div>Стоимость: {{ game.paymentAmount }} рублей </div>
+        <b-modal id="payReturnInfo" cancel-variant="hidden" title="Условия возврата" class="flex">
+          <RefundRules/>
+        </b-modal>
       </div>
       <div v-else-if="game.paymentType == 'shared'">
-        Оплата после игры <br>
-        Стоимость зала: {{ game.paymentAmount }} рублей <br>
-        <a class="dotted" v-b-modal.payinfo>Делится на всех пришедших</a>
+        <div>Оплата после игры</div>
+        <div>Стоимость зала: {{ game.paymentAmount }} рублей</div>
+        <div><a class="dotted" v-b-modal.payinfo>Делится на всех пришедших</a> </div>
 
         <b-modal id="payinfo" cancel-variant="hidden" title="Расчет" class="flex">
           <b-table small borderless striped :items="calculations"></b-table>
@@ -43,6 +46,7 @@
 <script>
 import DateTime from '../mixins/datetime.js'
 import Organizer from './Organizer.vue'
+import RefundRules from './RefundRules.vue'
 
 export default {
   name: 'GameInfo',
@@ -50,6 +54,12 @@ export default {
   props: ['game', 'show'],
   components: {
     Organizer,
+    RefundRules,
+  },
+  data: function() {
+    return {
+      prepayRefundText: ``,
+    }
   },
   methods: {
     visible: function(place) {

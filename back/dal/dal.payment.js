@@ -1,6 +1,7 @@
 let log; // eslint-disable-line
 let dal; // eslint-disable-line
 let execSQL;
+let maybeText;
 
 const addTransaction = async (recipientId, paySystem, amount, gameId, bookId, userId, rawData) => {
   const res = await execSQL.run(`INSERT INTO
@@ -50,25 +51,19 @@ const getPayment = async (paymentId) => {
 };
 
 const getCreditors = async (organizerId) => {
-  const data = await execSQL.all(`SELECT transactionId,date,userId,amount,reasonType,reasonId,comment
-
-    creditId, date, userId, credits.paymentId, amount, status, recipientId
+  //transactionId,date,userId,organizerId,amount,sourceType,sourceId,comment
+  const data = await execSQL.all(`SELECT userId, SUM(amount) amount
     FROM credits
-    LEFT JOIN (
-      SELECT paymentId, recipientId
-      FROM payments
-      WHERE recipientId = ${organizerId}
-    ) p ON p.paymentId = credits.paymentId
-    WHERE recipientId = ${organizerId}
-    AND status = "open"`);
+    WHERE organizerId = ${organizerId}
+    GROUP BY userId`);
 
   return data;
 };
 
-const addCredits = async (userId, paymentId, paymentAmount) => {
+const addCreditTransaction = async (userId, organizerId, amount, sourceType, sourceId = null, comment = null) => {
   const res = await execSQL.run(`INSERT INTO
-    credits (date, userId, paymentId, amount, status)
-    VALUES ('${new Date().toJSON()}', ${userId}, ${paymentId}, ${paymentAmount}, 'open')`);
+    credits (date, userId, organizerId, amount, sourceType, sourceId, comment)
+    VALUES ('${new Date().toJSON()}', ${userId}, ${organizerId}, ${amount}, '${sourceType}', ${sourceId}, ${maybeText(comment)})`);
 
   return res && res.lastID;
 };
@@ -77,12 +72,13 @@ module.exports = {
   init: (driver, dalInstance) => {
     if (!driver) { throw new Error(`${__filename}: undefined DAL driver`); }
 
+    dal = dalInstance;
     execSQL = driver.methods;
     log = driver.dalLog;
-    dal = dalInstance;
+    maybeText = driver.utils.maybeText;
 
     return {
-      addCredits,
+      addCreditTransaction,
       addTransaction,
       findOrganizerByPaySystem,
       findOrganizerIdByPaySystem,

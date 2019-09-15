@@ -120,7 +120,15 @@
         <div>
           <b-modal id="ackModal" title="Подтверждение" ok-variant="danger" ok-title="Да" cancel-title="Отмена"
             @ok="handleDeleteOk">
-            <p class="my-4">Удалить запись?</p>
+            <div v-if="mxGameDetails.game.paymentType === 'prepay'" class="my-2">
+                <a class="dotted" v-b-modal.payReturnInfo>Прочитайте условия возврата</a>
+            </div>
+            <p class="my-4">
+              Удалить запись?
+            </p>
+            <b-modal id="payReturnInfo" cancel-variant="hidden" title="Условия возврата" class="flex">
+              <RefundRules/>
+            </b-modal>
           </b-modal>
         </div>
         <!-- change name window -->
@@ -149,6 +157,7 @@ import DateTime from '../mixins/datetime.js'
 import GameUtils from '../mixins/game.js'
 import GameInfo from './GameInfo.vue'
 import PayButton from './PayButton.vue'
+import RefundRules from './RefundRules.vue'
 
 let intervalId;
 
@@ -158,6 +167,7 @@ export default {
   components: {
     GameInfo,
     PayButton,
+    RefundRules,
   },
   mounted: function () {
     const { commit } = this.$store
@@ -262,7 +272,12 @@ export default {
   border-left: 6px solid #ffc207 !important;
   border-right: 6px solid #ffc207 !important;
 }
-
+.dotted {
+  border: 2px dotted #007bff;
+  border-style: none none dotted;
+  color: #007bff !important;
+  /*background-color: #fff;*/
+}
 </style>
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style>
