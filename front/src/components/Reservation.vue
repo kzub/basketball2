@@ -51,7 +51,7 @@
           <b-form-input class="mt-2"
                         id="userPhone"
                         type="text"
-                        v-model="form.phone"
+                        v-model="bookingPhone"
                         disabled
                         placeholder="Номер телефона">
           </b-form-input>
@@ -178,7 +178,6 @@ export default {
     },
     form: function () {
       return {
-        phone: this.bookingPhone,
         name: this.mxBookInfo.playerName,
         code: '',
       }

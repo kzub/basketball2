@@ -30,7 +30,7 @@
         <div class="text-left m-2">Список игроков:</div>
         <div v-for="(slot, index) in mxGameDetails.players" :key="'p'+index">
           <router-link class="d-flex" :to="goLink(mxGameDetails.game, slot)" tag="div">
-            <b-button href="#" class="my-1 mx-3 slot" :variant="playerColor(slot)">
+            <b-button class="my-1 mx-3 slot" :variant="playerColor(slot)">
               <div  v-if="modifyAllowed(slot)">
                 <span class="arrow-text">{{ slot.playerName }}</span>
                 <div class="arrow"><i class="right"></i></div>
@@ -45,7 +45,7 @@
           <div class="text-left m-2">Список запасных:</div>
           <div v-for="(slot, index) in mxGameDetails.waiters" :key="'r'+index">
             <router-link class="d-flex" :to="goLink(mxGameDetails.game, slot)" tag="div">
-              <b-button href="#" class="my-1 mx-3 slot" :variant="playerColor(slot)">
+              <b-button class="my-1 mx-3 slot" :variant="playerColor(slot)">
                 <div  v-if="modifyAllowed(slot)">
                   <span class="arrow-text">{{ slot.playerName }}</span>
                   <div class="arrow"><i class="right"></i></div>
