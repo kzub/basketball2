@@ -4,24 +4,26 @@
 
     <Games :games="games"/>
 
-    <hr/>
-    <router-link v-if="user && user.isOrganizer" to="/game/new" tag="div">
-      <b-btn class="btn-lg mt-2 mb-3 rounded-0" block variant="danger">
-        Добавить игру <div class="arrow"><i class="right"></i></div>
-      </b-btn>
-    </router-link>
+    <div v-if="user && user.isOrganizer">
+      <hr/>
+      <router-link to="/game/new" tag="div">
+        <b-btn class="btn-lg mt-2 mb-3 rounded-0" block variant="danger">
+          Добавить игру <div class="arrow"><i class="right"></i></div>
+        </b-btn>
+      </router-link>
 
-    <router-link v-if="user && user.hasYM" to="/fpList" tag="div">
-      <b-btn class="btn-lg mt-2 mb-3 rounded-0" block variant="secondary">
-        Ссылка на оплату <div class="arrow"><i class="right"></i></div>
-      </b-btn>
-    </router-link>
+      <router-link v-if="user.hasYM" to="/fpList" tag="div">
+        <b-btn class="btn-lg mt-2 mb-3 rounded-0" block variant="secondary">
+          Ссылка на оплату <div class="arrow"><i class="right"></i></div>
+        </b-btn>
+      </router-link>
 
-    <router-link v-if="user && user.isOrganizer" to="/myGames" tag="div">
-      <b-btn class="btn-lg mt-2 mb-3 rounded-0" block variant="secondary">
-        Мои последние игры <div class="arrow"><i class="right"></i></div>
-      </b-btn>
-    </router-link>
+      <router-link to="/myGames" tag="div">
+        <b-btn class="btn-lg mt-2 mb-3 rounded-0" block variant="secondary">
+          Мои последние игры <div class="arrow"><i class="right"></i></div>
+        </b-btn>
+      </router-link>
+    </div>
 
   </div>
 </template>
