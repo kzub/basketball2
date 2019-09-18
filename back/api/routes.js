@@ -65,6 +65,7 @@ const init = (app) => {
   app.get('/api/reservation/cancel/:gameId/:bookId/', wrapper(reservation.cancel, true));
   app.get('/api/reservation/changePay/:gameId/:bookId/', wrapper(reservation.changePay, true));
   app.get('/api/reservation/clearExpire/:gameId/:bookId/', wrapper(reservation.clearExpire, true));
+  app.get('/api/reservation/payByCredits/:gameId/:bookId/', wrapper(reservation.payByCredits, true));
   app.get('/api/reservation/setPlayer/:gameId/:bookId/:name', wrapper(reservation.setPlayer, true));
   app.get('/api/user/auth/:phone/:code', wrapper(user.auth, false));
   app.get('/api/user/exit', wrapper(user.exit, true));

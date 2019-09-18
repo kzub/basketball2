@@ -15,8 +15,8 @@
 
     <div v-else>
       <b-card-body class="p-2 m-2">
-        <h3>Возвраты и предоплата</h3>
-        Список неиспользованных средств
+        <h3>Список предоплат</h3>
+        <p class="mt-4">Игроки, которые перевели, но не использовали свои средства</p>
       </b-card-body>
       
       <div v-if="creditorsCount">
@@ -61,7 +61,7 @@ export default {
     creditorsFields: function () {
       return [
         { key: 'name', label: 'Игрок' },
-        { key: 'amount', label: 'Баланс, ₽' },
+        { key: 'total', label: 'Баланс, ₽' },
         // { key: 'actions', label: 'Действия' },
       ]
     },

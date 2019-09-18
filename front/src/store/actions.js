@@ -12,7 +12,7 @@ const bookSlot = ({ state }, bookInfo) => {
 }
 
 const updateReservationName = ({ commit }, { gameId, bookId, name }) => {
-  console.log('actions::updateReservationName', gameId, bookId, name)  // eslint-disable-line
+  console.log('actions::updateReservationName', gameId, bookId, name) // eslint-disable-line no-console
   commit('setUpdatedFlag', false)
   return axios
     .get(`/api/reservation/setPlayer/${gameId}/${bookId}/${name}`)
@@ -27,7 +27,7 @@ const updateReservationName = ({ commit }, { gameId, bookId, name }) => {
 }
 
 const changeReservationPay = ({ commit, state }, { gameId, bookId }) => {
-  console.log('actions::changeReservationPay', gameId, bookId, name)  // eslint-disable-line
+  console.log('actions::changeReservationPay', gameId, bookId)  // eslint-disable-line no-console
   commit('setUpdatedFlag', false)
   return axios
     .get(`/api/reservation/changePay/${gameId}/${bookId}`)
@@ -42,8 +42,26 @@ const changeReservationPay = ({ commit, state }, { gameId, bookId }) => {
     })
 }
 
+const payByCredits = ({ commit, state }, { gameId, bookId }) => {
+  console.log('actions::payByCredits', gameId, bookId)  // eslint-disable-line
+  commit('setUpdatedFlag', false)
+  return axios
+    .get(`/api/reservation/payByCredits/${gameId}/${bookId}`)
+    .then(response => {
+      console.log('/api/reservation/payByCredits response:', response.data)  // eslint-disable-line
+      return getUserInfo({ commit }) // update credits data
+    })
+    .then(response => {
+      return updateGameData({ commit, state }, gameId)
+    })
+    .catch(error => {
+      console.log('/api/reservation/payByCredits error:', error)  // eslint-disable-line
+      commit('setUpdatedFlag', true)
+    })
+}
+
 const clearReservationExpire = ({ commit, state }, { gameId, bookId }) => {
-  console.log('actions::clearReservationExpire', gameId, bookId, name)  // eslint-disable-line
+  console.log('actions::clearReservationExpire', gameId, bookId)  // eslint-disable-line
   commit('setUpdatedFlag', false)
   return axios
     .get(`/api/reservation/clearExpire/${gameId}/${bookId}`)
@@ -315,7 +333,6 @@ const getCreditors = ({ commit }) => {
 const init = ({ dispatch }) => {
   console.log('actions::init')  // eslint-disable-line
   dispatch('getUserInfo')
-  // .then(dispatch('updateGamesData'))
 }
 
 export default {
@@ -331,6 +348,7 @@ export default {
   getNewGameOptions,
   getUserInfo,
   init,
+  payByCredits,
   sendCheckCode,
   sendPlayersList,
   setUserName,

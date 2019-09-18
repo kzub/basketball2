@@ -55,8 +55,12 @@ const changePay = async (req, res) => {
       event = 'reservation.admin.make.unpaid';
     } else {
       reservation.makePaid();
+      if (reservation.expireAt > 0) {
+        event = 'reservation.admin.make.book';
+      } else {
+        event = 'reservation.admin.make.paid';
+      }
       reservation.setExpire(0);
-      event = 'reservation.admin.make.paid';
     }
     ok = await req.dal.reservation.update(reservation);
     events.emit(event, { reservation });
@@ -85,6 +89,53 @@ const clearExpire = async (req, res) => {
   }
 
   res.status(200).send({ ok, reason });
+};
+
+const payByCredits = async (req, res) => {
+  const { gameId, bookId } = req.params;
+  const game = await req.dal.game.getGame(gameId);
+  const reservation = await req.dal.reservation.get(gameId, bookId);
+
+  if (!reservation.isOwnerUserId(req.userId)) {
+    req.log.error(`Not a reservation owner try to user credits ${gameId}/${bookId}`);
+    res.status(200).send({ ok: false, reason: 'you are not a reservation owner' });
+    return;
+  }
+
+  if (reservation.isPaid()) {
+    req.log.error(`try to pay by credits reservation already paid ${gameId}/${bookId}`);
+    res.status(200).send({ ok: false, reason: 'reservation already paid' });
+    return;
+  }
+
+  const currentCredits = await req.dal.payment.getUserCreditsForOrganizerId(req.userId, game.organizer.userId);
+  if (currentCredits.total < game.paymentAmount) {
+    req.log.error(`to enough credits for reservation pay ${gameId}/${bookId}`);
+    res.status(200).send({ ok: false, reason: 'not enought credits for reservation' });
+    return;
+  }
+
+  // userId, organizerId, amount, sourceType, sourceId = null, comment = null
+  const creditTransId = await req.dal.payment.addCreditTransaction(
+    req.userId, game.organizer.userId, -game.paymentAmount, 'reservation.pay', bookId
+  );
+
+  // recipientId, paySystem, amount, gameId, bookId, userId, rawData
+  const paymentId = await req.dal.payment.addTransaction(
+    game.organizer.userId, 'credits', game.paymentAmount, gameId, bookId, req.userId, {
+      creditTransactionId: creditTransId,
+    }
+  );
+
+  reservation.book();
+  reservation.makePaid(game.paymentAmount);
+  reservation.setExpire(0);
+  reservation.paymentId = paymentId;
+
+  const ok = await req.dal.reservation.update(reservation);
+  events.emit('reservation.paid', { reservation });
+
+  res.status(200).send({ ok });
 };
 
 const setPlayer = async (req, res) => {
@@ -162,5 +213,6 @@ module.exports = {
   cancel,
   changePay,
   clearExpire,
+  payByCredits,
   setPlayer,
 };

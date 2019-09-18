@@ -11,9 +11,12 @@ const get = async (req, res) => {
   }
 
   const user = await req.dal.user.getUser(req.userId);
+  const credits = await req.dal.payment.getUserCredits(req.userId);
+
   res.status(200).send({
     auth: true,
     ...user,
+    credits,
   });
 };
 

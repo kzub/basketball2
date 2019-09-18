@@ -90,7 +90,10 @@
               <GameInfo :game="mxGameDetails.game" show="payment"/>
             </h5>
 
-            <div v-if="isPayAvailable">
+            <b-btn v-if="isCreditsPayAvailable" @click="payByCredits" class="my-1" variant="success">
+              Оплатить со счета предоплаты
+            </b-btn>
+            <div v-else-if="isPayAvailable">
               <PayButton
                 :account="mxGameDetails.game.paymentGateAccount"
                 :message="mxGameDetails.game.paymentGateMessage"
@@ -121,14 +124,11 @@
           <b-modal id="ackModal" title="Подтверждение" ok-variant="danger" ok-title="Да" cancel-title="Отмена"
             @ok="handleDeleteOk">
             <div v-if="mxGameDetails.game.paymentType === 'prepay'" class="my-2">
-                <a class="dotted" v-b-modal.payReturnInfo>Прочитайте условия возврата</a>
+                <a class="dotted" v-b-modal.payReturnInfoGI>Прочитайте условия возврата</a>
             </div>
             <p class="my-4">
               Удалить запись?
             </p>
-            <b-modal id="payReturnInfo" cancel-variant="hidden" title="Условия возврата" class="flex">
-              <RefundRules/>
-            </b-modal>
           </b-modal>
         </div>
         <!-- change name window -->
@@ -199,9 +199,24 @@ export default {
       return this.mxBookInfo.paymentId > 0
     },
     isPayAvailable: function () {
+      if (!this.mxBookInfo || !this.mxGameDetails) {
+        return
+      }
       return this.mxGameDetails.game.paymentType === 'prepay' &&
              this.mxBookInfo.paymentStatus !== 'paid' &&
              this.mxBookInfo.status !== 'waiting'
+    },
+    isCreditsPayAvailable: function () {
+      if (!this.user || !this.user.credits || !this.mxGameDetails) {
+        return 0
+      }
+      const credits = this.user.credits.reduce((acc, elm) => {
+        if (elm.organizerId == this.mxGameDetails.game.organizer.userId) {
+          return acc + elm.total
+        }
+        return acc
+      }, 0)
+      return this.isPayAvailable && credits >= this.mxGameDetails.game.paymentAmount
     },
     paymentId: function () {
       return this.user && this.mxBookInfo &&
@@ -246,6 +261,11 @@ export default {
     informAboutPayment: function() {
       // console.log('informAboutPayment');
     },
+    payByCredits: function () {
+      this.$store.dispatch('payByCredits', {
+        ...this.mxLocationInfo,
+      })
+    },
     handleChangeOk: function() {
       if(!this.form.name) {
         return
@@ -256,9 +276,8 @@ export default {
       })
     },
     handleDeleteOk: function () {
-      this.$store.dispatch('deleteReservation', {
-        ...this.mxLocationInfo,
-      })
+      this.$store.dispatch('deleteReservation', { ...this.mxLocationInfo })
+      .then(() => { this.$store.dispatch('getUserInfo') })
       .then(this.back)
     }
   },

@@ -1,11 +1,17 @@
 <template>
   <div>
     <Auth/>
-
+    
     <b-card-body class="p-2 m-2">
       <h3>Текущие игры</h3>
     </b-card-body>
     <Games :games="games"/>
+
+    <router-link v-if="user && user.credits.length" to="/myCredits" tag="div">
+      <b-btn class="btn-lg mt-4 mb-4 rounded-0" block variant="warning">
+        Счета предоплаты: {{credits}} ₽<div class="arrow"><i class="right"></i></div>
+      </b-btn>
+    </router-link>
 
     <div v-if="user && user.isOrganizer">
       <hr/>
@@ -23,7 +29,7 @@
 
       <router-link v-if="user.hasYM" to="/credits" tag="div">
         <b-btn class="btn-lg mt-2 mb-3 rounded-0" block variant="secondary">
-          Возвраты и предоплата <div class="arrow"><i class="right"></i></div>
+          Список предоплат <div class="arrow"><i class="right"></i></div>
         </b-btn>
       </router-link>
 
@@ -57,6 +63,9 @@ export default {
     },
     myGamesOnly () {
       return this.$store.state.myGamesOnly
+    },
+    credits () {
+      return this.user && this.user.credits.reduce((acc, elm) => acc + elm.total, 0)
     },
   },
   methods: {

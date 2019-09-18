@@ -3,7 +3,7 @@ let dal; // eslint-disable-line
 let execSQL;
 let maybeText;
 
-const addTransaction = async (recipientId, paySystem, amount, gameId, bookId, userId, rawData) => {
+const addTransaction = async (recipientId, paySystem, amount, gameId, bookId, userId, rawData = {}) => {
   const res = await execSQL.run(`INSERT INTO
     payments (ts, recipientId, paySystem, amount, gameId, bookId, userId, rawData)
     VALUES (${Date.now()}, ${recipientId}, '${paySystem}', ${amount}, ${gameId}, ${bookId}, ${userId}, '${JSON.stringify(rawData)}')`);
@@ -52,7 +52,7 @@ const getPayment = async (paymentId) => {
 
 const getCreditors = async (organizerId) => {
   //transactionId,date,userId,organizerId,amount,sourceType,sourceId,comment
-  const data = await execSQL.all(`SELECT userId, SUM(amount) amount
+  const data = await execSQL.all(`SELECT userId, SUM(amount) total
     FROM credits
     WHERE organizerId = ${organizerId}
     GROUP BY userId`);
@@ -66,6 +66,35 @@ const addCreditTransaction = async (userId, organizerId, amount, sourceType, sou
     VALUES ('${new Date().toJSON()}', ${userId}, ${organizerId}, ${amount}, '${sourceType}', ${sourceId}, ${maybeText(comment)})`);
 
   return res && res.lastID;
+};
+
+const getUserCredits = async (userId) => {
+  //transactionId,date,userId,organizerId,amount,sourceType,sourceId,comment
+  const data = await execSQL.all(`SELECT u.name name, organizerId, SUM(amount) total
+    FROM credits
+    LEFT JOIN (
+      SELECT * FROM users
+    ) u ON u.userId = credits.organizerId
+    WHERE credits.userId = ${userId}
+    GROUP BY organizerId
+    HAVING total > 0`);
+
+  return data;
+};
+
+const getUserCreditsForOrganizerId = async (userId, organizerId) => {
+  //transactionId,date,userId,organizerId,amount,sourceType,sourceId,comment
+  const data = await execSQL.all(`SELECT u.name name, organizerId, SUM(amount) total
+    FROM credits
+    LEFT JOIN (
+      SELECT * FROM users
+    ) u ON u.userId = credits.organizerId
+    WHERE credits.userId = ${userId}
+    AND credits.organizerId = ${organizerId}
+    GROUP BY organizerId
+    HAVING total > 0`);
+
+  return data.pop();
 };
 
 module.exports = {
@@ -86,6 +115,8 @@ module.exports = {
       getPayment,
       getPaymentReciever,
       getPrepayMethodsByOrganizerId,
+      getUserCredits,
+      getUserCreditsForOrganizerId,
     };
   }
 };

@@ -171,7 +171,11 @@ function Reservation (obj) {
 }
 
 Reservation.prototype.isOwnerUser = function (user) {
-  return user.userId === this.userId;
+  return this.userId === user.userId;
+};
+
+Reservation.prototype.isOwnerUserId = function (userId) {
+  return this.userId === userId;
 };
 
 Reservation.prototype.isPaid = function () {

@@ -19,15 +19,15 @@
 
     <div v-if="visible('payment')">
       <div v-if="game.paymentType == 'prepay'">
-        <div class="mb-2">Предоплата (<a class="dotted" v-b-modal.payReturnInfo>условия возврата</a>) </div>
-        <div>Стоимость: {{ game.paymentAmount }} рублей </div>
-        <b-modal id="payReturnInfo" cancel-variant="hidden" title="Условия возврата" class="flex">
+        <div class="mb-2">Предоплата (<a class="dotted" v-b-modal.payReturnInfoGI>условия возврата</a>) </div>
+        <div>Стоимость: {{ game.paymentAmount }} ₽ </div>
+        <b-modal id="payReturnInfoGI" cancel-variant="hidden" title="Условия возврата" class="flex">
           <RefundRules/>
         </b-modal>
       </div>
       <div v-else-if="game.paymentType == 'shared'">
         <div>Оплата после игры</div>
-        <div>Стоимость зала: {{ game.paymentAmount }} рублей</div>
+        <div>Стоимость зала: {{ game.paymentAmount }} ₽</div>
         <div><a class="dotted" v-b-modal.payinfo>Делится на всех пришедших</a> </div>
 
         <b-modal id="payinfo" cancel-variant="hidden" title="Расчет" class="flex">
