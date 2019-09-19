@@ -21,10 +21,10 @@
 <script>
 export default {
   name: 'PayButton',
-  props: ['account','message','amount','label','buttonText'],
+  props: ['account','message','amount','label','buttonText', 'retQueryParams'],
   computed: {
     successURL: function () {
-      return document.location.host + '/#/success'
+      return document.location.host + `/#/success?${this.retQueryParams||''}`
     },
   },
   methods: {

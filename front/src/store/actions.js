@@ -107,6 +107,7 @@ const updateGamesData = ({ commit }, params) => {
       console.log('/api/games response:', response.data)  // eslint-disable-line
       commit('games', response.data)
       commit('setUpdatedFlag', true)
+      return response.data
     })
     .catch(error => {
       console.log('/api/games error:', error)  // eslint-disable-line
@@ -158,6 +159,7 @@ const updateGameData = ({ commit }, gameId) => {
       console.log(`/api/game/details/${gameId} response:`, response.data)  // eslint-disable-line
       commit('gameDetails', response.data)
       commit('setUpdatedFlag', true)
+      return response.data
     })
     .catch(error => {
       console.log(`/api/game/details/${gameId} error:`, error)  // eslint-disable-line

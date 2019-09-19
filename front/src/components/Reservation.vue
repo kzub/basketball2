@@ -109,6 +109,7 @@
                 :amount="mxGameDetails.game.paymentAmount - creditsToUse"
                 :label="paymentId"
                 :buttonText="`Оплатить ${mxGameDetails.game.paymentAmount - creditsToUse} ₽`"
+                :retQueryParams="`gameId=${mxGameDetails.game.gameId}`"
               />
             </div>
             <div v-else-if="isPayAvailable">
@@ -119,6 +120,7 @@
                 :amount="mxGameDetails.game.paymentAmount"
                 :label="paymentId"
                 :buttonText="`Оплатить ${mxGameDetails.game.paymentAmount} ₽`"
+                :retQueryParams="`gameId=${mxGameDetails.game.gameId}`"
               />
             </div>
             <!-- <b-btn v-if="mxGameDetails.game.status == 'settled' &&
@@ -288,6 +290,16 @@ export default {
     payByCredits: function () {
       this.$store.dispatch('payByCredits', {
         ...this.mxLocationInfo,
+      })
+      .then((res) => {
+        if (res) {
+          this.$router.push({
+            path: '/success',
+            query: {
+              gameId: this.mxLocationInfo.gameId,
+            },
+          })
+        }
       })
     },
     handleChangeOk: function() {

@@ -5,9 +5,9 @@
       </b-btn>
     <div class="d-flex flex-column px-2 m-3">
       <hr/>
-      Перевод совершен успешно!
+      Успешная оплата!
       <hr/>
-      <b-btn href="/#/" class="mt-1" variant="success">
+      <b-btn :href="retUrl" class="mt-1" variant="success">
         OK
       </b-btn>
     </div>
@@ -15,12 +15,21 @@
 </template>
 
 <script>
+import GameUtils from '../mixins/game.js'
+
 export default {
   name: 'Success',
   props: [],
+  mixins: [GameUtils],
   components: {
   },
   computed: {
+    retUrl: function () {
+      if (this.mxLocationInfo.gameId) {
+        return `/#/game?gameId=${this.mxLocationInfo.gameId}`
+      }
+      return '/#/'
+    },
   },
   methods: {
   },
