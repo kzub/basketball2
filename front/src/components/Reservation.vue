@@ -77,10 +77,9 @@
               @click="clearExpire" class="my-1" variant="warning">
               Убрать лимит на оплату
             </b-btn>
-
           </div>
 
-          <b-btn v-b-modal.ackModal class="my-1" variant="danger">Удалить запись</b-btn>
+          <b-btn v-b-modal.ackModal class="my-1 mb-5" variant="danger">Удалить запись</b-btn>
         </div>
 
         <!-- users action buttons -->
@@ -90,15 +89,37 @@
               <GameInfo :game="mxGameDetails.game" show="payment"/>
             </h5>
 
-            <b-btn v-if="isCreditsPayAvailable" @click="payByCredits" class="my-1" variant="success">
-              Оплатить со счета предоплаты
-            </b-btn>
+            <div v-if="isFullPayByCreditsAvailable">
+              <div class="w-100 my-3 rounded btn-warning">
+                <h5 class="py-2">Счет предоплаты: {{creditsTotal}} ₽</h5>
+              </div>
+              <hr/>
+              <b-btn @click="payByCredits" class="my-1 w-100" variant="success">
+                Оплатить со счета предоплаты
+              </b-btn>
+            </div>
+            <div v-else-if="isPartialPayByCreditsAvailable">
+              <div class="w-100 my-3 rounded btn-warning">
+                <h5 class="py-2">Счет предоплаты: {{creditsTotal}} ₽</h5>
+              </div>
+              <hr/>
+              <PayButton
+                :account="mxGameDetails.game.paymentGateAccount"
+                :message="mxGameDetails.game.paymentGateMessage"
+                :amount="mxGameDetails.game.paymentAmount - creditsToUse"
+                :label="paymentId"
+                :buttonText="`Оплатить ${mxGameDetails.game.paymentAmount - creditsToUse} ₽`"
+              />
+            </div>
             <div v-else-if="isPayAvailable">
+              <hr/>
               <PayButton
                 :account="mxGameDetails.game.paymentGateAccount"
                 :message="mxGameDetails.game.paymentGateMessage"
                 :amount="mxGameDetails.game.paymentAmount"
-                :label="paymentId"/>
+                :label="paymentId"
+                :buttonText="`Оплатить ${mxGameDetails.game.paymentAmount} ₽`"
+              />
             </div>
             <!-- <b-btn v-if="mxGameDetails.game.status == 'settled' &&
                          mxGameDetails.game.paymentType === 'shared' &&
@@ -109,7 +130,7 @@
             <b-btn v-b-modal.chgName class="my-1" variant="primary">
               Изменить имя
             </b-btn>
-            <b-btn class="my-1" variant="danger" v-b-modal.ackModal>
+            <b-btn class="my-1 mb-5" variant="danger" v-b-modal.ackModal>
               Отказаться от записи
             </b-btn>
           </div>
@@ -124,11 +145,14 @@
           <b-modal id="ackModal" title="Подтверждение" ok-variant="danger" ok-title="Да" cancel-title="Отмена"
             @ok="handleDeleteOk">
             <div v-if="mxGameDetails.game.paymentType === 'prepay'" class="my-2">
-                <a class="dotted" v-b-modal.payReturnInfoGI>Прочитайте условия возврата</a>
+                <a class="dotted" v-b-modal.payReturnInfo>Прочитайте условия возврата</a>
             </div>
             <p class="my-4">
               Удалить запись?
             </p>
+            <b-modal id="payReturnInfo" cancel-variant="hidden" title="Условия возврата" class="flex">
+              <RefundRules/>
+            </b-modal>
           </b-modal>
         </div>
         <!-- change name window -->
@@ -206,21 +230,21 @@ export default {
              this.mxBookInfo.paymentStatus !== 'paid' &&
              this.mxBookInfo.status !== 'waiting'
     },
-    isCreditsPayAvailable: function () {
-      if (!this.user || !this.user.credits || !this.mxGameDetails) {
-        return 0
-      }
-      const credits = this.user.credits.reduce((acc, elm) => {
-        if (elm.organizerId == this.mxGameDetails.game.organizer.userId) {
-          return acc + elm.total
-        }
-        return acc
-      }, 0)
-      return this.isPayAvailable && credits >= this.mxGameDetails.game.paymentAmount
+    creditsTotal: function () {
+      return this.mxGameDetails.creditsTotal || 0
+    },
+    creditsToUse: function () {
+      return this.mxGameDetails.creditsToUse || 0
+    },
+    isFullPayByCreditsAvailable: function () {
+      return this.isPayAvailable && (this.creditsToUse >= this.mxGameDetails.game.paymentAmount)
+    },
+    isPartialPayByCreditsAvailable: function () {
+      return this.isPayAvailable && (this.creditsToUse > 0)
     },
     paymentId: function () {
       return this.user && this.mxBookInfo &&
-        ['RSV', this.mxBookInfo.gameId, this.mxBookInfo.bookId, this.user.userId].join('|')
+        ['RSV', this.mxBookInfo.gameId, this.mxBookInfo.bookId, this.user.userId, this.creditsToUse].join('|')
     },
     bookingPhone: function () {
       if (this.$store.state.gameDetails && this.$store.state.gameDetails.users) {

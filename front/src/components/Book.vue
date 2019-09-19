@@ -15,25 +15,34 @@
       </b-btn>
 
       <GameInfo :game="mxGameDetails.game" show="place,time"/>
-      <hr/>
-      <h5 class="mt-2">
-        <GameInfo class="pl-3 text-left" :game="mxGameDetails.game" show="organizer"/>
-      </h5>
-      <h5 class="mt-2">
-        <GameInfo class="pl-3 text-left font-weight-bold" :game="mxGameDetails.game" show="payment"/>
-      </h5>
-      <hr/>
+      <div class="d-flex flex-column">
+        <div class="px-3">
+          <hr/>
+          <h5 class="mt-2">
+            <GameInfo class="pl-3 text-left" :game="mxGameDetails.game" show="organizer"/>
+          </h5>
+          <h5 class="mt-2">
+            <GameInfo class="pl-3 text-left font-weight-bold" :game="mxGameDetails.game" show="payment"/>
+          </h5>
 
-      <div v-if="!booking" class="mb-4 px-3 mt-4 d-flex flex-column">
-        <b-btn v-if="isWaiter" class="my-1" @click="bookSlot" variant="secondary">
-          Занять очередь
-        </b-btn>
-        <b-btn v-else class="my-1" @click="bookSlot" variant="primary">
-          Забронировать
-        </b-btn>
-      </div>
-      <div v-else class="spinner-border mt-5" role="status">
-        <span class="sr-only">Бронирую...</span>
+        </div>
+
+        <div v-if="!booking" class="mb-4 px-3 mt-4">
+          <div v-if="creditsTotal" class="w-100 rounded btn-warning">
+            <h5 class="py-2">Счет предоплаты: {{creditsTotal}} ₽</h5>
+          </div>
+          <hr v-if="creditsTotal"/>
+
+          <b-btn v-if="isWaiter" class="w-100 py-2" @click="bookSlot" variant="secondary">
+            Занять очередь <div class="arrow"><i class="right"></i></div>
+          </b-btn>
+          <b-btn v-else class="w-100  py-2" @click="bookSlot" variant="primary">
+            Забронировать <div class="arrow"><i class="right"></i></div>
+          </b-btn>
+        </div>
+        <div v-else class="spinner-border mx-auto mt-5" role="status">
+          <span class="sr-only">Бронирую...</span>
+        </div>
       </div>
     </div>
 
@@ -69,6 +78,9 @@ export default {
     },
     isWaiter: function () {
       return this.mxLocationInfo.slotType == 'waiter'
+    },
+    creditsTotal: function () {
+      return this.mxGameDetails.creditsTotal || 0
     },
   },
   methods: {
@@ -127,6 +139,6 @@ export default {
 <style>
 .btn-hidden {
   display: none;
-}  
-@import '../assets/backarrow.css'; 
+}
+@import '../assets/backarrow.css';
 </style>

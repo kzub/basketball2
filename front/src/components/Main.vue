@@ -9,7 +9,7 @@
 
     <router-link v-if="user && user.credits.length" to="/myCredits" tag="div">
       <b-btn class="btn-lg mt-4 mb-4 rounded-0" block variant="warning">
-        Счета предоплаты: {{credits}} ₽<div class="arrow"><i class="right"></i></div>
+        Мои предоплаты: {{credits}} ₽<div class="arrow"><i class="right"></i></div>
       </b-btn>
     </router-link>
 

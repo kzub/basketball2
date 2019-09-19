@@ -11,7 +11,7 @@
       <input name="successURL" type="hidden" :value="successURL">
 
       <b-btn type="submit" class="my-1 w-100" variant="success">
-        Оплатить
+        {{buttonText}}
       </b-btn>
     </b-form>
 
@@ -21,7 +21,7 @@
 <script>
 export default {
   name: 'PayButton',
-  props: ['account','message','amount','label'],
+  props: ['account','message','amount','label','buttonText'],
   computed: {
     successURL: function () {
       return document.location.host + '/#/success'

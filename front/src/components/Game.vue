@@ -35,8 +35,7 @@
           </router-link>
         </div>
 
-        <div v-if="mxGameDetails.waiters.length">
-          <hr/>
+        <div class="mt-4" v-if="mxGameDetails.waiters.length">
           <div class="text-left m-2">Список запасных:</div>
           <div v-for="(slot, index) in mxGameDetails.waiters" :key="'r'+index">
             <router-link class="d-flex" :to="goLink(mxGameDetails.game, slot)" tag="div">
@@ -52,8 +51,8 @@
         </div>
       </div>
 
-      <hr/>
-      <div class="pl-2 text-left">
+      <div class="text-left px-3">
+        <hr/>
         <GameInfo class="" :game="mxGameDetails.game" show="organizer"/>
         <GameInfo class="" :game="mxGameDetails.game" show="payment"/>
       </div>
@@ -81,17 +80,17 @@
           </b-button>
         </div>
       </div>
-      <hr/>
-      <div class="mt-4 mb-5 mx-3">
+      <div class="mt-4 mb-5 px-3">
+        <hr/>
         <router-link :to="'/map?gameId=' + mxGameDetails.game.gameId">
           <b-btn class="mt-2" block variant="warning">
-            Место проведения
+            Место проведения <div class="arrow"><i class="right"></i></div>
           </b-btn >
         </router-link>
         <b-btn v-if="mxGameDetails.game.chatLink"
                :href="mxGameDetails.game.chatLink"
                class="mt-2" block variant="warning">
-          Чат в телеграм
+          Чат в телеграм <div class="arrow"><i class="right"></i></div>
         </b-btn>
       </div>
 

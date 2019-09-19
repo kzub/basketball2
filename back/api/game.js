@@ -34,6 +34,22 @@ const get = async (req, res) => {
     gameDetails.users = users;
   }
 
+  if (req.userId && gameDetails.game.isPrepay()) {
+    const credits = await req.dal.payment.getUserCreditsForOrganizerId(req.userId, gameDetails.game.organizer.userId);
+    if (credits && credits.total > 0) {
+      gameDetails.creditsTotal = credits.total;
+      if (credits.total >= gameDetails.game.paymentAmount) {
+        gameDetails.creditsToUse = gameDetails.game.paymentAmount;
+      }
+      else if (gameDetails.game.paymentAmount - credits.total >= req.dal.payment.MIN_PAYMENT_AMOUNT){
+        gameDetails.creditsToUse = credits.total;
+      }
+      else {
+        gameDetails.creditsToUse = gameDetails.game.paymentAmount - req.dal.payment.MIN_PAYMENT_AMOUNT; 
+      }
+    }
+  }
+
   res.status(200).send(gameDetails);
 };
 
@@ -46,7 +62,7 @@ const add = async (req, res) => {
   const user = await req.dal.user.getUser(req.userId);
 
   if (!organizerSettings.adminOf(place.placeId)) {
-    req.log.warn(`not game admin (${req.userId}) try to add new game 
+    req.log.warn(`not game admin (${req.userId}) try to add new game
       ${JSON.stringify(newGame)}`);
     res.status(403).send({
       error: true,
@@ -198,7 +214,7 @@ const getOptions = async (req, res) => {
       }],
     },
   });
-  
+
   const prepays = await req.dal.payment.getPrepayMethodsByOrganizerId(req.userId);
   for (const prepay of prepays) {
     paymentsOptions.push({
@@ -225,7 +241,7 @@ const getOptions = async (req, res) => {
       },
     });
   }
-  
+
   options.push({
     label: 'Режим оплаты',
     output: 'paymentType',
@@ -272,7 +288,7 @@ const sendPlayerList = async (req, res) => {
   }
 
   const list = gameDetails.players.filter(p => p && p.ts > 0).map(p => p.playerName).join('\n');
- 
+
   events.emit('game.players.list', {
     game: gameDetails.game,
     text: `Список игроков:\n${list}`

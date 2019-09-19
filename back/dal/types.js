@@ -73,7 +73,7 @@ Game.prototype.isRefundable = function () {
   if (this.paymentType === 'prepay') {
     const tsGameStart = (new Date(`${this.date}T${this.timeStart}:00+0300`)).valueOf();
     const hoursToGameBegin = Math.ceil((tsGameStart - Date.now())/1000/60/60);
-    return hoursToGameBegin > 24;
+    return hoursToGameBegin >= 24;
   }
   return false;
 };

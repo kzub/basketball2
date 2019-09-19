@@ -2,6 +2,7 @@ let log; // eslint-disable-line
 let dal; // eslint-disable-line
 let execSQL;
 let maybeText;
+const MIN_PAYMENT_AMOUNT = 2;
 
 const addTransaction = async (recipientId, paySystem, amount, gameId, bookId, userId, rawData = {}) => {
   const res = await execSQL.run(`INSERT INTO
@@ -117,6 +118,7 @@ module.exports = {
       getPrepayMethodsByOrganizerId,
       getUserCredits,
       getUserCreditsForOrganizerId,
+      MIN_PAYMENT_AMOUNT,
     };
   }
 };

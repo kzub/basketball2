@@ -48,6 +48,7 @@
             :message="freePayment.paymentGateMessage"
             :amount="form.amount"
             :label="paymentId"
+            buttonText="Отправить"
           />
         </b-card-body>
       </div>
