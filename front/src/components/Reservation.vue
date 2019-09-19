@@ -1,19 +1,19 @@
 <template>
   <div>
+    <b-btn @click="back" class="btn-lg mb-3 rounded-0" block variant="warning">
+      <div class="arrow-left"><i class="left"></i></div>
+      <span>Назад</span>
+    </b-btn>
+
     <div v-if="!viewDataUpdated || !mxGameDetails || !mxBookInfo" class="my-2">
       <div class="d-flex justify-content-center">
-        <div class="spinner-border" role="status">
+        <div class="spinner-border mt-3" role="status">
           <span class="sr-only">Загружается...</span>
         </div>
       </div>
     </div>
 
     <div v-else>
-      <b-btn @click="back" class="btn-lg mb-3 rounded-0" block variant="warning">
-        <div class="arrow-left"><i class="left"></i></div>
-        <span>Назад</span>
-      </b-btn>
-
       <!-- game and payment info -->
       <GameInfo :game="mxGameDetails.game" show="place,time"/>
 
