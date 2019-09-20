@@ -12,7 +12,7 @@ const userName = (state, p) => state.user.name = p
 const creditors = (state, p) => state.creditors = p
 
 const setUpdatedFlag = (state, p) => {
-  console.log('setUpdatedFlag', p)
+  console.log('setUpdatedFlag', p) // eslint-disable-line no-console
   if (typeof p !== 'boolean') {
     throw `setUpdatedFlag should use boolean, currently: ${typeof(p)}`
   }

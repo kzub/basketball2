@@ -181,7 +181,7 @@ const cancel = async (req, res) => {
   events.emit(event, { reservation, isWaiter });
 
   if (isWaiter) {
-    res.status(200).send({ ok });
+    res.status(200).send({ ok: true });
     return;
   }
 
@@ -192,20 +192,21 @@ const cancel = async (req, res) => {
     events.emit('reservation.waiter.promoted', { reservation: promotedReservation });
   }
 
-  if (game.isRefundable() && reservation.realPaymentComplete()) {
-    req.log.debug('reservation is REFUNDABLE');
-    // userId, organizerId, amount, sourceType, sourceId, comment
-    await req.dal.payment.addCreditTransaction(reservation.userId, game.organizer.userId, reservation.paymentAmount, 'reservation.cancel', reservation.bookId);
+  let refundAmount;
+  if (game.isPrepay() && reservation.realPaymentComplete() && game.hoursToGameBegin() >= 24) {
+    req.log.info(`reservation.cancel() Reservation ${gameId}/${bookId} is REFUNDABLE`);
+    refundAmount = Math.ceil(reservation.paymentAmount * 0.9);
+    await req.dal.payment.addCreditTransaction(reservation.userId, game.organizer.userId, refundAmount, 'reservation.cancel', reservation.bookId);
     events.emit('user.credits.added', {
       userId: reservation.userId,
       organizerId: game.organizer.userId,
       amount: reservation.paymentAmount,
     });
   } else {
-    req.log.debug('reservation is NOT REFUNDABLE');
+    req.log.info(`reservation.cancel() Reservation ${gameId}/${bookId} is NOT REFUNDABLE`);
   }
 
-  res.status(200).send({ ok });
+  res.status(200).send({ ok: true, refundAmount });
 };
 
 module.exports = {

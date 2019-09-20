@@ -132,7 +132,7 @@
             <b-btn v-b-modal.chgName class="my-1" variant="primary">
               Изменить имя
             </b-btn>
-            <b-btn class="my-1 mb-5" variant="danger" v-b-modal.ackModal>
+            <b-btn class="my-1" variant="danger" v-b-modal.ackModal>
               Отказаться от записи
             </b-btn>
           </div>
@@ -140,21 +140,15 @@
           <h5 class="mt-4 mb-5">
             <GameInfo :game="mxGameDetails.game" show="organizer"/>
           </h5>
-          <hr/>
         </div>
         <!-- delete confirmation window -->
         <div>
           <b-modal id="ackModal" title="Подтверждение" ok-variant="danger" ok-title="Да" cancel-title="Отмена"
             @ok="handleDeleteOk">
-            <div v-if="mxGameDetails.game.paymentType === 'prepay'" class="my-2">
-                <a class="dotted" v-b-modal.payReturnInfo>Прочитайте условия возврата</a>
-            </div>
+            <RefundRules/>
             <p class="my-4">
               Удалить запись?
             </p>
-            <b-modal id="payReturnInfo" cancel-variant="hidden" title="Условия возврата" class="flex">
-              <RefundRules/>
-            </b-modal>
           </b-modal>
         </div>
         <!-- change name window -->
@@ -312,9 +306,34 @@ export default {
       })
     },
     handleDeleteOk: function () {
+      let refundAmount;
       this.$store.dispatch('deleteReservation', { ...this.mxLocationInfo })
-      .then(() => { this.$store.dispatch('getUserInfo') })
-      .then(this.back)
+      .then((res) => {
+        refundAmount = res && res.refundAmount
+        this.$store.dispatch('getUserInfo')
+      })
+      .then(() => {
+        if (refundAmount) {
+          if (this.isAdmin) {
+            this.$router.push({
+              path: '/credits',
+              query: {
+                refundAmount,
+                playerName: this.mxBookInfo.playerName,
+              },
+            })
+          } else {
+            this.$router.push({
+              path: '/myCredits',
+              query: {
+                refundAmount,
+              },
+            })
+          }
+          return
+        }
+        this.back()
+      })
     }
   },
 }

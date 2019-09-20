@@ -51,7 +51,7 @@ const payByCredits = ({ commit, state }, { gameId, bookId }) => {
       console.log('/api/reservation/payByCredits response:', response.data)  // eslint-disable-line
       return getUserInfo({ commit }) // update credits data
     })
-    .then(response => {
+    .then(() => {
       return updateGameData({ commit, state }, gameId)
     })
     .catch(error => {
@@ -84,6 +84,7 @@ const deleteReservation = ({ commit }, { gameId, bookId }) => {
     .then(response => {
       console.log('/api/reservation/cancel response:', response.data)  // eslint-disable-line
       commit('setUpdatedFlag', true)
+      return response.data
     })
     .catch(error => {
       console.log('/api/reservation/cancel error:', error)  // eslint-disable-line

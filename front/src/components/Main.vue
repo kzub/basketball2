@@ -29,7 +29,7 @@
 
       <router-link v-if="user.hasYM" to="/credits" tag="div">
         <b-btn class="btn-lg mt-2 mb-3 rounded-0" block variant="secondary">
-          Список предоплат <div class="arrow"><i class="right"></i></div>
+          Счета предоплат <div class="arrow"><i class="right"></i></div>
         </b-btn>
       </router-link>
 

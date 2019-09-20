@@ -19,8 +19,9 @@
 
     <div v-if="visible('payment')">
       <div v-if="game.paymentType == 'prepay'">
-        <div class="mb-2">Предоплата (<a class="dotted" v-b-modal.payReturnInfoGI>условия возврата</a>) </div>
+        <div>Предоплата</div>
         <div>Стоимость: {{ game.paymentAmount }} ₽ </div>
+        <div><a class="dotted" v-b-modal.payReturnInfoGI>Условия возврата</a></div>
         <b-modal id="payReturnInfoGI" cancel-variant="hidden" title="Условия возврата" class="flex">
           <RefundRules/>
         </b-modal>

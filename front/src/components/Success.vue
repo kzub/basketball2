@@ -1,15 +1,15 @@
 <template>
   <div>
-      <b-btn class="w-100 btn-lg mb-3 rounded-0" variant="primary">
-        Информация
-      </b-btn>
-    <div class="d-flex flex-column px-2 m-3">
-      <hr/>
-      Успешная оплата!
-      <hr/>
-      <b-btn :href="retUrl" class="mt-1" variant="success">
-        OK
-      </b-btn>
+    <b-btn class="w-100 btn-lg mb-3 rounded-0" variant="primary">
+      Информация
+    </b-btn>
+    <div class="d-flex flex-column justify-content-center">
+      <div class="mt-4"> Успешная оплата! </div>
+      <div class="mt-4">
+        <b-btn :href="retUrl" class="mt-1 w-25" variant="success">
+          OK
+        </b-btn>
+      </div>
     </div>
   </div>
 </template>

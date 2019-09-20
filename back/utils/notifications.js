@@ -48,6 +48,14 @@ emitter.on('payment.custom', async ({ amount, payerName, receiverName }) => {
   sendAdminMessage(`Получен платеж ${amount}р. для ${receiverName} ${fromWhom}`, 'info');
 });
 
+emitter.on('payment.wrong.amount', async ({ /*reservation,*/ game, amount, creditsToUse, currentCredits }) => {
+  sendAdminMessage(`Ошибка суммы платежа, ожидается: ${game.paymentAmount}р., получено: ${amount}р., запрошены кредиты: ${creditsToUse}р., есть кредитов: ${currentCredits}р.`, 'error');
+});
+
+emitter.on('payment.wrong.userId', async ({ reservation, userId }) => {
+  sendAdminMessage(`Ошибка. Не совпадает userId платежа, в брони: ${reservation.userId}, в платеже ${userId}`, 'error');
+});
+
 // TODO брать в платежных системах по organizotr какой notifyId нужен для уведомлений
 /* emitter.on('user.credits.added', async ({ user, amount, paymentId }) => {
   // const payment = await dal.payment.getPayment(paymentId);

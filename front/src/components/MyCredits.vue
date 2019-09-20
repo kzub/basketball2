@@ -1,6 +1,6 @@
 <template>
   <div>
-    <b-btn @click="back" class="btn-lg mb-3 rounded-0" block variant="warning">
+    <b-btn v-if="!refundAmount" @click="back" class="btn-lg mb-3 rounded-0" block variant="warning">
       <div class="arrow-left"><i class="left"></i></div>
       <span>Назад</span>
     </b-btn>
@@ -14,17 +14,31 @@
     </div>
 
     <div v-else>
-      <b-card-body class="p-2 m-2">
-        <h3>Мои предоплаты</h3>
-        <p class="mt-4">Вы можете использовать средства со счета для оплаты участия в будущих играх организатора</p>
-      </b-card-body>
-      
-      <b-table small borderless striped 
-        :fields="creditsFields"
-        :items="creditsList">
-      </b-table>
+      <div v-if="refundAmount">
+        <b-btn class="w-100 btn-lg mb-3" variant="warning">
+          Начисление
+        </b-btn>
+        <div>
+          <b-btn class="my-4 w-75" variant="danger">Вам начислено {{refundAmount}} ₽</b-btn>
+        </div>
+        <div class="mt-2">
+          <b-btn class="w-25" @click="ok">OK</b-btn>
+        </div>
+      </div>
+      <div v-else>
+        <b-card-body class="p-2 m-2">
+          <h3>Мои предоплаты</h3>
+          <p class="mt-4">Вы можете использовать средства со счета для оплаты участия в будущих играх организатора</p>
+        </b-card-body>
+
+
+        <b-table small borderless striped
+          :fields="creditsFields"
+          :items="creditsList">
+        </b-table>
+      </div>
     </div>
-    
+
   </div>
 </template>
 
@@ -33,6 +47,16 @@
 export default {
   name: 'MyCredits',
   components: {
+  },
+  mounted: function() {
+    if (this.$router.currentRoute.query.refundAmount) {
+      this.refundAmount = this.$router.currentRoute.query.refundAmount
+    }
+  },
+  data: function () {
+    return {
+      refundAmount: 0,
+    }
   },
   computed: {
     viewDataUpdated () {
@@ -55,7 +79,14 @@ export default {
     },
   },
   methods: {
+    ok: function () {
+      this.refundAmount = 0
+    },
     back: function() {
+      if (this.refundAmount) {
+        this.refundAmount = 0
+        return
+      }
       this.$router.push({
         path: '/',
       })

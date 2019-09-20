@@ -15,19 +15,25 @@
 
     <div v-else>
       <b-card-body class="p-2 m-2">
-        <h3>Список предоплат</h3>
+        <h3>Счета предоплат</h3>
         <p class="mt-4">Игроки, которые перевели, но не использовали свои средства</p>
       </b-card-body>
-      
+
+      <div v-if="refundAmount" class="mb-4">
+        <b-btn variant="danger">
+          Начислено {{refundAmount}} ₽ для {{refundPlayerName}}
+        </b-btn>
+      </div>
+
       <div v-if="creditorsCount">
-        <b-table small borderless striped 
+        <b-table small borderless striped
           :fields="creditorsFields"
           :items="creditorsList">
-          
+
           <template v-slot:cell(actions)="data">
             <b-badge class="m-1 px-3 py-2">-</b-badge>
             <b-badge class="m-1 px-3 py-2">+</b-badge>
-            
+
           </template>
         </b-table>
       </div>
@@ -70,6 +76,12 @@ export default {
         return []
       }
       return this.$store.state.creditors.creditorsList
+    },
+    refundAmount: function () {
+      return this.$router.currentRoute.query.refundAmount
+    },
+    refundPlayerName: function () {
+      return this.$router.currentRoute.query.playerName
     },
   },
   methods: {
