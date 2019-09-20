@@ -53,8 +53,8 @@
 
       <div class="text-left px-3">
         <hr/>
-        <GameInfo class="" :game="mxGameDetails.game" show="organizer"/>
-        <GameInfo class="" :game="mxGameDetails.game" show="payment"/>
+        <GameInfo :game="mxGameDetails.game" show="organizer"/>
+        <GameInfo :game="mxGameDetails.game" show="payment"/>
       </div>
       <div v-if="isAdmin" class="m-1 mx-2 mt-4 mb-4">
         <div class="m-1 p-2 mx-2 rounded adminMode">

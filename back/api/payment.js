@@ -3,6 +3,7 @@ const events = require('../utils/notifications');
 const onReservationPayment = async (req, paySystem, amount, label, organizer) => {
   const [, gameId, bookId, userId, strCreditsToUse] = label.split('|');
   const creditsToUse = Number(strCreditsToUse);
+  let amountForRsv = Number(amount);
 
   const paymentId = await req.dal.payment.addTransaction(organizer.userId, paySystem, amount, gameId, bookId, userId, req.body);
 
@@ -23,9 +24,9 @@ const onReservationPayment = async (req, paySystem, amount, label, organizer) =>
     }
 
     await req.dal.payment.addCreditTransaction(userId, organizer.userId, -creditsToUse, 'reservation.new', reservation.bookId);
+    amountForRsv = amount + creditsToUse;
   }
 
-  const amountForRsv = amount + (creditsToUse || 0);
   reservation.book();
   reservation.makePaid(amountForRsv);
   reservation.setExpire(0);
