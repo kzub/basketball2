@@ -254,33 +254,31 @@ const getUserInfo = ({ commit }) => {
 
 const sendCheckCode = ({ commit }, phone) => {
   console.log(`actions::sendCheckCode ${phone}`)  // eslint-disable-line
-  commit('setUpdatedFlag', false)
+  // commit('setUpdatedFlag', false) не нужно - всё ломает в регистрации
+  // потому что пока отправляется - удаляется форма и сохраненные данные
   return axios
     .get(`/api/user/sendCheckCode/${phone}`)
     .then(response => {
       console.log('/api/user/sendCheckCode response:', response.data)  // eslint-disable-line
-      commit('setUpdatedFlag', true)
       return response.data
     })
     .catch(error => {
       console.log('/api/user/sendCheckCode error:', error)  // eslint-disable-line
-      commit('setUpdatedFlag', true)
     })
 }
 
 const authUser = ({ commit }, { phone, code }) => {
   console.log(`actions::authUser ${phone} ${code}`)  // eslint-disable-line
-  commit('setUpdatedFlag', false)
+  // commit('setUpdatedFlag', false) не нужно - всё ломает в регистрации
+  // потому что пока отправляется - удаляется форма и сохраненные данные
   return axios
     .get(`/api/user/auth/${phone}/${code}`)
     .then(response => {
       console.log('/api/user/auth response:', response.data)  // eslint-disable-line
-      commit('setUpdatedFlag', true)
       return response.data
     })
     .catch(error => {
       console.log('/api/user/auth error:', error)  // eslint-disable-line
-      commit('setUpdatedFlag', true)
     })
 }
 

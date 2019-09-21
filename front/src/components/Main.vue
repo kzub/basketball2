@@ -7,7 +7,7 @@
     </b-card-body>
     <Games :games="games"/>
 
-    <router-link v-if="user && user.credits.length" to="/myCredits" tag="div">
+    <router-link v-if="user && user.credits && user.credits.length" to="/myCredits" tag="div">
       <b-btn class="btn-lg mt-4 mb-4 rounded-0" block variant="warning">
         Мои предоплаты: {{credits}} ₽<div class="arrow"><i class="right"></i></div>
       </b-btn>

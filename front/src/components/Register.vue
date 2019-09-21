@@ -77,26 +77,16 @@
 </template>
 
 <script>
-
-  import GameUtils from '../mixins/game.js'
-
   export default {
     name: 'Register',
-    mixins: [GameUtils],
-    props: ['name', 'phone'],
     data () {
       return {
         form: {
-          phone: this.phone,
-          name: this.name,
+          phone: undefined,
           code: '',
         },
         sendingSMS: false,
       }
-    },
-    components: {
-    },
-    computed: {
     },
     methods: {
       sendCheckCode (evt) {
