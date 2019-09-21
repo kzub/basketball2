@@ -90,19 +90,19 @@
             </h5>
 
             <div v-if="isFullPayByCreditsAvailable">
-              <div class="w-100 my-3 rounded btn-warning">
-                <h5 class="py-2">Счет предоплаты: {{creditsTotal}} ₽</h5>
-              </div>
               <hr/>
+              <div class="text-right my-3">
+                <h5 class="py-2">Ваш счет предоплаты: {{creditsTotal}} ₽</h5>
+              </div>
               <b-btn @click="payByCredits" class="my-1 w-100" variant="success">
                 Оплатить со счета предоплаты
               </b-btn>
             </div>
             <div v-else-if="isPartialPayByCreditsAvailable">
-              <div class="w-100 my-3 rounded btn-warning">
-                <h5 class="py-2">Счет предоплаты: {{creditsTotal}} ₽</h5>
-              </div>
               <hr/>
+              <div class="text-right my-3">
+                <h5 class="py-2">Ваш счет предоплаты: {{creditsTotal}} ₽</h5>
+              </div>
               <PayButton
                 :account="mxGameDetails.game.paymentGateAccount"
                 :message="mxGameDetails.game.paymentGateMessage"
@@ -112,7 +112,7 @@
                 :retQueryParams="`gameId=${mxGameDetails.game.gameId}`"
               />
             </div>
-            <div v-else-if="isPayAvailable">
+            <div v-else-if="isPayAvailable" class="mb-4">
               <hr/>
               <PayButton
                 :account="mxGameDetails.game.paymentGateAccount"
@@ -123,18 +123,25 @@
                 :retQueryParams="`gameId=${mxGameDetails.game.gameId}`"
               />
             </div>
+            <div v-else>
+              <hr/>
+            </div>
             <!-- <b-btn v-if="mxGameDetails.game.status == 'settled' &&
                          mxGameDetails.game.paymentType === 'shared' &&
                          mxBookInfo.paymentStatus !== 'paid'"
                    @click="informAboutPayment" class="my-1" variant="success">
               Сообщить об оплате
             </b-btn> -->
-            <b-btn v-b-modal.chgName class="my-1" variant="primary">
-              Изменить имя
-            </b-btn>
-            <b-btn class="my-1" variant="danger" v-b-modal.ackModal>
-              Отказаться от записи
-            </b-btn>
+            <div>
+              <b-btn v-b-modal.chgName class="my-1 w-100" variant="primary">
+                Изменить имя
+              </b-btn>
+            </div>
+            <div>
+              <b-btn class="my-1 w-100" variant="danger" v-b-modal.ackModal>
+                Отказаться от записи
+              </b-btn>
+            </div>
           </div>
           <hr/>
           <h5 class="mt-4 mb-5">

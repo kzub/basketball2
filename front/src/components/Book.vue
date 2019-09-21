@@ -24,14 +24,13 @@
           <h5 class="mt-2">
             <GameInfo class="pl-3 text-left font-weight-bold" :game="mxGameDetails.game" show="payment"/>
           </h5>
-
+          <hr/>
         </div>
 
-        <div v-if="!booking" class="mb-4 px-3 mt-4">
-          <div v-if="creditsTotal" class="w-100 rounded btn-warning">
-            <h5 class="py-2">Счет предоплаты: {{creditsTotal}} ₽</h5>
+        <div v-if="!booking" class="mb-4 px-3 mt-2">
+          <div v-if="creditsTotal" class="text-left">
+            <h5 class="p-2">Ваш счет предоплаты: {{creditsTotal}} ₽</h5>
           </div>
-          <hr v-if="creditsTotal"/>
 
           <b-btn v-if="isWaiter" class="w-100 py-2" @click="bookSlot" variant="secondary">
             Занять очередь <div class="arrow"><i class="right"></i></div>
