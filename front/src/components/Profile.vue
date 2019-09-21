@@ -25,7 +25,7 @@
         <b-btn class="p-2 rounded-0" block variant="secondary">
             Фамилия и имя
           </b-btn>
-        <b-form @submit="changeName" class="mt-3 d-flex flex-column" >
+        <b-form @submit="changeName" class="mt-3" >
           <b-form-group id="userName"
                         label-for="userName"
                         class="description mx-4 my-2"
@@ -38,7 +38,7 @@
                           placeholder="Фамилия и имя">
             </b-form-input>
           </b-form-group>
-          <b-btn class="mx-4 my-2" type="submit" variant="primary">Сохранить</b-btn>
+          <b-btn class="mx-4 my-2 w-75" type="submit" variant="primary">Сохранить</b-btn>
         </b-form>
       </div>
       <div v-else>
@@ -52,9 +52,9 @@
           </b-card-body>
         </b-card>
 
-        <div class="mt-3 d-flex flex-column">
-          <b-btn class="mx-4 my-2" @click="changeProfile" variant="primary">Изменить</b-btn>
-          <b-btn class="mx-4 my-2" @click="exit" variant="danger">Выйти</b-btn>
+        <div class="mt-3">
+          <b-btn class="mx-4 my-2 w-75" @click="changeProfile" variant="primary">Изменить</b-btn>
+          <b-btn class="mx-4 my-2 w-75" @click="exit" variant="danger">Выйти</b-btn>
         </div>
       </div>  
     </div>

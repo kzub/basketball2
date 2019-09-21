@@ -30,7 +30,7 @@
                   </b-form-input>
                 </div>
               </b-form-group>
-              <b-btn type="submit" variant="primary">Отправить код</b-btn>
+              <b-btn class="w-75" type="submit" variant="primary">Отправить код</b-btn>
             </b-form>
           </b-card-body>
         </b-collapse>
@@ -54,7 +54,7 @@
                 </b-form-input>
               </b-form-group>
 
-              <b-btn type="submit" variant="primary">Отправить</b-btn>
+              <b-btn class="w-75" type="submit" variant="primary">Отправить</b-btn>
             </b-form>
           </b-card-body>
         </b-collapse>
