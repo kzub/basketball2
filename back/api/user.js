@@ -90,7 +90,6 @@ const auth = async (req, res) => {
   };
   res.cookie('auth', authCookie, options).status(200).send({
     auth: true,
-    ...user,
   });
 };
 

@@ -110,14 +110,16 @@
           phone: this.form.phone,
           code: this.form.code,
         })
-        .then(user => {
-          if (!user || !user.auth) {
+        .then(resp => {
+          if (!resp || !resp.auth) {
             this.$bvModal.show('err-check-code')
             this.form.code = ''
             return
           }
-          this.$store.commit('user', user)
-          if (user.name) {
+          return this.$store.dispatch('getUserInfo')
+        })
+        .then(user => {
+          if (user && user.name) {
             if (this.$router.currentRoute.query.retUrl) {
               this.$router.push(this.$router.currentRoute.query.retUrl)
               return
