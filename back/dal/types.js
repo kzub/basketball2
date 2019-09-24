@@ -167,6 +167,10 @@ function Reservation (obj) {
   this.status        = checkString(obj.status, true, 'Reservation constructor: bad status');
 }
 
+Reservation.prototype.exists = function () {
+  return this.ts > 0;
+};
+
 Reservation.prototype.isOwnerUser = function (user) {
   return this.userId === user.userId;
 };

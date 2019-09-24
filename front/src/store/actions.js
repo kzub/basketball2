@@ -234,6 +234,21 @@ const sendPlayersList = ({ commit }, { gameId }) => {
     })
 }
 
+const askToPay = ({ commit }, { gameId }) => {
+  console.log('actions::askToPay', gameId)  // eslint-disable-line
+  commit('setUpdatedFlag', false)
+  return axios
+    .get(`/api/game/askToPay/${gameId}`)
+    .then(response => {
+      console.log(`/api/game/askToPay/${gameId} response:`, response.data)  // eslint-disable-line
+      commit('setUpdatedFlag', true)
+    })
+    .catch(error => {
+      console.log('/api/game/askToPay/${gameId} error:', error)  // eslint-disable-line
+      commit('setUpdatedFlag', true)
+    })
+}
+
 const getUserInfo = ({ commit }) => {
   console.log('actions::getUserInfo')  // eslint-disable-line
   commit('setUpdatedFlag', false)
@@ -252,7 +267,7 @@ const getUserInfo = ({ commit }) => {
     })
 }
 
-const sendCheckCode = ({ commit }, phone) => {
+const sendCheckCode = (store, phone) => {
   console.log(`actions::sendCheckCode ${phone}`)  // eslint-disable-line
   // commit('setUpdatedFlag', false) не нужно - всё ломает в регистрации
   // потому что пока отправляется - удаляется форма и сохраненные данные
@@ -267,7 +282,7 @@ const sendCheckCode = ({ commit }, phone) => {
     })
 }
 
-const authUser = ({ commit }, { phone, code }) => {
+const authUser = (store, { phone, code }) => {
   console.log(`actions::authUser ${phone} ${code}`)  // eslint-disable-line
   // commit('setUpdatedFlag', false) не нужно - всё ломает в регистрации
   // потому что пока отправляется - удаляется форма и сохраненные данные
@@ -337,6 +352,7 @@ const init = ({ dispatch }) => {
 }
 
 export default {
+  askToPay,
   addGame,
   authUser,
   bookSlot,

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div v-if="!viewDataUpdated" class="my-2">
+    <div v-if="!viewDataUpdated || !user" class="my-2">
       <div class="d-flex justify-content-center">
         <div class="spinner-border" role="status">
           <span class="sr-only">Загружается...</span>
@@ -83,7 +83,7 @@ export default {
   },
   computed: {
     paymentId: function () {
-      return ['FP', this.user && this.user.userId, this.form.sender.slice(0, 20)].join('|')
+      return [this.user.payEnv, 'FP', this.user.userId, this.form.sender.slice(0, 20)].join('|')
     },
     freePayment: function () {
       return this.$store.state.freePayment

@@ -82,9 +82,6 @@ export default {
   },
   methods: {
     gameType: function (game) {
-      if (game.status === 'poll') {
-        return 'Предварительная запись'
-      }
       if (game.status === 'settled') {
         return '' //'Игра запланирована'
       }
@@ -95,10 +92,7 @@ export default {
     },
     gameBorderColor: function (game) {
       let mode = '';
-      if (game.status === 'poll') {
-        mode += ' btn-secondary'
-      }
-      else if (game.status === 'disabled') {
+      if (game.status === 'disabled') {
         mode += ' btn-danger'
       }
       if (this.$store.state.user && this.$store.state.user.userId === game.organizer.userId) {

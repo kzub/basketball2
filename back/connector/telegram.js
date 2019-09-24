@@ -25,7 +25,8 @@ const send = async (token, chatId, msg) => {
   // console.log(token, chatId, msg)
   return botCmd(token, 'sendMessage', {
     chat_id: chatId,
-    text: msg
+    text: msg,
+    parse_mode: 'markdown',
   });
 };
 

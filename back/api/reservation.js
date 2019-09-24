@@ -5,6 +5,13 @@ const book = async (req, res) => {
   const { gameId, slotType } = req.body;
   const user = await req.dal.user.getUser(req.userId);
   const game = await req.dal.game.getGame(gameId);
+  const isGameAdmin = game.isAdminUser(user);
+
+  if (!isGameAdmin && game.isTimePassed()) {
+    req.log.error(`book() not game admin try to book slot for passed game, ${gameId}/${req.userId}`);
+    res.status(200).send({ ok: false });
+    return;
+  }
 
   let bookId = 0;
   let ttl = 0;
@@ -21,7 +28,7 @@ const book = async (req, res) => {
     } else {
       game.freeWaiterSlots--;
     }
-    events.emit('reservation.new', { game, bookId, user, slotType });
+    events.emit(`reservation.${slotType}.new`, { game, bookId, user });
   }
 
   res.status(200).send({
@@ -56,9 +63,9 @@ const changePay = async (req, res) => {
     } else {
       reservation.makePaid();
       if (reservation.expireAt > 0) {
-        event = 'reservation.admin.make.book';
+        event = 'reservation.admin.make.book'; // режим предоплаты, считаем что записал на игру
       } else {
-        event = 'reservation.admin.make.paid';
+        event = 'reservation.admin.make.paid'; // режим постоплаты
       }
       reservation.setExpire(0);
     }
@@ -145,7 +152,8 @@ const setPlayer = async (req, res) => {
   const reservation = await req.dal.reservation.get(gameId, bookId);
 
   let ok = false;
-  if (game.isAdminUser(user) || reservation.isOwnerUser(user)) {
+  if (game.isAdminUser(user) ||
+     (reservation.isOwnerUser(user) && !game.isTimePassed())) {
     reservation.playerName = name;
     ok = await req.dal.reservation.update(reservation);
   }
@@ -160,7 +168,10 @@ const cancel = async (req, res) => {
   const isWaiter = reservation.isWaiter();
   const isGameAdmin = game.isAdminUser(user);
 
-  if ((!isGameAdmin && !reservation.isOwnerUser(user)) || reservation.isCanceled()) {
+  if ((!isGameAdmin && !reservation.isOwnerUser(user)) ||
+      (!isGameAdmin && game.isTimePassed()) ||
+      reservation.isCanceled()) {
+    req.log.error(`cancel() illegal try to cancel game, ${gameId}/${req.userId}`);
     res.status(200).send({ ok: false });
     return;
   }
@@ -168,17 +179,14 @@ const cancel = async (req, res) => {
   reservation.cancel();
   const ok = await req.dal.reservation.update(reservation);
   if (!ok) {
+    req.log.error(`cancel():req.dal.reservation.update() error, ${gameId}/${reservation.bookId}/${req.userId}`);
     res.status(200).send({ ok: false });
     return;
   }
 
-  let event;
-  if (isGameAdmin) {
-    event = reservation.isPaid() ? 'reservation.admin.cancel.paid' : 'reservation.admin.cancel.unpaid';
-  } else {
-    event = reservation.isPaid() ? 'reservation.canceled.paid' : 'reservation.canceled.unpaid';
-  }
-  events.emit(event, { reservation, isWaiter });
+  const who = isGameAdmin ? 'admin' : (isWaiter ? 'waiter' : 'player');
+  const eventName = `reservation.${who}.cancel.${reservation.paymentStatus}`;
+  events.emit(eventName, { reservation, isWaiter });
 
   if (isWaiter) {
     res.status(200).send({ ok: true });
@@ -189,6 +197,7 @@ const cancel = async (req, res) => {
   const promotedRsvId = await req.dal.game.moveWaiters(gameId, ttl);
   if (promotedRsvId) {
     const promotedReservation = await req.dal.reservation.get(gameId, promotedRsvId);
+    // TODO: попробовтаь записать, если есть кредиты
     events.emit('reservation.waiter.promoted', { reservation: promotedReservation });
   }
 
@@ -198,9 +207,9 @@ const cancel = async (req, res) => {
     refundAmount = Math.ceil(reservation.paymentAmount * 0.9);
     await req.dal.payment.addCreditTransaction(reservation.userId, game.organizer.userId, refundAmount, 'reservation.cancel', reservation.bookId);
     events.emit('user.credits.added', {
-      userId: reservation.userId,
-      organizerId: game.organizer.userId,
-      amount: reservation.paymentAmount,
+      playerName: reservation.playerName,
+      receiverName: game.organizer.name,
+      amount: refundAmount,
     });
   } else {
     req.log.info(`reservation.cancel() Reservation ${gameId}/${bookId} is NOT REFUNDABLE`);

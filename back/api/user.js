@@ -1,11 +1,18 @@
 const authLib = require('../utils/auth');
 const events = require('../utils/notifications');
 const smsGate = require('../connector/twilio');
+const utils = require('../utils/misc');
+
+const config = utils.getConfig();
+const payEnv = {
+  payEnv: config.payproxy.env
+};
 
 const get = async (req, res) => {
   if (!req.userId) {
     res.status(200).send({
       auth: false,
+      ...payEnv,
     });
     return;
   }
@@ -17,6 +24,7 @@ const get = async (req, res) => {
     auth: true,
     ...user,
     credits,
+    ...payEnv,
   });
 };
 

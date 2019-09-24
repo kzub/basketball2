@@ -5,7 +5,7 @@
       <span>Назад</span>
     </b-btn>
 
-    <div v-if="!viewDataUpdated || !mxGameDetails || !mxBookInfo" class="my-2">
+    <div v-if="!viewDataUpdated || !mxGameDetails || !mxBookInfo || !user" class="my-2">
       <div class="d-flex justify-content-center">
         <div class="spinner-border mt-3" role="status">
           <span class="sr-only">Загружается...</span>
@@ -107,7 +107,7 @@
                 :account="mxGameDetails.game.paymentGateAccount"
                 :message="mxGameDetails.game.paymentGateMessage"
                 :amount="mxGameDetails.game.paymentAmount - creditsToUse"
-                :label="paymentId"
+                :label="paymentLabel"
                 :buttonText="`Оплатить ${mxGameDetails.game.paymentAmount - creditsToUse} ₽`"
                 :retQueryParams="`gameId=${mxGameDetails.game.gameId}`"
               />
@@ -118,7 +118,7 @@
                 :account="mxGameDetails.game.paymentGateAccount"
                 :message="mxGameDetails.game.paymentGateMessage"
                 :amount="mxGameDetails.game.paymentAmount"
-                :label="paymentId"
+                :label="paymentLabel"
                 :buttonText="`Оплатить ${mxGameDetails.game.paymentAmount} ₽`"
                 :retQueryParams="`gameId=${mxGameDetails.game.gameId}`"
               />
@@ -126,12 +126,6 @@
             <div v-else>
               <hr/>
             </div>
-            <!-- <b-btn v-if="mxGameDetails.game.status == 'settled' &&
-                         mxGameDetails.game.paymentType === 'shared' &&
-                         mxBookInfo.paymentStatus !== 'paid'"
-                   @click="informAboutPayment" class="my-1" variant="success">
-              Сообщить об оплате
-            </b-btn> -->
             <div>
               <b-btn v-b-modal.chgName class="my-1 w-100" variant="primary">
                 Изменить имя
@@ -152,7 +146,7 @@
         <div>
           <b-modal id="ackModal" title="Подтверждение" ok-variant="danger" ok-title="Да" cancel-title="Отмена"
             @ok="handleDeleteOk">
-            <RefundRules/>
+            <RefundRules v-if="isRefundable"/>
             <p class="my-4">
               Удалить запись?
             </p>
@@ -173,7 +167,6 @@
           </b-modal>
         </div>
       </div>
-
     </div>
   </div>
 </template>
@@ -220,18 +213,19 @@ export default {
       }
     },
     isAdmin: function () {
-      return this.$store.state.user && this.$store.state.user.userId === this.mxGameDetails.game.organizer.userId
+      return this.user.userId === this.mxGameDetails.game.organizer.userId
     },
     isPaymentGatewayUsed: function () {
       return this.mxBookInfo.paymentId > 0
     },
     isPayAvailable: function () {
-      if (!this.mxBookInfo || !this.mxGameDetails) {
-        return
-      }
       return this.mxGameDetails.game.paymentType === 'prepay' &&
              this.mxBookInfo.paymentStatus !== 'paid' &&
              this.mxBookInfo.status !== 'waiting'
+    },
+    isRefundable: function () {
+      return this.mxGameDetails.game.paymentType === 'prepay' &&
+             this.mxBookInfo.paymentStatus === 'paid'
     },
     creditsTotal: function () {
       return this.mxGameDetails.creditsTotal || 0
@@ -245,17 +239,15 @@ export default {
     isPartialPayByCreditsAvailable: function () {
       return this.isPayAvailable && (this.creditsToUse > 0)
     },
-    paymentId: function () {
-      return this.user && this.mxBookInfo &&
-        ['RSV', this.mxBookInfo.gameId, this.mxBookInfo.bookId, this.user.userId, this.creditsToUse].join('|')
+    paymentLabel: function () {
+      return [this.user.payEnv, 'RSV', this.mxBookInfo.gameId, this.mxBookInfo.bookId, this.user.userId, this.creditsToUse].join('|')
     },
     bookingPhone: function () {
-      if (this.$store.state.gameDetails && this.$store.state.gameDetails.users) {
-        const user = this.$store.state.gameDetails.users.filter(u =>
-          u.userId === this.mxBookInfo.userId)[0]
+      if (this.mxGameDetails.users) {
+        const user = this.mxGameDetails.users.filter(u => u.userId === this.mxBookInfo.userId).pop()
         return user && user.phone
       }
-      return this.$store.state.user && this.$store.state.user.phone
+      return this.user && this.user.phone
     },
     user () {
       return this.$store.state.user
@@ -284,9 +276,6 @@ export default {
       }).then(() => {
         this.$store.commit('setReservationExpire', undefined)
       })
-    },
-    informAboutPayment: function() {
-      // console.log('informAboutPayment');
     },
     payByCredits: function () {
       this.$store.dispatch('payByCredits', {
@@ -329,14 +318,15 @@ export default {
                 playerName: this.mxBookInfo.playerName,
               },
             })
-          } else {
-            this.$router.push({
-              path: '/myCredits',
-              query: {
-                refundAmount,
-              },
-            })
+            return
           }
+
+          this.$router.push({
+            path: '/myCredits',
+            query: {
+              refundAmount,
+            },
+          })
           return
         }
         this.back()
@@ -347,19 +337,8 @@ export default {
 </script>
 
 <style scoped>
-.manualPayment {
-  /*border: 2px dotted #dc3545;*/
-  border-left: 6px solid #ffc207 !important;
-  border-right: 6px solid #ffc207 !important;
-}
-.dotted {
-  border: 2px dotted #007bff;
-  border-style: none none dotted;
-  color: #007bff !important;
-  /*background-color: #fff;*/
-}
 </style>
-<!-- Add "scoped" attribute to limit CSS to this component only -->
+
 <style>
 @import '../assets/backarrow.css';
 </style>

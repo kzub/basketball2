@@ -1,7 +1,12 @@
 const events = require('../utils/notifications');
+const utils = require('../utils/misc');
+const payproxy = require('../connector/payproxy');
 
-const onReservationPayment = async (req, paySystem, amount, label, organizer) => {
-  const [, gameId, bookId, userId, strCreditsToUse] = label.split('|');
+const config = utils.getConfig();
+
+// ------------------------------------------------------------------------------
+const onReservationPayment = async (req, paySystem, amount, labelData, organizer) => {
+  const [gameId, bookId, userId, strCreditsToUse] = labelData;
   const creditsToUse = Number(strCreditsToUse);
   let amountForRsv = Number(amount);
 
@@ -19,11 +24,11 @@ const onReservationPayment = async (req, paySystem, amount, label, organizer) =>
     const currentCredits = (currentCreditsObj && currentCreditsObj.total) || 0;
 
     if (!creditsToUse || (amount + creditsToUse < game.paymentAmount) || (currentCredits < creditsToUse)) {
-      events.emit('payment.wrong.amount', { reservation, game, amount, creditsToUse, currentCredits });
+      events.emit('payment.wrong.amount', { game, amount, creditsToUse, currentCredits });
       return;
     }
 
-    await req.dal.payment.addCreditTransaction(userId, organizer.userId, -creditsToUse, 'reservation.new', reservation.bookId);
+    await req.dal.payment.addCreditTransaction(userId, organizer.userId, -creditsToUse, 'reservation.pay', reservation.bookId);
     amountForRsv = amount + creditsToUse;
   }
 
@@ -35,8 +40,23 @@ const onReservationPayment = async (req, paySystem, amount, label, organizer) =>
   events.emit('reservation.paid', { reservation });
 };
 
-const onFreePayment = async (req, paySystem, amount, label, organizer) => {
-  const [, userId, sender] = label.split('|');
+// ------------------------------------------------------------------------------
+const onReservationPostPay = async (req, paySystem, amount, labelData, organizer) => {
+  const [gameId, bookId, userId] = labelData;
+
+  const paymentId = await req.dal.payment.addTransaction(organizer.userId, paySystem, amount, gameId, bookId, userId, req.body);
+  const reservation = await req.dal.reservation.get(gameId, bookId);
+
+  reservation.makePaid(amount);
+  reservation.setExpire(0);
+  reservation.paymentId = paymentId;
+  await req.dal.reservation.update(reservation);
+  events.emit('reservation.postpay.paid', { reservation });
+};
+
+// ------------------------------------------------------------------------------
+const onFreePayment = async (req, paySystem, amount, labelData, organizer) => {
+  const [userId, sender] = labelData;
   await req.dal.payment.addTransaction(organizer.userId, paySystem, amount, 0, 0, userId || 0, req.body);
   let user;
 
@@ -51,27 +71,40 @@ const onFreePayment = async (req, paySystem, amount, label, organizer) => {
   });
 };
 
+// ------------------------------------------------------------------------------
 const complete = async (req, res) => {
   req.log.info(req.body);
   res.status(200).send('OK');
   const paySystem = req.params.paySystem;
   const amount = Number(req.body.withdraw_amount);
-  const label = req.body.label;
+  const label = req.body.label || '';
+
+  const [paymentEnvironment, paymentEvent, ...labelData] = label.split('|');
+  if (config.payproxy.backends && paymentEnvironment != config.payproxy.env) {
+    req.log.info(`proxy payment to ${paymentEnvironment}`);
+    payproxy.proxyPayment(paymentEnvironment, req);
+    return;
+  }
 
   const organizer = await req.dal.payment.findOrganizerByPaySystem(paySystem);
   if (!organizer) {
+    // attempt to emulate a payment?
     events.emit('payment.unknown.paysystem', { paySystem, label, amount, ip: req.ip });
-    // probably unauthorized attempt to emit payment
     return;
   }
 
-  if (label && label.startsWith('RSV')) {
-    onReservationPayment(req, paySystem, amount, label, organizer);
+  if (paymentEvent === 'RSV') {
+    onReservationPayment(req, paySystem, amount, labelData, organizer);
     return;
   }
 
-  if (label && label.startsWith('FP')) {
-    onFreePayment(req, paySystem, amount, label, organizer);
+  if (paymentEvent === 'FP') {
+    onFreePayment(req, paySystem, amount, labelData, organizer);
+    return;
+  }
+
+  if (paymentEvent === 'RPP') {
+    onReservationPostPay(req, paySystem, amount, labelData, organizer);
     return;
   }
 
@@ -79,6 +112,7 @@ const complete = async (req, res) => {
   req.dal.payment.addTransaction(0, paySystem, amount, 0, 0, 0, req.body);
 };
 
+// ------------------------------------------------------------------------------
 const getOrganizerYM = async (req, res) => {
   const allYMs = await req.dal.payment.getPaymentReciever(req.params.organizerId);
   const YMdata = allYMs
@@ -100,6 +134,7 @@ const getOrganizerYM = async (req, res) => {
   });
 };
 
+// ------------------------------------------------------------------------------
 const getAllOrganizerYMs = async (req, res) => {
   const YMs = await req.dal.payment.getPaymentReciever(req.userId);
 
@@ -118,6 +153,7 @@ const getAllOrganizerYMs = async (req, res) => {
   });
 };
 
+// ------------------------------------------------------------------------------
 const getCreditors = async (req, res) => {
   const creditors = await req.dal.payment.getCreditors(req.userId);
   const userNames = await req.dal.user.getUsers(creditors.map(c => c.userId));

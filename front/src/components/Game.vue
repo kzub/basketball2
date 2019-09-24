@@ -74,6 +74,12 @@
             Включить запись
           </b-button>
           <b-button
+            v-if="mxGameDetails.game.paymentGateAccount"
+            @click="askToPay"
+            class="w-100 py-2 my-1" variant="success">
+            Запросить оплату игры
+          </b-button>
+          <b-button
             @click="sendPlayersList"
             class="w-100 py-2 my-1" variant="success">
             Прислать список игроков
@@ -172,6 +178,11 @@ export default {
         gameId: this.mxGameDetails.game.gameId,
       });
     },
+    askToPay () {
+      this.$store.dispatch('askToPay', {
+        gameId: this.mxGameDetails.game.gameId,
+      });
+    },
     actionConfirmed () {
       this.$store.dispatch('changeGameStatus', {
         gameId: this.mxGameDetails.game.gameId,
@@ -232,10 +243,6 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-.game {
-  border: 1px solid black;
-  margin: 1px;
-}
 .slot {
   width: 100%;
 }

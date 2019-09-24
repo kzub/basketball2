@@ -45,7 +45,7 @@ const get = async (req, res) => {
         gameDetails.creditsToUse = credits.total;
       }
       else {
-        gameDetails.creditsToUse = gameDetails.game.paymentAmount - req.dal.payment.MIN_PAYMENT_AMOUNT; 
+        gameDetails.creditsToUse = gameDetails.game.paymentAmount - req.dal.payment.MIN_PAYMENT_AMOUNT;
       }
     }
   }
@@ -183,20 +183,6 @@ const getOptions = async (req, res) => {
 
   const paymentsOptions = [];
   paymentsOptions.push({
-    text: 'Стоимость зала делится на всех',
-    value: {
-      selected: 'shared',
-      inputs: [{
-        label: 'Стоимость зала',
-        output: 'paymentAmount',
-        type: 'number',
-      },{
-        label: 'Сообщение об условиях оплаты, когда и куда переводить деньги',
-        output: 'paymentMessage',
-        type: 'text',
-      }],
-    },
-  }, {
     text: 'Ручной режим',
     value: {
       selected: 'manual',
@@ -208,37 +194,96 @@ const getOptions = async (req, res) => {
         value: 0,
         type: 'number',
       }, {
-        label: 'Сообщение об условиях оплаты',
+        label: 'Сообщение о сумме, когда и как оплачивать',
         output: 'paymentMessage',
         type: 'text',
       }],
     },
   });
 
-  const prepays = await req.dal.payment.getPrepayMethodsByOrganizerId(req.userId);
-  for (const prepay of prepays) {
+  const accounts = await req.dal.payment.getPrepayMethodsByOrganizerId(req.userId);
+  const idGenerator = (function* () {
+    let index = 1;
+    yield '';
+    while (true) {
+      index++;
+      yield `(${index})`;
+    }
+  })();
+
+  if (accounts && accounts.length) {
+    for (const account of accounts) {
+      const accId = idGenerator.next().value;
+      // prepay
+      paymentsOptions.push({
+        text: `Предоплата ${accId}`,
+        value: {
+          selected: 'prepay',
+          inputs: [{
+            disabled: true,
+            label: 'Аккаунт Яндекс.Деньги',
+            output: 'paymentGateAccount',
+            value: account.paymentGateAccount,
+            type: 'text',
+          },{
+            disabled: true,
+            label: 'Сообщение при оплате',
+            output: 'paymentGateMessage',
+            value: account.paymentGateMessage,
+            type: 'text',
+          },{
+            label: 'Сумма с каждого участника',
+            output: 'paymentAmount',
+            type: 'number',
+          }],
+        },
+      });
+      // shared
+      paymentsOptions.push({
+        text: `После игры, делится на всех ${accId}`,
+        value: {
+          selected: 'shared',
+          inputs: [{
+            disabled: true,
+            label: 'Аккаунт Яндекс.Деньги',
+            output: 'paymentGateAccount',
+            value: account.paymentGateAccount,
+            type: 'text',
+          },{
+            disabled: true,
+            label: 'Сообщение при оплате',
+            output: 'paymentGateMessage',
+            value: account.paymentGateMessage,
+            type: 'text',
+          },{
+            label: 'Сообщение об условиях оплаты',
+            output: 'paymentMessage',
+            type: 'text',
+            value: 'Перевод на Яндекс.Деньги, после игры.',
+          },{
+            label: 'Стоимость зала',
+            output: 'paymentAmount',
+            type: 'number',
+          }],
+        }
+      });
+    }
+  } else {
+    // shared without yandex.money
     paymentsOptions.push({
-      text: `Предоплата на ${prepay.paymentGateAccount}`,
+      text: 'После игры, делится на всех',
       value: {
-        selected: 'prepay',
+        selected: 'shared',
         inputs: [{
-          disabled: true,
-          label: 'Аккаунт Яндекс.Деньги',
-          output: 'paymentGateAccount',
-          value: prepay.paymentGateAccount,
-          type: 'text',
-        },{
-          disabled: true,
-          label: 'Сообщение при оплате',
-          output: 'paymentGateMessage',
-          value: prepay.paymentGateMessage,
-          type: 'text',
-        },{
-          label: 'Сумма с каждого участника',
+          label: 'Стоимость зала',
           output: 'paymentAmount',
           type: 'number',
+        },{
+          label: 'Сообщение об условиях оплаты',
+          output: 'paymentMessage',
+          type: 'text',
         }],
-      },
+      }
     });
   }
 
@@ -287,18 +332,47 @@ const sendPlayerList = async (req, res) => {
     return;
   }
 
-  const list = gameDetails.players.filter(p => p && p.ts > 0).map(p => p.playerName).join('\n');
+  const playersList = gameDetails.players
+    .filter(rsv => rsv.exists())
+    .map(p => p.playerName);
 
   events.emit('game.players.list', {
     game: gameDetails.game,
-    text: `Список игроков:\n${list}`
+    playersList,
   });
+
+  res.status(200).send({ok: true});
+};
+
+const askToPay = async (req, res) => {
+  const { gameId } = req.params;
+  const gameDetails = await req.dal.game.getGameDetails(gameId);
+
+  if (req.userId !== gameDetails.game.organizer.userId) {
+    res.status(403).send({
+      error: true,
+      reason: 'you are not game admin',
+    });
+    return;
+  }
+
+  const playersList = gameDetails.players
+    .filter(rsv => rsv.exists() && !rsv.isPaid())
+    .map(rsv => rsv.playerName);
+
+  if (playersList.length) {
+    events.emit('game.players.ask.to.pay', {
+      game: gameDetails.game,
+      playersList,
+    });
+  }
 
   res.status(200).send({ok: true});
 };
 
 module.exports = {
   add,
+  askToPay,
   changeStatus,
   get,
   getOptions,

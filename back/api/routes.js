@@ -53,6 +53,7 @@ const smsLimiter = rateLimit({
 
 const init = (app) => {
   app.use(apiLimiter);
+  app.get('/api/game/askToPay/:gameId', wrapper(game.askToPay, true));
   app.get('/api/game/changeStatus/:gameId/:status', wrapper(game.changeStatus, true));
   app.get('/api/game/details/:gameId', wrapper(game.get, false));
   app.get('/api/game/options', wrapper(game.getOptions, true));

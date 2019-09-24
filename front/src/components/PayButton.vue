@@ -10,8 +10,8 @@
       <input name="label" type="hidden" :value="label">
       <input name="successURL" type="hidden" :value="successURL">
 
-      <b-btn type="submit" class="my-1 w-100" variant="success">
-        {{buttonText}}
+      <b-btn @click="onClick" type="submit" class="my-1 w-100" variant="success">
+        {{buttonText}} <div class="arrow"><i class="right"></i></div>
       </b-btn>
     </b-form>
 
@@ -21,13 +21,21 @@
 <script>
 export default {
   name: 'PayButton',
-  props: ['account','message','amount','label','buttonText', 'retQueryParams'],
+  props: ['account','message','amount','label','buttonText','retQueryParams','onSubmit'],
   computed: {
     successURL: function () {
-      return document.location.host + `/#/success?${this.retQueryParams||''}`
+      return document.location.host + `/#/success?${this.retQueryParams || ''}`
     },
   },
   methods: {
+    onClick (evt) {
+      if (this.onSubmit) {
+        evt.preventDefault()
+        this.onSubmit(() => {
+          evt.target.parentElement.submit()
+        })
+      }
+    }
   },
 }
 </script>

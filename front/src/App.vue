@@ -16,6 +16,7 @@ import FreePayment from './components/FreePayment.vue'
 import FreePaymentLinks from './components/FreePaymentLinks.vue'
 import Game from './components/Game.vue'
 import GameNew from './components/GameNew.vue'
+import GamePayments from './components/GamePayments.vue'
 import Main from './components/Main.vue'
 import MapView from './components/MapView.vue'
 import MyCredits from './components/MyCredits.vue'
@@ -33,6 +34,7 @@ const router = new VueRouter({
     { path: '/fpList', component: FreePaymentLinks},
     { path: '/game', component: Game },
     { path: '/game/new', component: GameNew },
+    { path: '/payments', component: GamePayments },
     { path: '/map', component: MapView},
     { path: '/myCredits', component: MyCredits },
     { path: '/myGames', component: MyGames },
