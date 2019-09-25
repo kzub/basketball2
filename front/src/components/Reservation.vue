@@ -112,7 +112,7 @@
                 :retQueryParams="`gameId=${mxGameDetails.game.gameId}`"
               />
             </div>
-            <div v-else-if="isPayAvailable" class="mb-4">
+            <div v-else-if="isPayAvailable">
               <hr/>
               <PayButton
                 :account="mxGameDetails.game.paymentGateAccount"
