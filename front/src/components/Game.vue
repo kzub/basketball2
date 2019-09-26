@@ -17,7 +17,7 @@
       <GameInfo :game="mxGameDetails.game" show="place,time"/>
 
       <div v-if="mxGameDetails.game.freePlayerSlots == 0"
-           class="card-title btn-danger m-1 p-2 mx-2 rounded">
+           class="card-title btn-danger p-2 mx-3 rounded">
         Свободных мест нет
       </div>
 
@@ -25,10 +25,10 @@
         <div class="text-left m-2">Список игроков:</div>
         <div v-for="(slot, index) in mxGameDetails.players" :key="'p'+index">
           <router-link class="d-flex" :to="goLink(mxGameDetails.game, slot)" tag="div">
-            <b-button class="my-1 mx-3 slot" :variant="playerColor(slot)">
-              <div  v-if="modifyAllowed(slot)">
+            <b-button :class="playerBorderColor(slot) + ' my-1 mx-3 slot'" :variant="playerColor(slot)">
+              <div v-if="modifyAllowed(slot)">
                 <span class="arrow-text">{{ slot.playerName }}</span>
-                <div class="arrow"><i class="right"></i></div>
+                <span class="arrow"><i class="right"></i></span>
               </div>
               <div v-else>{{ slot.playerName }}</div>
             </b-button>
@@ -40,9 +40,9 @@
           <div v-for="(slot, index) in mxGameDetails.waiters" :key="'r'+index">
             <router-link class="d-flex" :to="goLink(mxGameDetails.game, slot)" tag="div">
               <b-button class="my-1 mx-3 slot" :variant="playerColor(slot)">
-                <div  v-if="modifyAllowed(slot)">
+                <div v-if="modifyAllowed(slot)">
                   <span class="arrow-text">{{ slot.playerName }}</span>
-                  <div class="arrow"><i class="right"></i></div>
+                  <span class="arrow"><i class="right"></i></span>
                 </div>
                 <div v-else>{{ slot.playerName }}</div>
               </b-button>
@@ -65,7 +65,7 @@
             v-b-modal.ackModal
             @click="changeGameStatus('disabled')"
             class="w-100 py-2 my-1" variant="danger">
-            Скрыть игру
+            Отменить игру
           </b-button>
           <b-button v-if="showAdminButtons('settle')"
             v-b-modal.ackModal
@@ -74,10 +74,10 @@
             Включить запись
           </b-button>
           <b-button
-            v-if="mxGameDetails.game.paymentGateAccount"
+            v-if="showAdminButtons('askToPay')"
             @click="askToPay"
             class="w-100 py-2 my-1" variant="success">
-            Запросить оплату игры
+            Напомнить об оплате
           </b-button>
           <b-button
             @click="sendPlayersList"
@@ -131,8 +131,7 @@ export default {
   },
   computed: {
     isAdmin () {
-      return this.$store.state.user &&
-        this.$store.state.user.userId === this.mxGameDetails.game.organizer.userId
+      return this.user.userId === this.mxGameDetails.game.organizer.userId
     },
     user () {
       return this.$store.state.user
@@ -149,14 +148,20 @@ export default {
       if (slot.paymentStatus == 'unpaid') return 'warning'
       return 'danger'
     },
+    playerBorderColor: function (slot) {
+      if (slot.paymentStatus == 'paid' && !slot.paymentId) {
+        return 'manualPaid'
+      }
+    },
     showAdminButtons (button) {
-      if (this.mxGameDetails.game.status === 'disabled' &&
-        ['settle'].indexOf(button) >= 0) {
+      if (button === 'settle' && this.mxGameDetails.game.status === 'disabled') {
         return true
       }
-      else if (this.mxGameDetails.game.status === 'settled' &&
-        ['disable'].indexOf(button) >= 0) {
+      if (button === 'disable' && this.mxGameDetails.game.status === 'settled') {
         return true
+      }
+      if (button === 'askToPay' && this.mxGameDetails.game.paymentGateAccount) {
+        return this.mxGameDetails.players.filter(rsv => rsv.ts > 0 && rsv.paymentStatus !== 'paid').length > 0
       }
     },
     back: function() {
@@ -245,6 +250,10 @@ export default {
 <style scoped>
 .slot {
   width: 100%;
+}
+
+.manualPaid {
+  background-color: #1c8836 !important;
 }
 
 .adminMode {

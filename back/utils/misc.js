@@ -7,6 +7,9 @@ const dictMonths = ['января', 'февраля', 'марта', 'апрел�
 const dictMinutes = ['минут', 'минута', 'минуты', 'минуты', 'минуты', 'минут', 'минут', 'минут', 'минут', 'минут',
   'минут', 'минут', 'минут', 'минут', 'минут', 'минут', 'минут', 'минут', 'минут', 'минут'];
 
+const dictHours = ['часов', 'час', 'часа', 'часа', 'часа', 'часов', 'часов', 'часов', 'часов', 'часов',
+  'часов', 'часов', 'часов', 'часов', 'часов', 'часов', 'часов', 'часов', 'часов', 'часов'];
+
 const dateWeekDay = (isoDate) => {
   const date = new Date(isoDate);
   const word = dictDays[date.getDay()];
@@ -36,6 +39,44 @@ const textMinutesTo = (timestamp) => {
     return `${minutes} ${dictMinutes[minutes]}`;
   }
   return `${minutes} ${dictMinutes[minutes % 10]}`;
+};
+
+const textHoursTo = (timestamp) => {
+  const hours = Math.floor(minutesTo(timestamp)/60);
+  if (hours < 20) {
+    return `${hours} ${dictHours[hours]}`;
+  }
+  return `${hours} ${dictHours[hours % 10]}`;
+};
+
+const textHoursMinutesTo = (timestamp) => {
+  let minutes = minutesTo(timestamp);
+  let textMinutes;
+  let textHours;
+
+  const hours = Math.floor(minutes/60);
+  if (hours < 20) {
+    textHours = `${hours} ${dictHours[hours]}`;
+  } else {
+    textHours = `${hours} ${dictHours[hours % 10]}`;
+  }
+
+  minutes = minutes - hours * 60;
+  if (minutes < 20) {
+    textMinutes = `${minutes} ${dictMinutes[minutes]}`;
+  } else {
+    textMinutes = `${minutes} ${dictMinutes[minutes % 10]}`;
+  }
+
+  if (hours == 0) {
+    return `${textMinutes}`;
+  }
+
+  if (minutes == 0) {
+    return `${textHours}`;
+  }
+
+  return `${textHours} ${textMinutes}`;
 };
 
 const zeroPad = (time) => {
@@ -114,5 +155,7 @@ module.exports = {
   getStartOfTheDate,
   minutesTo,
   sleep,
+  textHoursMinutesTo,
+  textHoursTo,
   textMinutesTo,
 };

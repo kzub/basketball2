@@ -1,5 +1,4 @@
 const events = require('../utils/notifications');
-const { newReservationTTL, waiterReservationTTL } = require('../dal/types');
 
 const book = async (req, res) => {
   const { gameId, slotType } = req.body;
@@ -13,12 +12,15 @@ const book = async (req, res) => {
     return;
   }
 
+  if (!user || !user.name) {
+    req.log.error(`book() no user name userId: ${req.userId}, user: ${JSON.stringify(user)}`);
+    res.status(200).send({ ok: false });
+    return;
+  }
+
   let bookId = 0;
-  let ttl = 0;
+  const ttl = game.newReservationTTL(slotType);
   if (game.freeSlotExists(slotType)) {
-    if (game.isPrepay() && slotType === 'player') {
-      ttl = newReservationTTL;
-    }
     bookId = await req.dal.reservation.create(gameId, slotType, ttl, user);
   }
 
@@ -28,7 +30,7 @@ const book = async (req, res) => {
     } else {
       game.freeWaiterSlots--;
     }
-    events.emit(`reservation.${slotType}.new`, { game, bookId, user });
+    events.emit(`reservation.${slotType}.new`, { game, user, ttl });
   }
 
   res.status(200).send({
@@ -152,8 +154,8 @@ const setPlayer = async (req, res) => {
   const reservation = await req.dal.reservation.get(gameId, bookId);
 
   let ok = false;
-  if (game.isAdminUser(user) ||
-     (reservation.isOwnerUser(user) && !game.isTimePassed())) {
+  if (name && (game.isAdminUser(user) ||
+     (reservation.isOwnerUser(user) && !game.isTimePassed()))) {
     reservation.playerName = name;
     ok = await req.dal.reservation.update(reservation);
   }
@@ -188,13 +190,12 @@ const cancel = async (req, res) => {
   const eventName = `reservation.${who}.cancel.${reservation.paymentStatus}`;
   events.emit(eventName, { reservation, isWaiter });
 
-  if (isWaiter) {
+  if (isWaiter || game.isTimePassed()) {
     res.status(200).send({ ok: true });
     return;
   }
 
-  const ttl = game.isPrepay() ? waiterReservationTTL : 0;
-  const promotedRsvId = await req.dal.game.moveWaiters(gameId, ttl);
+  const promotedRsvId = await req.dal.game.moveWaiters(gameId, game.waiterReservationTTL());
   if (promotedRsvId) {
     const promotedReservation = await req.dal.reservation.get(gameId, promotedRsvId);
     // TODO: попробовтаь записать, если есть кредиты

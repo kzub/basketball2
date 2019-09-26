@@ -11,7 +11,7 @@
         </div>
       </div>
     </div>
-    <div class="mx-3" v-else>
+    <div v-else class="mx-3">
       <GameInfo :game="mxGameDetails.game" show="place,time"/>
 
       <div v-if="unpaidPlayers.length">
@@ -99,10 +99,10 @@
         return this.$store.state.viewDataUpdated
       },
       totalPlayers () {
-        return this.mxGameDetails && this.mxGameDetails.players.length
+        return this.mxGameDetails.game.usedPlayerSlots || 1
       },
       paymentType () {
-        return this.mxGameDetails && this.mxGameDetails.game.paymentType
+        return this.mxGameDetails.game.paymentType
       },
       unpaidPlayers () {
         return this.mxGameDetails.players.filter(slot => slot.bookId != 0 && slot.paymentStatus != 'paid')

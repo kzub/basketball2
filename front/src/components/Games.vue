@@ -121,7 +121,6 @@ export default {
   font-size: 20px;
 }
 .userIsAdmin {
-  /*border: 2px dotted #dc3545;*/
   border-left: 10px solid #dc3545 !important;
 }
 

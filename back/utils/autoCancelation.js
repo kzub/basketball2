@@ -1,7 +1,6 @@
 const dal = require('../dal/dal');
 const events = require('../utils/notifications');
 const logger = require('../utils/logger');
-const { waiterReservationTTL } = require('../dal/types');
 
 const log = logger.create('AUTO_CANCEL');
 
@@ -15,7 +14,8 @@ const checkExpiredReservations = async () => {
       events.emit('reservation.expired', { reservation });
       // always set expire time as waiterReservationTTL, because previuos reservation has expire time,
       // so new one must be the same
-      const promotedRsvId = await dal.game.moveWaiters(reservation.gameId, waiterReservationTTL);
+      const game = await dal.game.getGame(reservation.gameId);
+      const promotedRsvId = await dal.game.moveWaiters(reservation.gameId, game.waiterReservationTTL());
       if (promotedRsvId) {
         const promotedReservation = await dal.reservation.get(reservation.gameId, promotedRsvId);
         events.emit('reservation.waiter.promoted', { reservation: promotedReservation });

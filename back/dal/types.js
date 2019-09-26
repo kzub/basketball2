@@ -87,6 +87,27 @@ Game.prototype.freeSlotExists = function (slotType) {
   );
 };
 
+Game.prototype.waiterReservationTTL = function () {
+  if (this.isPrepay()) {
+    if (this.hoursToGameBegin() > 36) {
+      return 12*60*60*1000;
+    }
+    return 4*60*60*1000;
+  }
+  return 0;
+};
+
+Game.prototype.newReservationTTL = function (slotType) {
+  if (slotType !== 'player') {
+    return 0;
+  }
+  if (this.isPrepay()) {
+    return Date.now() + 30*60*1000;
+  }
+  return 0;
+};
+
+
 function GameDetails (game, players, waiters) {
   this.game = game;
   this.players = players;
@@ -268,17 +289,12 @@ OrganizerSettings.prototype.allowedPlaces = function () {
   return this.placesIds.slice();
 };
 
-const newReservationTTL = 30*60*1000;
-const waiterReservationTTL = 240*60*1000;
-
 module.exports = {
   Game,
   GameDetails,
-  newReservationTTL,
   Notification,
   OrganizerSettings,
   Place,
   Reservation,
   User,
-  waiterReservationTTL,
 };

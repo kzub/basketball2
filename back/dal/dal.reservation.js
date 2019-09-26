@@ -6,13 +6,9 @@ let execSQL;
 
 const create = async (gameId, slotType, ttl, user) => {
   const status = slotType === 'player' ? 'reserved' : 'waiting';
-  let ttlDB = 0;
-  if (ttl > 0) {
-    ttlDB = Date.now() + ttl;
-  }
   const res = await execSQL.run(`INSERT INTO bookings 
     (ts, gameId, userId, playerName, paymentAmount, paymentStatus, status, expireAt) VALUES 
-    (${Date.now()}, ${gameId}, ${user.userId}, '${user.name}', 0, 'unpaid', '${status}', ${ttlDB})`);
+    (${Date.now()}, ${gameId}, ${user.userId}, '${user.name}', 0, 'unpaid', '${status}', ${ttl})`);
 
   return res && res.lastID;
 };

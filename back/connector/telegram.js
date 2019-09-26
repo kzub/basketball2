@@ -27,6 +27,7 @@ const send = async (token, chatId, msg) => {
     chat_id: chatId,
     text: msg,
     parse_mode: 'markdown',
+    disable_web_page_preview: 'true',
   });
 };
 
@@ -39,6 +40,10 @@ const getUpdates = (token) => {
   });
 };
 // getUpdates(config.telegram.token);
+
+// send(config.telegram.token, 139323428, `
+//  оплатите игру по [ссылке](https://basket.msk.ru/#/payments?gameId=5)
+// `)
 
 module.exports = {
   send,

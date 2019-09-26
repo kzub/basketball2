@@ -12,7 +12,7 @@ const log = logger.create('NOTIFY');
 const sendAdminMessage = async (msg, type) => {
   log[type](msg);
   const site = `\n${config.site}`;
-  telegram.send(config.telegram.token, config.telegram.owner, `[ADMIN] ${msg}${site}`);
+  telegram.send(config.telegram.token, config.telegram.owner, `*[ADMIN]* ${msg}${site}`);
 };
 
 emitter.on('user.sms', async ({ phone, code }) => {
@@ -70,7 +70,7 @@ const createNotification = async (notifyId, event) => {
       send: async (text, skipSite) => {
         try {
           log.info(text);
-          let site = `\n${config.site}`;
+          let site = `\n[${config.site}](https://${config.site})`;
           if (skipSite) {
             site = '';
           }
@@ -90,10 +90,14 @@ const createNotification = async (notifyId, event) => {
 };
 
 // NEW RESERVATIONS ---------------------------------------------------------------
-emitter.on('reservation.player.new', async ({ game, user }) => {
+emitter.on('reservation.player.new', async ({ game, user, ttl }) => {
   if (game.isDisabled() || game.isTimePassed()) { return; }
   const notify = await createNotification(game.notifyId, 'reservation.player.new');
-  notify.send(`${user.name} забронировал место на игру в ${game.place.title}, в ${game.timeStart} ${utils.getBeautifulDate(game.date)}, свободных мест: ${game.freePlayerSlots}`);
+  let payTime = '';
+  if (game.isPrepay()) {
+    payTime = `, на оплату отведено ${utils.textHoursMinutesTo(ttl)}`;
+  }
+  notify.send(`${user.name} забронировал место на игру в ${game.place.title}, в ${game.timeStart} ${utils.getBeautifulDate(game.date)}${payTime}, свободных мест: ${game.freePlayerSlots}`);
 });
 
 emitter.on('reservation.waiter.new', async ({ game, user }) => {
@@ -153,7 +157,7 @@ emitter.on('reservation.waiter.promoted', async ({ reservation }) => {
   const notify = await createNotification(game.notifyId, 'reservation.waiter.promoted');
   let payTime = '';
   if (game.isPrepay()) {
-    payTime = `, на оплату отведено ${utils.textMinutesTo(reservation.expireAt)}`;
+    payTime = `, на оплату отведено ${utils.textHoursMinutesTo(reservation.expireAt)}`;
   }
   notify.send(`Запасной ${reservation.playerName} забронировал место в игре ${game.place.title}, в ${game.timeStart} ${utils.getBeautifulDate(game.date)}${payTime}`);
 });
@@ -163,14 +167,14 @@ emitter.on('reservation.admin.make.unpaid', async ({ reservation }) => {
   const game = await dal.game.getGame(reservation.gameId);
   if (game.isDisabled() || game.isTimePassed()) { return; }
   const notify = await createNotification(game.notifyId, 'reservation.admin.make.unpaid');
-  notify.send(`${game.organizer.name} пометил не оплаченной бронь ${reservation.playerName} в игре ${game.place.title}, в ${game.timeStart} ${utils.getBeautifulDate(game.date)}`);
+  notify.send(`${game.organizer.name} пометил бронь ${reservation.playerName} не оплаченной в игре ${game.place.title}, в ${game.timeStart} ${utils.getBeautifulDate(game.date)}`);
 });
 
 emitter.on('reservation.admin.make.paid', async ({ reservation }) => {
   const game = await dal.game.getGame(reservation.gameId);
   if (game.isDisabled() || game.isTimePassed()) { return; }
   const notify = await createNotification(game.notifyId, 'reservation.admin.make.paid');
-  notify.send(`${game.organizer.name} пометил оплаченной бронь ${reservation.playerName} на игру ${game.place.title}, в ${game.timeStart} ${utils.getBeautifulDate(game.date)}, свободных мест: ${game.freePlayerSlots}`);
+  notify.send(`${game.organizer.name} пометил бронь ${reservation.playerName} оплаченной на игру ${game.place.title}, в ${game.timeStart} ${utils.getBeautifulDate(game.date)}, свободных мест: ${game.freePlayerSlots}`);
 });
 
 emitter.on('reservation.admin.make.book', async ({ reservation }) => {
@@ -226,14 +230,17 @@ emitter.on('game.change.status', async ({ game, status }) => {
 
 emitter.on('game.players.list', async ({ game, playersList }) => {
   const notify = await createNotification(game.notifyId, 'game.players.list');
-  notify.send(`Список игроков:\n${playersList.join('\n')}`, true);
+  notify.send(`Список игроков:
+${playersList.join('\n')}`, true);
 });
 
 emitter.on('game.players.ask.to.pay', async ({ game, playersList }) => {
   const notify = await createNotification(game.notifyId, 'game.players.ask.to.pay');
-  notify.send(`${playersList.join('\n')}
-
-оплатите игру по [ссылке](https://${config.site}/#/payments/?gameId=${game.gameId})`, true);
+  notify.send(`Оплатите игру
+${game.place.title}, в ${game.timeStart} ${utils.getBeautifulDate(game.date)}
+по этой [ссылке](https://${config.site}/#/payments/?gameId=${game.gameId})
+--------------
+${playersList.join('\n')}`, true);
 });
 
 module.exports = emitter;
