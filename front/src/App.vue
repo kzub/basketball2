@@ -10,20 +10,20 @@
 
 import VueRouter from 'vue-router'
 
-import Book from './components/Book.vue'
-import Credits from './components/Credits.vue'
-import FreePayment from './components/FreePayment.vue'
-import FreePaymentLinks from './components/FreePaymentLinks.vue'
-import Game from './components/Game.vue'
-import GameNew from './components/GameNew.vue'
-import GamePayments from './components/GamePayments.vue'
-import Main from './components/Main.vue'
-import MapView from './components/MapView.vue'
-import MyCredits from './components/MyCredits.vue'
-import MyGames from './components/MyGames.vue'
-import Profile from './components/Profile.vue'
-import Reservation from './components/Reservation.vue'
-import Success from './components/Success.vue'
+const Book = () => import(/* webpackChunkName: "book" */ './components/Book.vue')
+const Credits = () => import(/* webpackChunkName: "payments" */ './components/Credits.vue')
+const FreePayment = () => import(/* webpackChunkName: "payments" */ './components/FreePayment.vue')
+const FreePaymentLinks = () => import(/* webpackChunkName: "admin" */ './components/FreePaymentLinks.vue')
+const Game = () => import(/* webpackChunkName: "game" */ './components/Game.vue')
+const GameNew = () => import(/* webpackChunkName: "admin" */ './components/GameNew.vue')
+const GamePayments = () => import(/* webpackChunkName: "payments" */ './components/GamePayments.vue')
+const Main = () => import(/* webpackChunkName: "game" */ './components/Main.vue')
+const MapView = () => import(/* webpackChunkName: "details" */ './components/MapView.vue')
+const MyCredits = () => import(/* webpackChunkName: "payments" */ './components/MyCredits.vue')
+const MyGames = () => import(/* webpackChunkName: "admin" */ './components/MyGames.vue')
+const Profile = () => import(/* webpackChunkName: "profile" */ './components/Profile.vue')
+const Reservation = () => import(/* webpackChunkName: "rsv" */ './components/Reservation.vue')
+const Success = () => import(/* webpackChunkName: "payments" */ './components/Success.vue')
 
 const router = new VueRouter({
   routes :[

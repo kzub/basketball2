@@ -98,3 +98,7 @@ export default {
 }
 </style>
 
+<style>
+@import '../assets/backarrow.css';
+</style>
+
