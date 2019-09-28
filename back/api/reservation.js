@@ -1,5 +1,5 @@
 const events = require('../utils/notifications');
-
+// ----------------------------------------------------------------------------------
 const book = async (req, res) => {
   const { gameId, slotType } = req.body;
   const user = await req.dal.user.getUser(req.userId);
@@ -42,6 +42,7 @@ const book = async (req, res) => {
   });
 };
 
+// ----------------------------------------------------------------------------------
 const changePay = async (req, res) => {
   const { gameId, bookId } = req.params;
   const user = await req.dal.user.getUser(req.userId);
@@ -78,6 +79,7 @@ const changePay = async (req, res) => {
   res.status(200).send({ ok, reason });
 };
 
+// ----------------------------------------------------------------------------------
 const clearExpire = async (req, res) => {
   const { gameId, bookId } = req.params;
   const user = await req.dal.user.getUser(req.userId);
@@ -100,6 +102,7 @@ const clearExpire = async (req, res) => {
   res.status(200).send({ ok, reason });
 };
 
+// ----------------------------------------------------------------------------------
 const payByCredits = async (req, res) => {
   const { gameId, bookId } = req.params;
   const game = await req.dal.game.getGame(gameId);
@@ -147,6 +150,7 @@ const payByCredits = async (req, res) => {
   res.status(200).send({ ok });
 };
 
+// ----------------------------------------------------------------------------------
 const setPlayer = async (req, res) => {
   const { gameId, bookId, name } = req.params;
   const user = await req.dal.user.getUser(req.userId);
@@ -162,6 +166,7 @@ const setPlayer = async (req, res) => {
   res.status(200).send({ ok });
 };
 
+// ----------------------------------------------------------------------------------
 const cancel = async (req, res) => {
   const { gameId, bookId } = req.params;
   const user = await req.dal.user.getUser(req.userId);
@@ -195,11 +200,9 @@ const cancel = async (req, res) => {
     return;
   }
 
-  const promotedRsvId = await req.dal.game.moveWaiters(gameId, game.waiterReservationTTL());
-  if (promotedRsvId) {
-    const promotedReservation = await req.dal.reservation.get(gameId, promotedRsvId);
-    // TODO: попробовтаь записать, если есть кредиты
-    events.emit('reservation.waiter.promoted', { reservation: promotedReservation });
+  const promotedRsv = await req.dal.game.moveWaiters(game);
+  if (promotedRsv) {
+    events.emit('reservation.waiter.promoted', { reservation: promotedRsv });
   }
 
   let refundAmount;
@@ -219,6 +222,7 @@ const cancel = async (req, res) => {
   res.status(200).send({ ok: true, refundAmount });
 };
 
+// ----------------------------------------------------------------------------------
 module.exports = {
   book,
   cancel,

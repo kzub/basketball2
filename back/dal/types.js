@@ -90,9 +90,9 @@ Game.prototype.freeSlotExists = function (slotType) {
 Game.prototype.waiterReservationTTL = function () {
   if (this.isPrepay()) {
     if (this.hoursToGameBegin() > 36) {
-      return 12*60*60*1000;
+      return Date.now() + 12*60*60*1000;
     }
-    return 4*60*60*1000;
+    return Date.now() + 4*60*60*1000;
   }
   return 0;
 };

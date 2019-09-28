@@ -34,7 +34,7 @@
         <div v-if="reservationExpire"
              class="btn-danger">
              <hr style="background-color: white"/>
-          на оплату есть {{ reservationExpire }} {{mxTextMinutesTo(reservationExpire)}}
+          на оплату есть<br> {{mxTextHoursMinutesTo(Date.now() + reservationExpire*60*1000)}}
         </div>
       </b-button>
 

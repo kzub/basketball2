@@ -12,13 +12,10 @@ const checkExpiredReservations = async () => {
     const ok = await dal.reservation.update(reservation);
     if (ok) { 
       events.emit('reservation.expired', { reservation });
-      // always set expire time as waiterReservationTTL, because previuos reservation has expire time,
-      // so new one must be the same
       const game = await dal.game.getGame(reservation.gameId);
-      const promotedRsvId = await dal.game.moveWaiters(reservation.gameId, game.waiterReservationTTL());
-      if (promotedRsvId) {
-        const promotedReservation = await dal.reservation.get(reservation.gameId, promotedRsvId);
-        events.emit('reservation.waiter.promoted', { reservation: promotedReservation });
+      const promotedRsv = await dal.game.moveWaiters(game);
+      if (promotedRsv) {
+        events.emit('reservation.waiter.promoted', { reservation: promotedRsv });
       }
     }
   }

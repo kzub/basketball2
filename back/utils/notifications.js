@@ -157,9 +157,13 @@ emitter.on('reservation.waiter.promoted', async ({ reservation }) => {
   const notify = await createNotification(game.notifyId, 'reservation.waiter.promoted');
   let payTime = '';
   if (game.isPrepay()) {
-    payTime = `, на оплату отведено ${utils.textHoursMinutesTo(reservation.expireAt)}`;
+    if(reservation.isPaid()) {
+      payTime = ', оплачено автоматически';
+    } else {
+      payTime = `, на оплату отводится ${utils.textHoursMinutesTo(reservation.expireAt)}`;
+    }
   }
-  notify.send(`Запасной ${reservation.playerName} забронировал место в игре ${game.place.title}, в ${game.timeStart} ${utils.getBeautifulDate(game.date)}${payTime}`);
+  notify.send(`Запасной ${reservation.playerName} получил место в игре ${game.place.title}, в ${game.timeStart} ${utils.getBeautifulDate(game.date)}${payTime}`);
 });
 
 // ADMIN ACTIONS ---------------------------------------------------------------

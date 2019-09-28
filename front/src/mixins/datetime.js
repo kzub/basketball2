@@ -17,6 +17,8 @@ const mxDateDayAndMonth = (isoDate) => {
 
 const dictMinutes = ['минут', 'минута', 'минуты', 'минуты', 'минуты', 'минут', 'минут', 'минут', 'минут', 'минут',
                      'минут', 'минут', 'минут', 'минут', 'минут', 'минут', 'минут', 'минут', 'минут', 'минут']
+const dictHours = ['часов', 'час', 'часа', 'часа', 'часа', 'часов', 'часов', 'часов', 'часов', 'часов',
+  'часов', 'часов', 'часов', 'часов', 'часов', 'часов', 'часов', 'часов', 'часов', 'часов'];
 
 const mxMinutesTo = (timestamp) => {
   const now = Date.now()
@@ -29,18 +31,58 @@ const mxMinutesTo = (timestamp) => {
 }
 
 const mxTextMinutesTo = (timestamp) => {
-  const minutes = mxMinutesTo(timestamp)
+  const minutes = mxMinutesTo(timestamp);
   if (minutes < 20) {
-    return `${dictMinutes[minutes]}`
+    return `${minutes} ${dictMinutes[minutes]}`;
   }
-  return `${dictMinutes[minutes % 10]}`
-}
+  return `${minutes} ${dictMinutes[minutes % 10]}`;
+};
+
+const mxTextHoursTo = (timestamp) => {
+  const hours = Math.floor(mxMinutesTo(timestamp)/60);
+  if (hours < 20) {
+    return `${hours} ${dictHours[hours]}`;
+  }
+  return `${hours} ${dictHours[hours % 10]}`;
+};
+
+const mxTextHoursMinutesTo = (timestamp) => {
+  let minutes = mxMinutesTo(timestamp);
+  let textMinutes;
+  let textHours;
+
+  const hours = Math.floor(minutes/60);
+  if (hours < 20) {
+    textHours = `${hours} ${dictHours[hours]}`;
+  } else {
+    textHours = `${hours} ${dictHours[hours % 10]}`;
+  }
+
+  minutes = minutes - hours * 60;
+  if (minutes < 20) {
+    textMinutes = `${minutes} ${dictMinutes[minutes]}`;
+  } else {
+    textMinutes = `${minutes} ${dictMinutes[minutes % 10]}`;
+  }
+
+  if (hours == 0) {
+    return `${textMinutes}`;
+  }
+
+  if (minutes == 0) {
+    return `${textHours}`;
+  }
+
+  return `${textHours} ${textMinutes}`;
+};
 
 export default {
   methods: {
-    mxDateWeekDay,
     mxDateDayAndMonth,
+    mxDateWeekDay,
     mxMinutesTo,
+    mxTextHoursMinutesTo,
+    mxTextHoursTo,
     mxTextMinutesTo,
   }
 }

@@ -52,7 +52,7 @@ const addGame = async (game) => {
     paymentType, paymentAmount, paymentMessage, paymentGateAccount, paymentGateMessage)
     VALUES (${game.place.placeId}, ${game.notifyId}, '${game.date}', '${game.timeStart}',
     '${game.timeEnd}', ${game.organizer.userId}, ${game.playerSlots}, ${game.waiterSlots},
-    '${game.status}', '${game.paymentType}', ${game.paymentAmount}, 
+    '${game.status}', '${game.paymentType}', ${game.paymentAmount},
     ${optionalText(game.paymentMessage)},
     ${optionalText(game.paymentGateAccount)},
     ${optionalText(game.paymentGateMessage)})
@@ -151,26 +151,63 @@ const getGamesList = async (props = {}) => {
   }));
 };
 
-const moveWaiters = async (gameId, ttl) => {
+const moveWaiters = async (game) => {
   const bookIds = await execSQL.all(`SELECT bookId from bookings
     WHERE status = 'waiting'
-    AND gameId = ${gameId}
+    AND gameId = ${game.gameId}
     ORDER by ts
     LIMIT 1`);
 
-  if (bookIds.length > 0) {
-    const bookId = bookIds[0].bookId;
-    const ttlDB = (ttl > 0) ? (Date.now() + ttl) : 0;
-    const res = await execSQL.run(`UPDATE bookings SET status = 'reserved', expireAt = ${ttlDB}
-      WHERE bookId = ${bookId} AND
-      (SELECT playerSlots from games WHERE gameId = ${gameId}) - 
-      (SELECT count(*) from bookings WHERE status IN ('booked', 'reserved') AND gameId = ${gameId}) = 1`);
-      // если игра не полная, а есть отмена, не нужно записывать ожидающего в играющего
-      // он это может сделать и сам
-    if (res && res.changes == 1) {
-      return bookId;
+  if (bookIds.length == 0) {
+    return;
+  }
+
+  // always set expire time as waiterReservationTTL, because previuos reservation has expire time,
+  // so new one must be the same
+  const ttl = game.waiterReservationTTL();
+  const promotedRsvId = bookIds[0].bookId;
+
+  const res = await execSQL.run(`UPDATE bookings SET status = 'reserved', expireAt = ${ttl}
+    WHERE bookId = ${promotedRsvId} AND
+    (SELECT playerSlots from games WHERE gameId = ${game.gameId}) -
+    (SELECT count(*) from bookings WHERE status IN ('booked', 'reserved') AND gameId = ${game.gameId}) = 1`);
+    // если игра не полная, а есть отмена, не нужно записывать ожидающего в играющего
+    // он это может сделать и сам
+
+  if (!res || res.changes !== 1) {
+    return;
+  }
+
+  const promotedRsv = await dal.reservation.get(game.gameId, promotedRsvId);
+
+  if (game.isPrepay()) {
+    const credits = await dal.payment.getUserCreditsForOrganizerId(promotedRsv.userId, game.organizer.userId);
+    if (credits && credits.total >= game.paymentAmount) {
+      // userId, organizerId, amount, sourceType, sourceId = null, comment = null
+      const creditTransId = await dal.payment.addCreditTransaction(
+        promotedRsv.userId, game.organizer.userId, -game.paymentAmount, 'reservation.pay', promotedRsv.bookId, 'waiter.promouted'
+      );
+
+      // recipientId, paySystem, amount, gameId, bookId, userId, rawData
+      const paymentId = await dal.payment.addTransaction(
+        game.organizer.userId, 'credits', game.paymentAmount, game.gameId, promotedRsv.bookId, promotedRsv.userId, {
+          creditTransactionId: creditTransId,
+          reason: 'waiter promouted',
+        }
+      );
+
+      promotedRsv.book();
+      promotedRsv.makePaid(game.paymentAmount);
+      promotedRsv.setExpire(0);
+      promotedRsv.paymentId = paymentId;
+      const ok = await dal.reservation.update(promotedRsv);
+      if (!ok) {
+        log.error(`moveWaiters error, ok: ${ok}`);
+      }
     }
   }
+
+  return promotedRsv;
 };
 
 
