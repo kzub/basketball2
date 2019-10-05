@@ -6,7 +6,7 @@ const utils = require('../utils/misc');
 
 const config = utils.getConfig();
 const emitter = new EventEmitter();
-const log = logger.create('NOTIFY');
+const log = logger.create('NOTIFICATION');
 
 // --------------------- SITE ADMIN NOTIFICATIONS ------------------------
 const sendAdminMessage = async (msg, type) => {
@@ -69,7 +69,7 @@ const createNotification = async (notifyId, event) => {
     return {
       send: async (text, skipSite) => {
         try {
-          log.info(text);
+          log.info(`${event}: ${text}`);
           let site = `\n[${config.site}](https://${config.site})`;
           if (skipSite) {
             site = '';
@@ -146,7 +146,7 @@ emitter.on('reservation.waiter.cancel.unpaid', async ({ reservation }) => {
 emitter.on('reservation.player.cancel.paid', async ({ reservation }) => {
   const game = await dal.game.getGame(reservation.gameId);
   if (game.isDisabled() || game.isTimePassed()) { return; }
-  const notify = await createNotification(game.notifyId, 'reservation.cancel.paid');
+  const notify = await createNotification(game.notifyId, 'reservation.player.cancel.paid');
   notify.send(`${reservation.playerName} отменил свою запись на игру в ${game.place.title}, в ${game.timeStart} ${utils.getBeautifulDate(game.date)}, свободных мест: ${game.freePlayerSlots}`);
 });
 
