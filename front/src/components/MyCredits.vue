@@ -19,7 +19,7 @@
           Начисление
         </b-btn>
         <div>
-          <b-btn class="my-4 w-75" variant="danger">Вам начислено {{refundAmount}} ₽</b-btn>
+          <b-btn class="my-4 w-75" variant="danger">Вам начислено {{refundAmount}} р.</b-btn>
         </div>
         <div class="mt-2">
           <b-btn class="w-25" @click="ok">OK</b-btn>
@@ -68,7 +68,7 @@ export default {
     creditsFields: function () {
       return [
         { key: 'name', label: 'Организатор' },
-        { key: 'total', label: 'Баланс, ₽' },
+        { key: 'total', label: 'Баланс, р.' },
       ]
     },
     creditsList: function() {

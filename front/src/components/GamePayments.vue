@@ -39,12 +39,12 @@
       <h5 class="text-left">
         <div v-if="paymentType == 'prepay'">
           <div>Игроков пришло: {{totalPlayers}}</div>
-          Стоимость участия: {{ mxGameDetails.game.paymentAmount }} ₽
+          Стоимость участия: {{ mxGameDetails.game.paymentAmount }} р.
         </div>
         <div v-else-if="paymentType == 'shared'">
           <div>Игроков пришло: {{totalPlayers}}</div>
-          <div>Стоимость зала: {{mxGameDetails.game.paymentAmount}} ₽</div>
-          <div>Стоимость участия: {{ Math.ceil(mxGameDetails.game.paymentAmount / totalPlayers) }} ₽</div>
+          <div>Стоимость зала: {{mxGameDetails.game.paymentAmount}} р.</div>
+          <div>Стоимость участия: {{ Math.ceil(mxGameDetails.game.paymentAmount / totalPlayers) }} р.</div>
         </div>
       </h5>
 

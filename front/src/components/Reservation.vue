@@ -92,7 +92,7 @@
             <div v-if="isFullPayByCreditsAvailable">
               <hr/>
               <div class="text-right my-3">
-                <h5 class="py-2">Ваш счет предоплаты: {{creditsTotal}} ₽</h5>
+                <h5 class="py-2">Ваш счет предоплаты: {{creditsTotal}} р.</h5>
               </div>
               <b-btn @click="payByCredits" class="my-1 w-100" variant="success">
                 Оплатить со счета предоплаты
@@ -101,14 +101,14 @@
             <div v-else-if="isPartialPayByCreditsAvailable">
               <hr/>
               <div class="text-right my-3">
-                <h5 class="py-2">Ваш счет предоплаты: {{creditsTotal}} ₽</h5>
+                <h5 class="py-2">Ваш счет предоплаты: {{creditsTotal}} р.</h5>
               </div>
               <PayButton
                 :account="mxGameDetails.game.paymentGateAccount"
                 :message="mxGameDetails.game.paymentGateMessage"
                 :amount="mxGameDetails.game.paymentAmount - creditsToUse"
                 :label="paymentLabel"
-                :buttonText="`Оплатить ${mxGameDetails.game.paymentAmount - creditsToUse} ₽`"
+                :buttonText="`Оплатить ${mxGameDetails.game.paymentAmount - creditsToUse} р.`"
                 :retQueryParams="`gameId=${mxGameDetails.game.gameId}`"
               />
             </div>
@@ -119,7 +119,7 @@
                 :message="mxGameDetails.game.paymentGateMessage"
                 :amount="mxGameDetails.game.paymentAmount"
                 :label="paymentLabel"
-                :buttonText="`Оплатить ${mxGameDetails.game.paymentAmount} ₽`"
+                :buttonText="`Оплатить ${mxGameDetails.game.paymentAmount} р.`"
                 :retQueryParams="`gameId=${mxGameDetails.game.gameId}`"
               />
             </div>

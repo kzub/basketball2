@@ -21,7 +21,7 @@
 
       <div v-if="refundAmount" class="mb-4">
         <b-btn variant="danger">
-          Начислено {{refundAmount}} ₽ для {{refundPlayerName}}
+          Начислено {{refundAmount}} р. для {{refundPlayerName}}
         </b-btn>
       </div>
 
@@ -67,7 +67,7 @@ export default {
     creditorsFields: function () {
       return [
         { key: 'name', label: 'Игрок' },
-        { key: 'total', label: 'Баланс, ₽' },
+        { key: 'total', label: 'Баланс, р.' },
         // { key: 'actions', label: 'Действия' },
       ]
     },

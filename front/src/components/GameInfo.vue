@@ -20,7 +20,7 @@
     <div v-if="visible('payment')">
       <div v-if="game.paymentType == 'prepay'">
         <div>Предоплата</div>
-        <div>Стоимость: {{ game.paymentAmount }} ₽ </div>
+        <div>Стоимость: {{ game.paymentAmount }} р. </div>
         <div><a class="dotted" v-b-modal.payReturnInfoGI>Условия возврата</a></div>
         <b-modal id="payReturnInfoGI" cancel-variant="hidden" title="Условия возврата" class="flex">
           <RefundRules/>
@@ -28,7 +28,7 @@
       </div>
       <div v-else-if="game.paymentType == 'shared'">
         <div>Оплата после игры</div>
-        <div>Стоимость зала: {{ game.paymentAmount }} ₽</div>
+        <div>Стоимость зала: {{ game.paymentAmount }} р.</div>
         <div><a class="dotted" v-b-modal.payinfo>Делится на всех пришедших</a> </div>
 
         <b-modal id="payinfo" cancel-variant="hidden" title="Расчет" class="flex">
@@ -74,7 +74,7 @@ export default {
         const current = index == this.game.usedPlayerSlots;
         items.push({
           'Игроков': index,
-          'Стоимость, ₽': Math.ceil(this.game.paymentAmount / index),
+          'Стоимость, р.': Math.ceil(this.game.paymentAmount / index),
           _rowVariant : current && 'primary',
         })
       }
@@ -89,7 +89,6 @@ export default {
   border: 2px dotted #007bff;
   border-style: none none dotted;
   color: #007bff !important;
-  /*background-color: #fff;*/
 }
 
 .paymentInfoButton {

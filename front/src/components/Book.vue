@@ -29,7 +29,7 @@
 
         <div v-if="!booking" class="mb-4 px-3 mt-2">
           <div v-if="creditsTotal" class="text-left">
-            <h5 class="p-2">Ваш счет предоплаты: {{creditsTotal}} ₽</h5>
+            <h5 class="p-2">Ваш счет предоплаты: {{creditsTotal}} р.</h5>
           </div>
 
           <b-btn v-if="isWaiter" class="w-100 py-2" @click="bookSlot" variant="secondary">
