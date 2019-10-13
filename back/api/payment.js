@@ -165,13 +165,14 @@ const getCreditors = async (req, res) => {
     };
   });
 
-  creditorsWithName.sort((a, b) => {
-    return b.amount - a.amount;
+  const realCreditors = creditorsWithName.filter(creditor => creditor.total > 0);
+  realCreditors.sort((a, b) => {
+    return b.total - a.total;
   });
 
   res.status(200).send({
     ok: true,
-    creditorsList: creditorsWithName,
+    creditorsList: realCreditors,
   });
 };
 
