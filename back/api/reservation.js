@@ -160,8 +160,10 @@ const setPlayer = async (req, res) => {
   let ok = false;
   if (name && (game.isAdminUser(user) ||
      (reservation.isOwnerUser(user) && !game.isTimePassed()))) {
+    const oldPlayerName = reservation.playerName;
     reservation.playerName = name;
     ok = await req.dal.reservation.update(reservation);
+    events.emit('reservation.change.name', { reservation, oldPlayerName });
   }
   res.status(200).send({ ok });
 };
