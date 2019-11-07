@@ -34,22 +34,22 @@ const jsonFormat = (name, req) => format.combine(
   }),
 );
 
+const logTransport = (config.logger.logfile && new winston.transports.File({ filename: config.logger.logfile })) ||
+                     new winston.transports.Console();
+
 const create = (name, req) => {
   let format;
-  let transport;
 
   if (config.logger.logfile) {
     format = jsonFormat(name, req);
-    transport = new winston.transports.File({ filename: config.logger.logfile });
   } else {
     format = consoleFormat(name, req);
-    transport = new winston.transports.Console();
   }
 
   const logger = winston.createLogger({
     level: config.logger.loglevel || 'info',
     format,
-    transports : [transport],
+    transports : [logTransport],
     exitOnError: false,
   });
 
