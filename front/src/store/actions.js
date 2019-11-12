@@ -113,6 +113,7 @@ const updateGamesData = ({ commit }, params) => {
     .catch(error => {
       console.log('/api/games error:', error)  // eslint-disable-line
       commit('games', [])
+      commit('apiError', true)
       commit('setUpdatedFlag', true)
     })
 }
@@ -165,6 +166,7 @@ const updateGameData = ({ commit }, gameId) => {
     .catch(error => {
       console.log(`/api/game/details/${gameId} error:`, error)  // eslint-disable-line
       commit('gameDetails', undefined)
+      commit('apiError', true)
       commit('setUpdatedFlag', true)
     })
 }
@@ -252,6 +254,7 @@ const askToPay = ({ commit }, { gameId }) => {
 const getUserInfo = ({ commit }) => {
   console.log('actions::getUserInfo')  // eslint-disable-line
   commit('setUpdatedFlag', false)
+  commit('apiError', false)
   return axios
     .get(`/api/user/get`)
     .then(response => {
@@ -262,6 +265,7 @@ const getUserInfo = ({ commit }) => {
     })
     .catch(error => {
       commit('user', { auth: false })
+      commit('apiError', true)
       commit('setUpdatedFlag', true)
       console.log('/api/user/get error:', error)  // eslint-disable-line
     })

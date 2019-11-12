@@ -20,7 +20,8 @@
     "sqlite3": "^4.0.8",
     "twilio": "^3.33.0",
     "uuid": "^3.3.2",
-    "winston": "^3.2.1"
+    "winston": "^3.2.1",
+    "winston-daily-rotate-file": "^4.2.1"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",

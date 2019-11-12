@@ -1,7 +1,22 @@
 <template>
     <div id="app">
       <transition name="slide">
-        <router-view/>
+        <div v-if="apiError">
+          <b-btn @click="reload" class="btn-lg mb-3 rounded-0" block variant="warning">
+            <div class="arrow-left"><i class="left"></i></div>
+            <span>Обновить</span>
+            <div class="arrow"><i class="right"></i></div>
+          </b-btn>
+          <h4 class="mt-4">
+            Сайт временно недоступен
+          </h4>
+          <h6 class="mt-4">
+            Попробуйте обновить страницу позже
+          </h6>
+        </div>
+
+        <router-view v-else>
+        </router-view>
       </transition>
     </div>
 </template>
@@ -46,9 +61,17 @@ const router = new VueRouter({
 
 export default {
   name: 'app',
-  components: {
-  },
   router,
+  computed: {
+    apiError: function () {
+      return this.$store.state.apiError;
+    },
+  },
+  methods: {
+    reload: function () {
+      this.$store.dispatch('getUserInfo')
+    },
+  },
 }
 
 </script>

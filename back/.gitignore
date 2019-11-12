@@ -1,4 +1,6 @@
 node_modules
+*-audit.json
 *.db
 *.log
 config
+*.log.gz

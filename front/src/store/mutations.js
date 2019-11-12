@@ -1,3 +1,4 @@
+const apiError = (state, p) => state.apiError = p
 const freePayment = (state, p) => state.freePayment = p
 const freePaymentList = (state, p) => state.freePaymentList = p
 const gameDetails = (state, p) => state.gameDetails = p
@@ -20,6 +21,7 @@ const setUpdatedFlag = (state, p) => {
 }
 
 export default {
+  apiError,
   creditors,
   freePayment,
   freePaymentList,

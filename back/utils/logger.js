@@ -1,6 +1,8 @@
+const utils = require('./misc');
 const winston = require('winston');
 const { format } = require('logform');
-const utils = require('./misc');
+
+require('winston-daily-rotate-file');
 
 const config = utils.getConfig();
 
@@ -34,8 +36,16 @@ const jsonFormat = (name, req) => format.combine(
   }),
 );
 
-const logTransport = (config.logger.logfile && new winston.transports.File({ filename: config.logger.logfile })) ||
-                     new winston.transports.Console();
+let logTransport = new winston.transports.Console();
+if (config.logger.logdir) {
+  logTransport = new (winston.transports.DailyRotateFile)({
+    filename: `${config.logger.logdir}basketmsk-%DATE%.log`,
+    datePattern: 'YYYY-MM-DD',
+    zippedArchive: true,
+    maxSize: '20m',
+    maxFiles: '14d'
+  });
+}
 
 const create = (name, req) => {
   let format;
