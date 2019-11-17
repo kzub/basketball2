@@ -54,7 +54,8 @@ const sendCheckCode = async (req, res) => {
       req.log.warn(`SMSAUTH: bad phone number: ${phone}`);
     }
     else {
-      req.log.error(`SMSAUTH: ${err} ${err.stack}`);
+      events.emit('user.sms.error', { phone, code, err });
+      req.log.error(`SMSAUTH: ${err}`);
     }
   }
   setTimeout(function(){

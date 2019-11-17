@@ -19,6 +19,10 @@ emitter.on('user.sms', async ({ phone, code }) => {
   sendAdminMessage(`sent sms to user: ${phone}, code: ${code}`, 'info');
 });
 
+emitter.on('user.sms.error', async ({ phone, code, err }) => {
+  sendAdminMessage(`ERROR: send sms to user: ${phone}, code: ${code}, err: ${err}`, 'error');
+});
+
 emitter.on('user.new', async ({ phone }) => {
   sendAdminMessage(`new user confirmed: ${phone}`, 'info');
 });
