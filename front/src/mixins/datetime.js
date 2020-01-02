@@ -2,13 +2,13 @@ const dictDays = ['Воскресенье', 'Понедельник', 'Втор�
 const dictMonths = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря']
 
 const mxDateWeekDay = (isoDate) => {
-  const date = new Date(isoDate)
+  const date = new Date(`${isoDate}T00:00:00`)
   const word = dictDays[date.getDay()]
   return word
 }
 
 const mxDateDayAndMonth = (isoDate) => {
-  const date = new Date(isoDate)
+  const date = new Date(`${isoDate}T00:00:00`)
   const day = date.getDate();
   const month = dictMonths[date.getMonth()]
 
