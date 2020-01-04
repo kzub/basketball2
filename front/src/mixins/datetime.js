@@ -21,6 +21,9 @@ const dictHours = ['часов', 'час', 'часа', 'часа', 'часа', '
   'часов', 'часов', 'часов', 'часов', 'часов', 'часов', 'часов', 'часов', 'часов', 'часов'];
 
 const mxMinutesTo = (timestamp) => {
+  if (!timestamp) {
+    return 0
+  }
   const now = Date.now()
   const diff =  timestamp - now
   let minutes = Math.ceil(diff / 1000 / 60)

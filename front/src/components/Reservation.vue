@@ -38,7 +38,7 @@
         </div>
       </b-button>
 
-      <div v-if="reservationExpire <= 0" class="mt-3">
+      <div v-if="reservationExpire < 0" class="mt-3">
         <h4>Время на оплату истекло</h4>
       </div>
       <div v-else class="mb-4 px-3">
@@ -243,8 +243,10 @@ export default {
   },
   computed: {
     reservationExpire: function() {
-        return this.$store.state.reservationExpire || 
-          (this.mxBookInfo.expireAt && this.mxMinutesTo(this.mxBookInfo.expireAt))
+      if (this.mxBookInfo.expireAt > 0 && this.mxBookInfo.expireAt < Date.now()) {
+        return -1
+      }
+      return this.$store.state.reservationExpire || this.mxMinutesTo(this.mxBookInfo.expireAt)
     },
     form: function () {
       return {
