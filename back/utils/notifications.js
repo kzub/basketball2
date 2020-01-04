@@ -163,6 +163,15 @@ emitter.on('reservation.change.name', async ({ reservation, oldPlayerName }) => 
 ${game.place.title}, в ${game.timeStart} ${utils.getBeautifulDate(game.date)}`);
 });
 
+// RESERVATIONS TRANSFERS ---------------------------------------------------------------
+emitter.on('reservation.transfer', async ({ reservation, oldPlayerName }) => {
+  const game = await dal.game.getGame(reservation.gameId);
+  if (game.isDisabled() || game.isTimePassed()) { return; }
+  const notify = await createNotification(game.notifyId, 'reservation.transfer');
+  notify.send(`Замена игрока: ${oldPlayerName} => ${reservation.playerName}
+${game.place.title}, в ${game.timeStart} ${utils.getBeautifulDate(game.date)}`);
+});
+
 // WAITER PROMOTION ---------------------------------------------------------------
 emitter.on('reservation.waiter.promoted', async ({ reservation }) => {
   const game = await dal.game.getGame(reservation.gameId);
