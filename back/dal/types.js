@@ -213,7 +213,7 @@ Reservation.prototype.isWaiter = function () {
 };
 
 Reservation.prototype.isPlayer = function () {
-  return this.status === 'booked' || this.status === 'reserved';
+  return this.status === 'reserved';
 };
 
 Reservation.prototype.isCanceled = function () {
@@ -239,16 +239,8 @@ Reservation.prototype.realPaymentComplete = function () {
   return this.paymentId > 0;
 };
 
-Reservation.prototype.reserve = function () {
-  this.status = 'reserved';
-};
-
 Reservation.prototype.cancel = function () {
   this.status = 'canceled';
-};
-
-Reservation.prototype.book = function () {
-  this.status = 'booked';
 };
 
 function Notification (obj) {

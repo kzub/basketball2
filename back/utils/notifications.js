@@ -200,18 +200,14 @@ emitter.on('reservation.admin.make.paid', async ({ reservation }) => {
   const game = await dal.game.getGame(reservation.gameId);
   if (game.isDisabled() || game.isTimePassed()) { return; }
   const notify = await createNotification(game.notifyId, 'reservation.admin.make.paid');
-  notify.send(`${game.organizer.name} пометил бронь ${reservation.playerName} оплаченной на игру ${game.place.title}, в ${game.timeStart} ${utils.getBeautifulDate(game.date)}, свободных мест: ${game.freePlayerSlots}`);
+  notify.send(`${game.organizer.name} пометил оплаченной бронь ${reservation.playerName} на игру ${game.place.title}, в ${game.timeStart} ${utils.getBeautifulDate(game.date)}, свободных мест: ${game.freePlayerSlots}`);
 });
 
-emitter.on('reservation.admin.make.book', async ({ reservation }) => {
+emitter.on('reservation.admin.clear.expiration', async ({ reservation }) => {
   const game = await dal.game.getGame(reservation.gameId);
   if (game.isDisabled() || game.isTimePassed()) { return; }
-  const notify = await createNotification(game.notifyId, 'reservation.admin.make.book');
-  let slotMessage = `записал ${reservation.playerName}`;
-  if (game.organizer.name === reservation.playerName) {
-    slotMessage = 'записался';
-  }
-  notify.send(`${game.organizer.name} ${slotMessage} на игру ${game.place.title}, в ${game.timeStart} ${utils.getBeautifulDate(game.date)}, свободных мест: ${game.freePlayerSlots}`);
+  const notify = await createNotification(game.notifyId, 'reservation.admin.clear.expiration');
+  notify.send(`${game.organizer.name} убрал лимит оплаты для ${reservation.playerName} на игру ${game.place.title}, в ${game.timeStart} ${utils.getBeautifulDate(game.date)}, свободных мест: ${game.freePlayerSlots}`);
 });
 
 emitter.on('reservation.admin.cancel.unpaid', async ({ reservation, isWaiter }) => {

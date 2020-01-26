@@ -32,7 +32,6 @@ const onReservationPayment = async (req, paySystem, amount, labelData, organizer
     amountForRsv = amount + creditsToUse;
   }
 
-  reservation.book();
   reservation.makePaid(amountForRsv);
   reservation.setExpire(0);
   reservation.paymentId = paymentId;
