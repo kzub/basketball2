@@ -38,7 +38,10 @@
         </div>
       </b-button>
 
-      <div class="mb-4 px-3">
+      <div v-if="reservationExpire < 0" class="mt-3">
+        <h4>Время на оплату истекло</h4>
+      </div>
+      <div v-else class="mb-4 px-3">
         <!-- player details -->
         <b-form class="text-left">
           Участник:
@@ -128,11 +131,16 @@
             </div>
             <div>
               <b-btn v-b-modal.chgName class="my-1 w-100" variant="primary">
-                Изменить имя
+                Изменить имя игрока
               </b-btn>
             </div>
             <div>
-              <b-btn class="my-1 w-100" variant="danger" v-b-modal.ackModal>
+              <b-btn v-b-modal.transferPlayer v-if="isTransferable" class="my-1 w-100" variant="warning">
+                Передать запись другому игроку
+              </b-btn>
+            </div>
+            <div>
+              <b-btn v-b-modal.ackModal class="my-1 w-100" variant="danger">
                 Отказаться от записи
               </b-btn>
             </div>
@@ -141,6 +149,26 @@
           <h5 class="mt-4 mb-5">
             <GameInfo :game="mxGameDetails.game" show="organizer"/>
           </h5>
+        </div>
+        <!-- transfer reservation window -->
+        <div>
+          <b-modal id="transferPlayer" title="Передать свою запись" ok-title="Понятно" cancel-variant="hidden">
+            <p class="my-4">
+              Можно передать свою запись другому зарегистрированному игроку. Для этого, скопируйте и отправьте ссылку человеку, которому хотите передать свою бронь, любым доступным способом. Пройдя по ссылке, получатель сможет запустить процесс передачи этой записи себе.
+            </p>
+
+            <div class="d-flex justify-content-center">
+              <a v-if="transferLink" class="dotted w-100" :href="transferLink" target="_blank">
+                {{transferLink}}
+              </a>
+              <div v-else-if="linkIsLoading" class="spinner-border mt-3" role="status">
+                <span class="sr-only">Загружается...</span>
+              </div>
+              <div v-else>
+                <b-btn class="px-5 my-3" @click="getRsvTrnsfrLink">Получить ссылку</b-btn>
+              </div>
+            </div>
+          </b-modal>
         </div>
         <!-- delete confirmation window -->
         <div>
@@ -179,7 +207,7 @@ import GameInfo from './GameInfo.vue'
 import PayButton from './PayButton.vue'
 import RefundRules from './RefundRules.vue'
 
-let intervalId;
+let intervalId
 
 export default {
   name: 'Reservation',
@@ -191,20 +219,34 @@ export default {
   },
   mounted: function () {
     const { commit } = this.$store
-    const self = this;
+    const self = this
+
     intervalId = setInterval(function() {
-      if (self.mxBookInfo && self.mxBookInfo.expireAt) {
+      if (self.mxBookInfo && self.mxBookInfo.expireAt) { // должно быть внутри, потому что данные появляются не сразу
+                                                         // при монтировании элемента
         commit('setReservationExpire', self.mxMinutesTo(self.mxBookInfo.expireAt))
       }
     }, 1000)
+
+    commit('rsvTransferCode', undefined)
   },
   destroyed: function () {
-    clearInterval(intervalId)
+    if (intervalId) {
+      clearInterval(intervalId)
+    }
     this.$store.commit('setReservationExpire', undefined)
+  },
+  data() {
+    return {
+      linkIsLoading: false
+    }
   },
   computed: {
     reservationExpire: function() {
-        return this.$store.state.reservationExpire || this.mxMinutesTo(this.mxBookInfo.expireAt)
+      if (this.mxBookInfo.expireAt > 0 && this.mxBookInfo.expireAt < Date.now()) {
+        return -1
+      }
+      return this.$store.state.reservationExpire || this.mxMinutesTo(this.mxBookInfo.expireAt)
     },
     form: function () {
       return {
@@ -227,6 +269,9 @@ export default {
       return this.mxGameDetails.game.paymentType === 'prepay' &&
              this.mxBookInfo.paymentStatus === 'paid'
     },
+    isTransferable: function () {
+      return this.mxBookInfo.status === 'booked' || this.mxBookInfo.status === 'reserved'
+    },
     creditsTotal: function () {
       return this.mxGameDetails.creditsTotal || 0
     },
@@ -248,6 +293,12 @@ export default {
         return user && user.phone
       }
       return this.user && this.user.phone
+    },
+    transferLink () {
+      if (!this.$store.state.rsvTransferCode) {
+        return
+      }
+      return [document.location.origin, this.$store.state.rsvTransferCode].join('/#/bookTransfer/?c=')
     },
     user () {
       return this.$store.state.user
@@ -291,6 +342,11 @@ export default {
           })
         }
       })
+    },
+    getRsvTrnsfrLink: function () {
+      this.linkIsLoading = true
+      this.$store.dispatch('getTransferCode', { ...this.mxLocationInfo })
+      .then(() => { this.linkIsLoading = false })
     },
     handleChangeOk: function() {
       if(!this.form.name) {
@@ -337,6 +393,12 @@ export default {
 </script>
 
 <style scoped>
+.dotted {
+  border: 2px dotted #007bff;
+  border-style: none none dotted;
+  color: #007bff !important;
+  overflow: scroll;
+}
 </style>
 
 <style>

@@ -22,6 +22,7 @@ const get = async (gameId, bookId) => {
 
 const update = async (reservation) => {
   const res = await execSQL.run(`UPDATE bookings SET
+    userId = ${reservation.userId},
     playerName = '${reservation.playerName}',
     paymentAmount = ${reservation.paymentAmount},
     paymentStatus = '${reservation.paymentStatus}',

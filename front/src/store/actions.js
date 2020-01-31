@@ -204,6 +204,49 @@ const getNewGameOptions = ({ commit }) => {
     })
 }
 
+const getTransferCode = ({ commit }, { gameId, bookId }) => {
+  console.log('actions::getTransferCode')  // eslint-disable-line
+  return axios
+    .get(`/api/reservation/getTransferCode/${gameId}/${bookId}`)
+    .then(response => {
+      console.log(`/api/reservation/getTransferCode/${gameId}/${bookId}`, response.data)  // eslint-disable-line
+      commit('rsvTransferCode', response.data)
+    })
+    .catch(error => {
+      console.log(`/api/reservation/getTransferCode/${gameId}/${bookId} error:`, error)  // eslint-disable-line
+      commit('rsvTransferCode', undefined)
+    })
+}
+
+const getTransferDetails = ({ commit }, { rsvTransferCode }) => {
+  console.log('actions::getTransferDetails')  // eslint-disable-line
+  return axios
+    .get(`/api/reservation/getTransferDetails/${rsvTransferCode}`)
+    .then(response => {
+      console.log(`/api/reservation/getTransferDetails/${rsvTransferCode}`, response.data)  // eslint-disable-line
+      commit('gameDetails', response.data.gameDetails)
+      return response.data.transferDetails
+    })
+    .catch(error => {
+      console.log(`/api/reservation/getTransferDetails/${rsvTransferCode} error:`, error)  // eslint-disable-line
+      commit('gameDetails', undefined)
+    })
+}
+
+const doTransfer = (store, { rsvTransferCode }) => {
+  console.log('actions::doTransfer')  // eslint-disable-line
+  return axios
+    .get(`/api/reservation/doTransfer/${rsvTransferCode}`)
+    .then(response => {
+      console.log(`/api/reservation/doTransfer/${rsvTransferCode}`, response.data)  // eslint-disable-line
+      return response.data
+    })
+    .catch(error => {
+      console.log(`/api/reservation/doTransfer/${rsvTransferCode} error:`, error)  // eslint-disable-line
+      return
+    })
+}
+
 const changeGameStatus = ({ commit }, { gameId, status }) => {
   console.log('actions::changeGameStatus', gameId)  // eslint-disable-line
   commit('setUpdatedFlag', false)
@@ -364,9 +407,12 @@ export default {
   changeReservationPay,
   clearReservationExpire,
   deleteReservation,
+  doTransfer,
   exitUser,
   getCreditors,
   getNewGameOptions,
+  getTransferCode,
+  getTransferDetails,
   getUserInfo,
   init,
   payByCredits,

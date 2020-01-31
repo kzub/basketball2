@@ -26,6 +26,7 @@
 import VueRouter from 'vue-router'
 
 import Book from './components/Book.vue'
+import BookTransfer from './components/BookTransfer.vue'
 import Credits from './components/Credits.vue'
 import FreePayment from './components/FreePayment.vue'
 import FreePaymentLinks from './components/FreePaymentLinks.vue'
@@ -44,6 +45,7 @@ const router = new VueRouter({
   routes :[
     { path: '/', component: Main },
     { path: '/book', component: Book },
+    { path: '/bookTransfer', component: BookTransfer },
     { path: '/credits', component: Credits },
     { path: '/fp', component: FreePayment},
     { path: '/fpList', component: FreePaymentLinks},

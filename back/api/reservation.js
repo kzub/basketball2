@@ -65,12 +65,8 @@ const changePay = async (req, res) => {
       event = 'reservation.admin.make.unpaid';
     } else {
       reservation.makePaid();
-      if (reservation.expireAt > 0) {
-        event = 'reservation.admin.make.book'; // режим предоплаты, считаем что записал на игру
-      } else {
-        event = 'reservation.admin.make.paid'; // режим постоплаты
-      }
       reservation.setExpire(0);
+      event = 'reservation.admin.make.paid';
     }
     ok = await req.dal.reservation.update(reservation);
     events.emit(event, { reservation });
@@ -93,10 +89,9 @@ const clearExpire = async (req, res) => {
     reason = 'you are not game admin';
     req.log.error(`Not a game admin try to change game status for ${gameId}/${bookId}`);
   } else {
-    reservation.book();
     reservation.setExpire(0);
     ok = await req.dal.reservation.update(reservation);
-    events.emit('reservation.admin.make.book', { reservation });
+    events.emit('reservation.admin.clear.expiration', { reservation });
   }
 
   res.status(200).send({ ok, reason });
@@ -139,7 +134,6 @@ const payByCredits = async (req, res) => {
     }
   );
 
-  reservation.book();
   reservation.makePaid(game.paymentAmount);
   reservation.setExpire(0);
   reservation.paymentId = paymentId;
@@ -166,6 +160,75 @@ const setPlayer = async (req, res) => {
     events.emit('reservation.change.name', { reservation, oldPlayerName });
   }
   res.status(200).send({ ok });
+};
+
+// ----------------------------------------------------------------------------------
+const getTransferCode = async (req, res) => {
+  const { gameId, bookId } = req.params;
+  const user = await req.dal.user.getUser(req.userId);
+  const game = await req.dal.game.getGame(gameId);
+  const reservation = await req.dal.reservation.get(gameId, bookId);
+
+  let ok = false;
+  let transferCode;
+  if ((reservation.isOwnerUser(user) && reservation.isPlayer() && !game.isTimePassed())) {
+    transferCode = await req.dal.transfer.create(gameId, bookId, user.userId);
+  }
+  res.status(200).send({ ok, transferCode });
+};
+
+// ----------------------------------------------------------------------------------
+const getTransferDetails = async (req, res) => {
+  const { transferCode } = req.params;
+  const transferDetails = await req.dal.transfer.get(transferCode);
+  if (!transferDetails) {
+    res.status(200).send({ ok: false });
+    return;
+  }
+
+  const gameDetails = await req.dal.game.getGameDetails(transferDetails.gameId);
+
+  res.status(200).send({ ok: true, gameDetails, transferDetails });
+};
+
+// ----------------------------------------------------------------------------------
+const doTransfer = async (req, res) => {
+  let ok;
+  const user = await req.dal.user.getUser(req.userId);
+  const { transferCode } = req.params;
+  const transferDetails = await req.dal.transfer.get(transferCode);
+
+  if (!transferDetails) {
+    req.log.error(`doTransfer():req.dal.transfer.get() error:
+      ${transferDetails.gameId}/${transferDetails.bookId}/${req.userId}/${transferCode}`);
+    res.status(200).send({ ok: false });
+    return;
+  }
+
+  const reservation = await req.dal.reservation.get(transferDetails.gameId, transferDetails.bookId);
+  const oldPlayerName = reservation.playerName;
+  reservation.userId = user.userId; // set new reservation's owner
+  reservation.playerName = user.name;
+  ok = await req.dal.reservation.update(reservation);
+  if (!ok) {
+    req.log.error(`doTransfer():req.dal.reservation.update() error:
+      ${transferDetails.gameId}/${transferDetails.bookId}/${req.userId}/${transferCode}`);
+    res.status(200).send({ ok: false });
+    return;
+  }
+
+  transferDetails.newPlayerId = user.userId;
+  ok = await req.dal.transfer.finish(transferDetails);
+  if (!ok) {
+    req.log.error(`doTransfer():req.dal.transfer.finish() error:
+      ${transferDetails.gameId}/${transferDetails.bookId}/${user.userId}/${transferCode}`);
+    res.status(200).send({ ok: false });
+    return;
+  }
+
+  events.emit('reservation.transfer', { reservation, oldPlayerName });
+
+  res.status(200).send({ ok: true });
 };
 
 // ----------------------------------------------------------------------------------
@@ -208,7 +271,7 @@ const cancel = async (req, res) => {
   }
 
   let refundAmount;
-  if (game.isPrepay() && reservation.realPaymentComplete() && game.hoursToGameBegin() >= 24) {
+  if (game.isPrepay() && reservation.isPaid() && game.hoursToGameBegin() >= 24) {
     req.log.info(`reservation.cancel() Reservation ${gameId}/${bookId} is REFUNDABLE`);
     refundAmount = Math.ceil(reservation.paymentAmount * 0.9);
     await req.dal.payment.addCreditTransaction(reservation.userId, game.organizer.userId, refundAmount, 'reservation.cancel', reservation.bookId);
@@ -230,6 +293,9 @@ module.exports = {
   cancel,
   changePay,
   clearExpire,
+  doTransfer,
+  getTransferCode,
+  getTransferDetails,
   payByCredits,
   setPlayer,
 };

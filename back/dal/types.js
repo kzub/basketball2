@@ -16,6 +16,7 @@ const checkNumber = (num, msg) => {
 };
 
 const checkDate = (str, required, msg) => {
+  if(!str && !required) { return; }
   const date = checkString(str, required, msg);
   let check = new Date(date);
   if (isNaN(check.valueOf())) {
@@ -102,7 +103,10 @@ Game.prototype.newReservationTTL = function (slotType) {
     return 0;
   }
   if (this.isPrepay()) {
-    return Date.now() + 30*60*1000;
+    if (this.hoursToGameBegin() > 36) {
+      return Date.now() + 12*60*60*1000;
+    }
+    return Date.now() + 1*60*60*1000;
   }
   return 0;
 };
@@ -208,6 +212,10 @@ Reservation.prototype.isWaiter = function () {
   return this.status === 'waiting';
 };
 
+Reservation.prototype.isPlayer = function () {
+  return this.status === 'reserved';
+};
+
 Reservation.prototype.isCanceled = function () {
   return this.status === 'canceled';
 };
@@ -231,16 +239,8 @@ Reservation.prototype.realPaymentComplete = function () {
   return this.paymentId > 0;
 };
 
-Reservation.prototype.reserve = function () {
-  this.status = 'reserved';
-};
-
 Reservation.prototype.cancel = function () {
   this.status = 'canceled';
-};
-
-Reservation.prototype.book = function () {
-  this.status = 'booked';
 };
 
 function Notification (obj) {
@@ -289,6 +289,16 @@ OrganizerSettings.prototype.allowedPlaces = function () {
   return this.placesIds.slice();
 };
 
+function Transfer (obj) {
+  this.transferCode = checkString(obj.transferCode, true, 'Transfer constructor: bad transferCode');
+  this.created      = checkDate(obj.created, true, 'Transfer constructor: bad created');
+  this.bookId       = checkNumber(obj.bookId, 'Transfer constructor: bad bookId');
+  this.gameId       = checkNumber(obj.gameId, 'Transfer constructor: bad gameId');
+  this.playerId      = checkNumber(obj.playerId, 'Transfer constructor: bad playerId');
+  this.newPlayerId   = this.newPlayerId && checkNumber(obj.newPlayerId, 'Transfer constructor: bad newPlayerId');
+  this.executedAt   = checkDate(obj.executedAt, false, 'Transfer constructor: bad executedAt');
+}
+
 module.exports = {
   Game,
   GameDetails,
@@ -296,5 +306,6 @@ module.exports = {
   OrganizerSettings,
   Place,
   Reservation,
+  Transfer,
   User,
 };

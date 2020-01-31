@@ -111,6 +111,16 @@ db.run(`CREATE TABLE IF NOT EXISTS games (
   paymentGateMessage TEXT
 )`);
 
+db.run(`CREATE TABLE IF NOT EXISTS transfers (
+  transferCode TEXT PRIMARY KEY NOT NULL,
+  created DATETIME NOT NULL,
+  bookId INTEGER NOT NULL,
+  gameId INTEGER NOT NULL,
+  playerId INTEGER NOT NULL,
+  newPlayerId INTEGER,
+  executedAt DATETIME
+)`);
+
 const promiseSQL = (dalLog, cmd, query, ...rest) => {
   dalLog.debug(query);
   return new Promise(function (fulfill, reject){
@@ -151,6 +161,7 @@ dalInstance.game = require('./dal.game').init(execSQL('DAL_GAME'), dalInstance);
 dalInstance.place = require('./dal.place').init(execSQL('DAL_PLACE'), dalInstance);
 dalInstance.user = require('./dal.user').init(execSQL('DAL_USER'), dalInstance);
 dalInstance.reservation = require('./dal.reservation').init(execSQL('DAL_RSV'), dalInstance);
+dalInstance.transfer = require('./dal.transfer').init(execSQL('DAL_TRNSFR'), dalInstance);
 dalInstance.payment = require('./dal.payment').init(execSQL('DAL_PAYMENT'), dalInstance);
 dalInstance.notification = require('./dal.notification').init(execSQL('DAL_NOTIFICATION'), dalInstance);
 

@@ -9,7 +9,7 @@ const getGame = async (gameId) => {
   const games = await execSQL.all(`SELECT g.*, usedPlayerSlots, usedWaiterSlots, chatLink FROM games g
     LEFT JOIN (
       SELECT gameId, count(*) usedPlayerSlots from bookings
-      WHERE status IN ('booked', 'reserved')
+      WHERE status IN ('reserved')
       AND gameId = ${gameId}
       GROUP BY gameId
     ) bk ON g.gameId = bk.gameId
@@ -95,7 +95,7 @@ const getGameDetails = async (gameId) => {
   const allBookings = await execSQL.all(`SELECT * FROM bookings
     WHERE gameId = ${game.gameId}`
   );
-  const players = allBookings.filter(b => ['reserved', 'booked'].indexOf(b.status) > -1);
+  const players = allBookings.filter(b => ['reserved'].indexOf(b.status) > -1);
   const waiters = allBookings.filter(b => b.status == 'waiting');
 
   return new GameDetails(
@@ -117,7 +117,7 @@ const getGamesList = async (props = {}) => {
   let games = await execSQL.all(`SELECT g.*, usedPlayerSlots, usedWaiterSlots, chatLink FROM games g
     LEFT JOIN (
       SELECT gameId, count(*) usedPlayerSlots from bookings
-      WHERE status IN ('booked', 'reserved')
+      WHERE status IN ('reserved')
       GROUP BY gameId
     ) bk ON g.gameId = bk.gameId
     LEFT JOIN (
@@ -170,7 +170,7 @@ const moveWaiters = async (game) => {
   const res = await execSQL.run(`UPDATE bookings SET status = 'reserved', expireAt = ${ttl}
     WHERE bookId = ${promotedRsvId} AND
     (SELECT playerSlots from games WHERE gameId = ${game.gameId}) -
-    (SELECT count(*) from bookings WHERE status IN ('booked', 'reserved') AND gameId = ${game.gameId}) = 1`);
+    (SELECT count(*) from bookings WHERE status IN ('reserved') AND gameId = ${game.gameId}) = 1`);
     // если игра не полная, а есть отмена, не нужно записывать ожидающего в играющего
     // он это может сделать и сам
 
@@ -196,7 +196,6 @@ const moveWaiters = async (game) => {
         }
       );
 
-      promotedRsv.book();
       promotedRsv.makePaid(game.paymentAmount);
       promotedRsv.setExpire(0);
       promotedRsv.paymentId = paymentId;

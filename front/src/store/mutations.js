@@ -5,12 +5,12 @@ const gameDetails = (state, p) => state.gameDetails = p
 const games = (state, p) => state.games = p
 const myGamesOnly = (state, p) => state.myGamesOnly = p
 const newGameOptions = (state, p) => state.newGameOptions = p
-const reservationDetails = (state, p) => state.reservationDetails = p
 const returnInfo = (state, p) => state.returnInfo = { ...state.returnInfo, ...p }
 const setReservationExpire = (state, p) => state.reservationExpire = p
 const user = (state, p) => state.user = p
 const userName = (state, p) => state.user.name = p
 const creditors = (state, p) => state.creditors = p
+const rsvTransferCode = (state, p) => state.rsvTransferCode = p && p.transferCode
 
 const setUpdatedFlag = (state, p) => {
   console.log('setUpdatedFlag', p) // eslint-disable-line no-console
@@ -29,8 +29,8 @@ export default {
   games,
   myGamesOnly,
   newGameOptions,
-  reservationDetails,
   returnInfo,
+  rsvTransferCode,
   setReservationExpire,
   setUpdatedFlag,
   user,

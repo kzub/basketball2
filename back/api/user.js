@@ -102,6 +102,25 @@ const auth = async (req, res) => {
   });
 };
 
+const getUserAuthByPhone = async (req, res) => {
+  const phone = formatPhone(req.params.phone);
+  const user = await req.dal.user.findUserByPhone(phone);
+  const authCookie = authLib.encode(user.userId);
+  req.log.info(`getUserAuthByPhone phone: ${phone}, auth: ${authCookie}`);
+  res.status(200).send({
+    ok: true,
+  });
+};
+
+const getUserAuthById = async (req, res) => {
+  const userId = req.params.id;
+  const authCookie = authLib.encode(userId);
+  req.log.info(`getUserAuthById userId: ${userId}, auth: ${authCookie}`);
+  res.status(200).send({
+    ok: true,
+  });
+};
+
 const set = async (req, res) => {
   req.log.info(`set userId: ${req.userId}, name: ${req.params.name}`);
   await req.dal.user.updateUser(req.userId, req.params.name);
@@ -118,9 +137,11 @@ const exit = async (req, res) => {
 };
 
 module.exports = {
-  get,
-  sendCheckCode,
   auth,
-  set,
   exit,
+  get,
+  getUserAuthById,
+  getUserAuthByPhone,
+  sendCheckCode,
+  set,
 };
