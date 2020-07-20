@@ -103,10 +103,10 @@ Game.prototype.newReservationTTL = function (slotType) {
     return 0;
   }
   if (this.isPrepay()) {
-    if (this.hoursToGameBegin() > 36) {
+    if (this.hoursToGameBegin() > 24) {
       return Date.now() + 12*60*60*1000;
     }
-    return Date.now() + 1*60*60*1000;
+    return Date.now() + 2*60*60*1000;
   }
   return 0;
 };
