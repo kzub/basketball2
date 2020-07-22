@@ -41,7 +41,7 @@ function Game (obj) {
   this.timeEnd            = checkString(obj.timeEnd, true, 'Game constructor: bad timeEnd');
   this.status             = checkString(obj.status, true, 'Game constructor: bad status');
   this.paymentType        = checkString(obj.paymentType, true, 'Game constructor: bad paymentType');
-  this.chatLink           = checkString(obj.chatLink, true, 'Game constructor: bad chatLink');
+  this.chatLink           = checkString(obj.chatLink, false, 'Game constructor: bad chatLink');
 
   this.paymentMessage     = checkString(obj.paymentMessage, false, 'Game constructor: bad paymentMessage');
   this.paymentGateMessage = checkString(obj.paymentGateMessage, false, 'Game constructor: bad paymentGateMessage');
@@ -255,7 +255,7 @@ function Notification (obj) {
       acc[elm] = true;
       return acc;
     }, {});
-  this.chatLink = checkString(obj.chatLink, true, 'Notification constructor: bad chatLink');
+  this.chatLink = checkString(obj.chatLink, false, 'Notification constructor: bad chatLink');
   this.label    = checkString(obj.label, true, 'Notification constructor: bad label');
 }
 
