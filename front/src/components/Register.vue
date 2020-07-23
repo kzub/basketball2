@@ -37,7 +37,7 @@
       </b-card>
 
       <b-card no-body class="mb-1">
-        <b-btn class="p-2 rounded-0" block disabled v-b-toggle.regStep2 variant="secondary">Подтверждение</b-btn>
+        <b-btn class="p-2 rounded-0" block v-b-toggle.regStep2 variant="secondary">Подтверждение</b-btn>
 
         <b-collapse id="regStep2" accordion="reg-accordion" role="tabpanel">
           <b-card-body>
@@ -106,6 +106,10 @@
       },
       authUser: function (evt) {
         evt.preventDefault()
+        if (!this.form.phone) {
+          this.$root.$emit('bv::toggle::collapse', 'regStep1')
+          return
+        }
         this.$store.dispatch('authUser', {
           phone: this.form.phone,
           code: this.form.code,
@@ -123,7 +127,7 @@
             if (this.$router.currentRoute.query.retUrl) {
               this.$router.push(this.$router.currentRoute.query.retUrl)
               return
-            } 
+            }
             this.back()
           }
         })
