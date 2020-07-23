@@ -36,9 +36,9 @@
         </b-form>
       </b-card-body>
 
-      <h3 class="py-3" v-if="link">
-        <a :href="link">войти</a>
-      </h3>
+      <p class="enter-link" v-if="link">
+        {{link}}
+      </p>
 
     </div>
   </div>
@@ -89,4 +89,10 @@ export default {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style>
 @import '../assets/backarrow.css';
+.enter-link {
+    margin-top: 0;
+    margin-bottom: 1rem;
+    margin: 0 10px;
+    word-break: break-all;
+}
 </style>
