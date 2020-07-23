@@ -27,6 +27,10 @@ emitter.on('user.new', async ({ phone }) => {
   sendAdminMessage(`new user confirmed: ${phone}`, 'info');
 });
 
+emitter.on('user.enter.by.link', async ({ phone }) => {
+  sendAdminMessage(`user entered by link: ${phone}`, 'info');
+});
+
 emitter.on('request.limit', async ({ userId, ip }) => {
   sendAdminMessage(`request limit reached: ${userId}, ${ip}`, 'warn');
 });
@@ -115,7 +119,7 @@ emitter.on('reservation.paid', async ({ reservation }) => {
   // отправляем сообщение в любом случае, потому что это оплаченная деньгами бронь
   const game = await dal.game.getGame(reservation.gameId);
   const notify = await createNotification(game.notifyId, 'reservation.paid');
-  notify.send(`${reservation.playerName} записался на игру в ${game.place.title}, в ${game.timeStart} ${utils.getBeautifulDate(game.date)}, свободных мест: ${game.freePlayerSlots}`);
+  notify.send(`${reservation.playerName} оплатил игру в ${game.place.title}, в ${game.timeStart} ${utils.getBeautifulDate(game.date)}, свободных мест: ${game.freePlayerSlots}`);
 });
 
 emitter.on('reservation.postpay.paid', async ({ reservation }) => {

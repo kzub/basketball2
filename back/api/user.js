@@ -19,19 +19,21 @@ const get = async (req, res) => {
 
   const user = await req.dal.user.getUser(req.userId);
   const credits = await req.dal.payment.getUserCredits(req.userId);
+  const isSystemOwner = config.ownerId === req.userId;
 
   res.status(200).send({
     auth: true,
     ...user,
     credits,
     ...payEnv,
+    isSystemOwner,
   });
 };
 
 const formatPhone = phoneNumber => {
   let phone = phoneNumber.toString();
   if (phone[0] === '8') { // 89154443322 -> 79154443322
-    phone = '7' + phone.slice(1); 
+    phone = '7' + phone.slice(1);
   }
   else if (phone[0] !== '+' && phone[0] !== '7') { // 9154443322 -> 79154443322
     phone = '7' + phone;
@@ -78,8 +80,8 @@ const auth = async (req, res) => {
     });
     return;
   }
-  
-  // check ok - find or create user
+
+  // check ok, find or create new user
   let user = await req.dal.user.findUserByPhone(phone);
   if (!user) {
     user = await req.dal.user.createUserByPhone(phone);
@@ -90,34 +92,22 @@ const auth = async (req, res) => {
   }
 
   await req.dal.user.deleteVerificationCode(phone);
-  
+
   const authCookie = authLib.encode(user.userId);
   req.log.debug(`set auth '${authCookie}' for userId: ${user.userId}`);
-  const options = {
+  res.cookie('auth', authCookie, {
     expires: new Date(Date.now() + 1000*60*60*24*365*10),
     httpOnly: true,
-  };
-  res.cookie('auth', authCookie, options).status(200).send({
+  });
+
+  if (req.params.redirect) {
+    events.emit('user.enter.by.link', { phone });
+    res.redirect(`https://${config.site}/`);
+    return;
+  }
+
+  res.status(200).send({
     auth: true,
-  });
-};
-
-const getUserAuthByPhone = async (req, res) => {
-  const phone = formatPhone(req.params.phone);
-  const user = await req.dal.user.findUserByPhone(phone);
-  const authCookie = authLib.encode(user.userId);
-  req.log.info(`getUserAuthByPhone phone: ${phone}, auth: ${authCookie}`);
-  res.status(200).send({
-    ok: true,
-  });
-};
-
-const getUserAuthById = async (req, res) => {
-  const userId = req.params.id;
-  const authCookie = authLib.encode(userId);
-  req.log.info(`getUserAuthById userId: ${userId}, auth: ${authCookie}`);
-  res.status(200).send({
-    ok: true,
   });
 };
 
@@ -136,10 +126,68 @@ const exit = async (req, res) => {
   });
 };
 
+// owner's methods
+// -------------------------------------------------------------------------
+const getLoginLinkByPhone = async (req, res) => {
+  if (req.userId !== config.ownerId) {
+    res.status(403).send({
+      error: true,
+      comment: 'you are not allowed to do this',
+    });
+    return;
+  }
+
+  const phone = formatPhone(req.params.phone);
+  const code = await req.dal.user.createVerificationCode(phone);
+  const link = `https://${config.site}/api/user/auth/${phone}/${code}/true`;
+  req.log.info(`getLoginLinkByPhone phone: ${phone}, link: ${link}`);
+
+  res.status(200).send({
+    link,
+    ok: true,
+  });
+};
+
+const getUserAuthByPhone = async (req, res) => {
+  if (req.userId !== config.ownerId) {
+    res.status(403).send({
+      error: true,
+      comment: 'you are not allowed to do this',
+    });
+    return;
+  }
+  const phone = formatPhone(req.params.phone);
+  const user = await req.dal.user.findUserByPhone(phone);
+  const authCookie = authLib.encode(user.userId);
+  req.log.info(`getUserAuthByPhone phone: ${phone}, auth: ${authCookie}`);
+  res.status(200).send({
+    auth: authCookie,
+    ok: true,
+  });
+};
+
+const getUserAuthById = async (req, res) => {
+  if (req.userId !== config.ownerId) {
+    res.status(403).send({
+      error: true,
+      comment: 'you are not allowed to do this',
+    });
+    return;
+  }
+  const userId = req.params.id;
+  const authCookie = authLib.encode(userId);
+  req.log.info(`getUserAuthById userId: ${userId}, auth: ${authCookie}`);
+  res.status(200).send({
+    auth: authCookie,
+    ok: true,
+  });
+};
+
 module.exports = {
   auth,
   exit,
   get,
+  getLoginLinkByPhone,
   getUserAuthById,
   getUserAuthByPhone,
   sendCheckCode,

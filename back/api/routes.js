@@ -71,11 +71,12 @@ const init = (app) => {
   app.get('/api/reservation/getTransferDetails/:transferCode', wrapper(reservation.getTransferDetails, true));
   app.get('/api/reservation/payByCredits/:gameId/:bookId/', wrapper(reservation.payByCredits, true));
   app.get('/api/reservation/setPlayer/:gameId/:bookId/:name', wrapper(reservation.setPlayer, true));
-  app.get('/api/user/auth/:phone/:code', wrapper(user.auth, false));
+  app.get('/api/user/auth/:phone/:code/:redirect?', wrapper(user.auth, false));
   app.get('/api/user/exit', wrapper(user.exit, true));
   app.get('/api/user/get', wrapper(user.get, false));
-  app.get('/api/user/getUserAuthById/:id', wrapper(user.getUserAuthById, false));
-  app.get('/api/user/getUserAuthByPhone/:phone', wrapper(user.getUserAuthByPhone, false));
+  app.get('/api/user/getLoginLinkByPhone/:phone', wrapper(user.getLoginLinkByPhone, true));
+  app.get('/api/user/getUserAuthById/:id', wrapper(user.getUserAuthById, true));
+  app.get('/api/user/getUserAuthByPhone/:phone', wrapper(user.getUserAuthByPhone, true));
   app.get('/api/user/sendCheckCode/:phone', smsLimiter, wrapper(user.sendCheckCode, false));
   app.get('/api/user/set/:name', wrapper(user.set, true));
   app.post('/api/game/add', wrapper(game.add, true));

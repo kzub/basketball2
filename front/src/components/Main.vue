@@ -1,7 +1,7 @@
 <template>
   <div>
     <Auth/>
-    
+
     <b-card-body class="p-2 m-2">
       <h3>Текущие игры</h3>
     </b-card-body>
@@ -36,6 +36,15 @@
       <router-link to="/myGames" tag="div">
         <b-btn class="btn-lg mt-2 mb-3 rounded-0" block variant="secondary">
           Мои последние игры <div class="arrow"><i class="right"></i></div>
+        </b-btn>
+      </router-link>
+    </div>
+
+    <div v-if="user && user.isSystemOwner">
+      <hr/>
+      <router-link to="/loginLink" tag="div">
+        <b-btn class="btn-lg mt-2 mb-3 rounded-0" block variant="danger">
+            Ссылка на вход<div class="arrow"><i class="right"></i></div>
         </b-btn>
       </router-link>
     </div>

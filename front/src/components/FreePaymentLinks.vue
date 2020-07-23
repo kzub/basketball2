@@ -30,7 +30,7 @@
         </a>
         <hr/>
       </div>
-      
+
     </div>
   </div>
 </template>

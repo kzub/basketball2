@@ -24,7 +24,7 @@
       <div v-else-if="wantChange || newUser" class="my-2">
         <b-btn class="p-2 rounded-0" block variant="secondary">
             Фамилия и имя
-          </b-btn>
+        </b-btn>
         <b-form @submit="changeName" class="mt-3" >
           <b-form-group id="userName"
                         label-for="userName"
@@ -56,9 +56,9 @@
           <b-btn class="mx-4 my-2 w-75" @click="changeProfile" variant="primary">Изменить</b-btn>
           <b-btn class="mx-4 my-2 w-75" @click="exit" variant="danger">Выйти</b-btn>
         </div>
-      </div>  
+      </div>
     </div>
-    
+
     <div>
       <b-modal id="err-change" title="Ошибка" ok-variant="danger" ok-title="ОК" cancel-variant="hidden">
         <h5 class="my-4 text">Не удалось сохранить изменения. Проверьте доступность интернета</h5>
@@ -106,7 +106,7 @@ export default {
     },
     changeName: function (evt) {
       evt.preventDefault()
-      
+
       this.$store.dispatch('setUserName', this.newName)
       .then(res => {
         if (!res || !res.ok) {
@@ -149,5 +149,5 @@ export default {
 </style>
 
 <style>
-@import '../assets/backarrow.css'; 
+@import '../assets/backarrow.css';
 </style>

@@ -329,6 +329,22 @@ const sendCheckCode = (store, phone) => {
     })
 }
 
+const getLoginLink = ({commit}, phone) => {
+  console.log(`actions::getLoginLink ${phone}`)  // eslint-disable-line
+  commit('setUpdatedFlag', false)
+  return axios
+    .get(`/api/user/getLoginLinkByPhone/${phone}`)
+    .then(response => {
+      commit('setUpdatedFlag', true)
+      console.log('/api/user/getLoginLinkByPhone response:', response.data)  // eslint-disable-line
+      return response.data
+    })
+    .catch(error => {
+      commit('setUpdatedFlag', true)
+      console.log('/api/user/getLoginLinkByPhone error:', error)  // eslint-disable-line
+    })
+}
+
 const authUser = (store, { phone, code }) => {
   console.log(`actions::authUser ${phone} ${code}`)  // eslint-disable-line
   // commit('setUpdatedFlag', false) не нужно - всё ломает в регистрации
@@ -399,8 +415,8 @@ const init = ({ dispatch }) => {
 }
 
 export default {
-  askToPay,
   addGame,
+  askToPay,
   authUser,
   bookSlot,
   changeGameStatus,
@@ -410,6 +426,7 @@ export default {
   doTransfer,
   exitUser,
   getCreditors,
+  getLoginLink,
   getNewGameOptions,
   getTransferCode,
   getTransferDetails,
