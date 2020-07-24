@@ -73,11 +73,11 @@
           <div v-if="!isPaymentGatewayUsed" class="d-flex flex-column">
             <b-btn v-if="mxBookInfo.paymentStatus === 'paid'"
                    @click="changePay" class="my-1" variant="warning">
-              Не оплачено
+              Изменить на "Не оплачено"
             </b-btn>
             <b-btn v-if="mxBookInfo.paymentStatus !== 'paid'"
               @click="changePay" class="my-1" variant="success">
-              Оплачено
+              Изменить на "Оплачено"
             </b-btn>
             <b-btn v-if="mxBookInfo.paymentStatus !== 'paid' &&
                          mxBookInfo.status === 'reserved' &&
