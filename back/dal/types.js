@@ -100,7 +100,7 @@ Game.prototype.waiterReservationTTL = function () {
     if (this.hoursToGameBegin() > 24) {
       return Date.now() + 12*60*60*1000;
     }
-    return Date.now() + 1*60*60*1000;
+    return Date.now() + 2*60*60*1000;
   }
   return 0;
 };
@@ -111,7 +111,7 @@ Game.prototype.newReservationTTL = function (slotType) {
   }
   if (this.isPrepay()) {
     if (this.hoursToGameBegin() > 24) {
-      return Date.now() + 12*60*60*1000;
+      return Date.now() + 4*60*60*1000;
     }
     return Date.now() + 1*60*60*1000;
   }
