@@ -63,6 +63,11 @@
 
         <!-- admin action buttons -->
         <div v-if="isAdmin" class="mt-3 d-flex flex-column">
+          <div>
+            <b-btn v-b-modal.transferPlayer v-if="isTransferable" class="my-1 w-100" variant="warning">
+              Передать запись другому игроку
+            </b-btn>
+          </div>
           <b-btn v-b-modal.chgName class="my-1" variant="primary">Изменить имя</b-btn>
 
           <div v-if="!isPaymentGatewayUsed" class="d-flex flex-column">
