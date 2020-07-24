@@ -20,7 +20,7 @@
         <b-container class="px-1">
           <GameOptions v-for="option in newGameOptions" :option="option" :storage="choosedOptions" v-bind:key="option.label"/>
         </b-container>
-        
+
         <b-btn class="w-75 mt-4 mb-5" variant="primary" type="submit">Создать</b-btn>
       </form>
     </div>

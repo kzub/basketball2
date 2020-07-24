@@ -23,7 +23,7 @@
         <div>Стоимость: {{ game.paymentAmount }} р. </div>
         <div><a class="dotted" v-b-modal.payReturnInfoGI>Условия возврата</a></div>
         <b-modal id="payReturnInfoGI" cancel-variant="hidden" title="Условия возврата" class="flex">
-          <RefundRules/>
+          <RefundRules :game="game" />
         </b-modal>
       </div>
       <div v-else-if="game.paymentType == 'shared'">

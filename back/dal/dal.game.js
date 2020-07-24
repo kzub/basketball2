@@ -49,13 +49,14 @@ const optionalText = (text) => {
 const addGame = async (game) => {
   const res = await execSQL.run(`INSERT INTO games
     (placeId, notifyId, date, timeStart, timeEnd, organizerId, playerSlots, waiterSlots, status,
-    paymentType, paymentAmount, paymentMessage, paymentGateAccount, paymentGateMessage)
+    paymentType, paymentAmount, paymentMessage, paymentGateAccount, paymentGateMessage, hoursBeforeGameRefundAllowed)
     VALUES (${game.place.placeId}, ${game.notifyId}, '${game.date}', '${game.timeStart}',
     '${game.timeEnd}', ${game.organizer.userId}, ${game.playerSlots}, ${game.waiterSlots},
     '${game.status}', '${game.paymentType}', ${game.paymentAmount},
     ${optionalText(game.paymentMessage)},
     ${optionalText(game.paymentGateAccount)},
-    ${optionalText(game.paymentGateMessage)})
+    ${optionalText(game.paymentGateMessage)},
+    ${game.hoursBeforeGameRefundAllowed})
   `);
 
   return res && res.lastID;

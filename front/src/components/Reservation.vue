@@ -179,7 +179,7 @@
         <div>
           <b-modal id="ackModal" title="Подтверждение" ok-variant="danger" ok-title="Да" cancel-title="Отмена"
             @ok="handleDeleteOk">
-            <RefundRules v-if="isRefundable"/>
+            <RefundRules v-if="isRefundable" :game="mxGameDetails.game"/>
             <p class="my-4">
               Удалить запись?
             </p>

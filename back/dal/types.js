@@ -35,6 +35,8 @@ function Game (obj) {
   this.freeWaiterSlots    = checkNumber(this.waiterSlots - this.usedWaiterSlots, 'Game constructor: bad freeWaiterSlots');
   this.paymentAmount      = checkNumber(obj.paymentAmount, 'Game constructor: bad paymentAmount');
   this.notifyId           = checkNumber(obj.notifyId, 'Game constructor: bad notifyId');
+  this.hoursBeforeGameRefundAllowed
+                          = checkNumber(obj.hoursBeforeGameRefundAllowed || 0, 'Game constructor: bad hoursBeforeGameRefundAllowed');
 
   this.date               = checkDate(obj.date, true, 'Game constructor: bad date');
   this.timeStart          = checkString(obj.timeStart, true, 'Game constructor: bad timeStart');
@@ -76,6 +78,11 @@ Game.prototype.hoursToGameBegin = function () {
   return hoursToGameBegin;
 };
 
+Game.prototype.isRefundAllowed = function () {
+  console.log('aaaa', this.isPrepay() ,this.hoursToGameBegin(), this.hoursBeforeGameRefundAllowed);
+  return this.isPrepay() && (this.hoursToGameBegin() > this.hoursBeforeGameRefundAllowed);
+};
+
 Game.prototype.isTimePassed = function () {
   const tsGameEnd = (new Date(`${this.date}T${this.timeEnd}:00+0300`)).valueOf();
   return Date.now() > tsGameEnd;
@@ -93,7 +100,7 @@ Game.prototype.waiterReservationTTL = function () {
     if (this.hoursToGameBegin() > 24) {
       return Date.now() + 12*60*60*1000;
     }
-    return Date.now() + 2*60*60*1000;
+    return Date.now() + 1*60*60*1000;
   }
   return 0;
 };
@@ -106,7 +113,7 @@ Game.prototype.newReservationTTL = function (slotType) {
     if (this.hoursToGameBegin() > 24) {
       return Date.now() + 12*60*60*1000;
     }
-    return Date.now() + 2*60*60*1000;
+    return Date.now() + 1*60*60*1000;
   }
   return 0;
 };

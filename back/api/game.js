@@ -85,6 +85,7 @@ const add = async (req, res) => {
     paymentGateMessage: newGame.paymentGateMessage,
     paymentMessage: newGame.paymentMessage,
     paymentType: newGame.paymentType,
+    hoursBeforeGameRefundAllowed: Number(newGame.hoursBeforeGameRefundAllowed),
     place,
     playerSlots: Number(newGame.playerSlots),
     status: 'disabled',
@@ -231,6 +232,12 @@ const getOptions = async (req, res) => {
             output: 'paymentGateMessage',
             value: account.paymentGateMessage,
             type: 'text',
+          },{
+            disabled: true,
+            label: 'Разрешен возврат, часов до игры',
+            output: 'hoursBeforeGameRefundAllowed',
+            value: account.hoursBeforeGameRefundAllowed,
+            type: 'number',
           },{
             label: 'Сумма с каждого участника',
             output: 'paymentAmount',

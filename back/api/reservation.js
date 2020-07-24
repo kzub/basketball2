@@ -271,9 +271,9 @@ const cancel = async (req, res) => {
   }
 
   let refundAmount;
-  if (game.isPrepay() && reservation.isPaid() && game.hoursToGameBegin() >= 24) {
+  if (reservation.isPaid() && game.isRefundAllowed()) {
     req.log.info(`reservation.cancel() Reservation ${gameId}/${bookId} is REFUNDABLE`);
-    refundAmount = Math.ceil(reservation.paymentAmount * 0.9);
+    refundAmount = reservation.paymentAmount;
     await req.dal.payment.addCreditTransaction(reservation.userId, game.organizer.userId, refundAmount, 'reservation.cancel', reservation.bookId);
     events.emit('user.credits.added', {
       playerName: reservation.playerName,
