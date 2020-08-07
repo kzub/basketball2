@@ -202,10 +202,27 @@ const getOptions = async (req, res) => {
     },
   });
 
+  // shared without yandex.money
+  paymentsOptions.push({
+    text: 'После игры, делится на всех',
+    value: {
+      selected: 'shared',
+      inputs: [{
+        label: 'Стоимость зала',
+        output: 'paymentAmount',
+        type: 'number',
+      },{
+        label: 'Сообщение об условиях оплаты',
+        output: 'paymentMessage',
+        type: 'text',
+      }],
+    }
+  });
+
   const accounts = await req.dal.payment.getPrepayMethodsByOrganizerId(req.userId);
   const idGenerator = (function* () {
     let index = 1;
-    yield '';
+    yield ''; // if only one account - without index
     while (true) {
       index++;
       yield `(${index})`;
@@ -217,7 +234,7 @@ const getOptions = async (req, res) => {
       const accId = idGenerator.next().value;
       // prepay
       paymentsOptions.push({
-        text: `Предоплата ${accId}`,
+        text: `Предоплата Яндекс.Деньги ${accId}`,
         value: {
           selected: 'prepay',
           inputs: [{
@@ -247,7 +264,7 @@ const getOptions = async (req, res) => {
       });
       // shared
       paymentsOptions.push({
-        text: `После игры, делится на всех ${accId}`,
+        text: `Постоплата Яндекс.Деньги ${accId}`,
         value: {
           selected: 'shared',
           inputs: [{
@@ -275,23 +292,6 @@ const getOptions = async (req, res) => {
         }
       });
     }
-  } else {
-    // shared without yandex.money
-    paymentsOptions.push({
-      text: 'После игры, делится на всех',
-      value: {
-        selected: 'shared',
-        inputs: [{
-          label: 'Стоимость зала',
-          output: 'paymentAmount',
-          type: 'number',
-        },{
-          label: 'Сообщение об условиях оплаты',
-          output: 'paymentMessage',
-          type: 'text',
-        }],
-      }
-    });
   }
 
   options.push({
