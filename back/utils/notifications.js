@@ -64,11 +64,6 @@ emitter.on('payment.wrong.userId', async ({ reservation, userId }) => {
   sendAdminMessage(`Ошибка. Не совпадает userId платежа, в брони: ${reservation.userId}, в платеже ${userId}`, 'error');
 });
 
-// TODO брать в платежных системах по organizotr какой notifyId нужен для уведомлений
-emitter.on('user.credits.added', async ({ playerName, receiverName, amount }) => {
-  sendAdminMessage(`Начислено ${amount} кредитов для ${playerName} на счёт организатора ${receiverName}`, 'info');
-});
-
 // --------------------- GAME ADMIN NOTIFICATIONS ------------------------
 const createNotification = async (notifyId, event) => {
   try {
@@ -127,6 +122,13 @@ emitter.on('reservation.postpay.paid', async ({ reservation }) => {
   const game = await dal.game.getGame(reservation.gameId);
   const notify = await createNotification(game.notifyId, 'reservation.postpay.paid');
   notify.send(`${reservation.playerName} перевел ${reservation.paymentAmount} рублей, за игру в ${game.place.title}, в ${game.timeStart} ${utils.getBeautifulDate(game.date)}`);
+});
+
+emitter.on('user.credits.added', async ({ gameId, playerName, receiverName, amount }) => {
+  // отправляем сообщение в любом случае, потому что деньги
+  const game = await dal.game.getGame(gameId);
+  const notify = await createNotification(game.notifyId, 'user.credits.added');
+  notify.send(`Начислено ${amount} кредитов для ${playerName} на счёт организатора ${receiverName} за игру в ${game.place.title},  в ${game.timeStart} ${utils.getBeautifulDate(game.date)}`);
 });
 
 // RESERVATIONS CANCELATIONS ---------------------------------------------------------------
