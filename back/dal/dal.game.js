@@ -210,6 +210,33 @@ const moveWaiters = async (game) => {
   return promotedRsv;
 };
 
+const getNotRefundedCanceledReservations = async (gameId) => {
+  const rsvs = await execSQL.all(`SELECT canceledRsvs.* FROM
+    (SELECT * FROM bookings WHERE
+      gameId = ${gameId}
+      AND paymentStatus = 'paid'
+      AND paymentId  > 0
+      AND status = 'canceled'
+    ) canceledRsvs
+    LEFT JOIN credits ON
+      canceledRsvs.userId = credits.userId
+      AND credits.sourceType = 'reservation.cancel'
+      AND canceledRsvs.bookId = credits.sourceId
+    WHERE
+     credits.amount IS NULL
+    ORDER BY ts`
+  );
+  return rsvs.map(rsv => new Reservation(rsv));
+};
+
+const getPayedReservationsNumber = async (gameId) => {
+  const result = await execSQL.all(`SELECT count(*) cnt FROM bookings WHERE
+    gameId = ${gameId}
+    AND paymentStatus = 'paid'
+    AND status = 'reserved'
+  `);
+  return result[0].cnt;
+};
 
 module.exports = {
   init: (driver, dalInstance) => {
@@ -226,6 +253,8 @@ module.exports = {
       getGameNotifyId,
       getGameOrganizerId,
       getGamesList,
+      getNotRefundedCanceledReservations,
+      getPayedReservationsNumber,
       moveWaiters,
       updateGameStatus,
     };

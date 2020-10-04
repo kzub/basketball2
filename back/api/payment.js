@@ -37,6 +37,23 @@ const onReservationPayment = async (req, paySystem, amount, labelData, organizer
   reservation.paymentId = paymentId;
   await req.dal.reservation.update(reservation);
   events.emit('reservation.paid', { reservation });
+
+  const payedReservationsCount = await req.dal.game.getPayedReservationsNumber(gameId);
+  // refund previous player with canceled reservation if last free player slot was payed
+  if (game.isPrepay() && game.playerSlots == payedReservationsCount) {
+    const rsvs = await req.dal.game.getNotRefundedCanceledReservations(gameId);
+    if (rsvs.length) {
+      const reservation = rsvs[0];
+      req.log.info(`onReservationPayment(), new payment, all slots are payed, will refund ${reservation.gameId}/${reservation.bookId}`);
+      const refundAmount = reservation.paymentAmount;
+      await req.dal.payment.addCreditTransaction(reservation.userId, game.organizer.userId, refundAmount, 'reservation.cancel', reservation.bookId, 'new payment');
+      events.emit('user.credits.added', {
+        playerName: reservation.playerName,
+        receiverName: game.organizer.name,
+        amount: refundAmount,
+      });
+    }
+  }
 };
 
 // ------------------------------------------------------------------------------
