@@ -5,25 +5,25 @@ let dal; // eslint-disable-line
 let execSQL;
 
 const getNotification = async (notifyId) => {
-  const notification = 
+  const notification =
     await execSQL.all(`SELECT * FROM notifications WHERE notifyId = ${notifyId}`);
 
   return new Notification(notification[0]);
 };
 
 const getSystemAdminNotification = async () => {
-  const notification = 
+  const notification =
     await execSQL.all('SELECT * FROM notifications WHERE notifyId = 1');
 
   return new Notification(notification[0]);
 };
 
 const getNotificationsForOrganizerId = async (organizerId) => {
-  const allowedNotifications = 
+  const allowedNotifications =
     await execSQL.all(`SELECT * FROM organizersNotifications WHERE organizerId = ${organizerId}`);
 
   const ids = allowedNotifications.map(n => n.notifyId).join();
-  const notifications = 
+  const notifications =
     await execSQL.all(`SELECT * FROM notifications WHERE notifyId IN (${ids})`);
 
   return notifications.map(n => new Notification(n));
