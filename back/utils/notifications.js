@@ -186,7 +186,7 @@ emitter.on('reservation.waiter.promoted', async ({ reservation }) => {
   let payTime = '';
   if (game.isPrepay()) {
     if(reservation.isPaid()) {
-      payTime = ', оплачено автоматически';
+      payTime = ', оплачено автоматически со счёта предоплаты';
     } else {
       payTime = `, на оплату отводится ${utils.textHoursMinutesTo(reservation.expireAt)}`;
     }
