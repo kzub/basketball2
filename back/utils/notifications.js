@@ -258,7 +258,7 @@ emitter.on('game.change.status', async ({ game, status }) => {
 
 emitter.on('game.players.list', async ({ game, playersList }) => {
   const notify = await createNotification(game.notifyId, 'game.players.list');
-  notify.send(`Список игроков:
+  notify.send(`Список игроков (${game.timeStart} ${utils.getBeautifulDate(game.date)}):
 ${playersList.join('\n')}`, true);
 });
 
