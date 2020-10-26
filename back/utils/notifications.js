@@ -64,11 +64,6 @@ emitter.on('payment.wrong.userId', async ({ reservation, userId }) => {
   sendAdminMessage(`Ошибка. Не совпадает userId платежа, в брони: ${reservation.userId}, в платеже ${userId}`, 'error');
 });
 
-// TODO брать в платежных системах по organizotr какой notifyId нужен для уведомлений
-emitter.on('user.credits.added', async ({ playerName, receiverName, amount }) => {
-  sendAdminMessage(`Начислено ${amount} кредитов для ${playerName} на счёт организатора ${receiverName}`, 'info');
-});
-
 // --------------------- GAME ADMIN NOTIFICATIONS ------------------------
 const createNotification = async (notifyId, event) => {
   try {
@@ -129,6 +124,13 @@ emitter.on('reservation.postpay.paid', async ({ reservation }) => {
   notify.send(`${reservation.playerName} перевел ${reservation.paymentAmount} рублей, за игру в ${game.place.title}, в ${game.timeStart} ${utils.getBeautifulDate(game.date)}`);
 });
 
+emitter.on('user.credits.added', async ({ gameId, playerName, receiverName, amount }) => {
+  // отправляем сообщение в любом случае, потому что деньги
+  const game = await dal.game.getGame(gameId);
+  const notify = await createNotification(game.notifyId, 'user.credits.added');
+  notify.send(`Начислено ${amount} кредитов для ${playerName} на счёт организатора ${receiverName} за игру в ${game.place.title},  в ${game.timeStart} ${utils.getBeautifulDate(game.date)}`);
+});
+
 // RESERVATIONS CANCELATIONS ---------------------------------------------------------------
 emitter.on('reservation.expired', async ({ reservation }) => {
   const game = await dal.game.getGame(reservation.gameId);
@@ -184,7 +186,7 @@ emitter.on('reservation.waiter.promoted', async ({ reservation }) => {
   let payTime = '';
   if (game.isPrepay()) {
     if(reservation.isPaid()) {
-      payTime = ', оплачено автоматически';
+      payTime = ', оплачено автоматически со счёта предоплаты';
     } else {
       payTime = `, на оплату отводится ${utils.textHoursMinutesTo(reservation.expireAt)}`;
     }
@@ -256,7 +258,7 @@ emitter.on('game.change.status', async ({ game, status }) => {
 
 emitter.on('game.players.list', async ({ game, playersList }) => {
   const notify = await createNotification(game.notifyId, 'game.players.list');
-  notify.send(`Список игроков:
+  notify.send(`Список игроков (${game.timeStart} ${utils.getBeautifulDate(game.date)}):
 ${playersList.join('\n')}`, true);
 });
 

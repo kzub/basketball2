@@ -79,7 +79,6 @@ Game.prototype.hoursToGameBegin = function () {
 };
 
 Game.prototype.isRefundAllowed = function () {
-  console.log('aaaa', this.isPrepay() ,this.hoursToGameBegin(), this.hoursBeforeGameRefundAllowed);
   return this.isPrepay() && (this.hoursToGameBegin() > this.hoursBeforeGameRefundAllowed);
 };
 

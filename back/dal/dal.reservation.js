@@ -6,15 +6,15 @@ let execSQL;
 
 const create = async (gameId, slotType, ttl, user) => {
   const status = slotType === 'player' ? 'reserved' : 'waiting';
-  const res = await execSQL.run(`INSERT INTO bookings 
-    (ts, gameId, userId, playerName, paymentAmount, paymentStatus, status, expireAt) VALUES 
+  const res = await execSQL.run(`INSERT INTO bookings
+    (ts, gameId, userId, playerName, paymentAmount, paymentStatus, status, expireAt) VALUES
     (${Date.now()}, ${gameId}, ${user.userId}, '${user.name}', 0, 'unpaid', '${status}', ${ttl})`);
 
   return res && res.lastID;
 };
 
 const get = async (gameId, bookId) => {
-  const res = await execSQL.all(`SELECT * FROM bookings 
+  const res = await execSQL.all(`SELECT * FROM bookings
     WHERE gameId = ${gameId} AND bookId = ${bookId}`);
 
   return new Reservation(res[0]);
@@ -35,8 +35,8 @@ const update = async (reservation) => {
 };
 
 const getExpired = async () => {
-  const expired = await execSQL.all(`SELECT * FROM bookings 
-    WHERE expireAt > 0 
+  const expired = await execSQL.all(`SELECT * FROM bookings
+    WHERE expireAt > 0
     AND expireAt < ${Date.now()}
     AND status = 'reserved'`);
 
