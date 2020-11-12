@@ -1,7 +1,7 @@
 <template>
   <div>
 
-    <b-form method="POST" action="https://money.yandex.ru/quickpay/confirm.xml">
+    <b-form method="POST" action="https://yoomoney.ru/quickpay/confirm.xml">
       <input name="receiver" type="hidden" :value="account">
       <input name="quickpay-form" type="hidden" value="donate">
       <input id="ordertarget" type="hidden" name="targets" :value="message">
