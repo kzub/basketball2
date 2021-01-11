@@ -49,14 +49,14 @@ const sendCheckCode = async (req, res) => {
   req.log.info(`sendCheckCode phone: ${phone}, code: ${code}`);
   try {
     await smsGate.sendSMS(phone, code);
-    events.emit('user.sms', { phone, code });
+    events.emit('user.sms', { phone, code, ip: req.ip });
   } catch (err) {
     ok = false;
     if (err === 'BAD_PHONE_NUMBER') {
       req.log.warn(`SMSAUTH: bad phone number: ${phone}`);
     }
     else {
-      events.emit('user.sms.error', { phone, code, err });
+      events.emit('user.sms.error', { phone, code, err, ip: req.ip });
       req.log.error(`SMSAUTH: ${err}`);
     }
   }

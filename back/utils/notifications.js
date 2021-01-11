@@ -15,12 +15,12 @@ const sendAdminMessage = async (msg, type) => {
   telegram.send(config.telegram.token, config.telegram.owner, `*[ADMIN]* ${msg}${site}`);
 };
 
-emitter.on('user.sms', async ({ phone, code }) => {
-  sendAdminMessage(`sent sms to user: ${phone}, code: ${code}`, 'info');
+emitter.on('user.sms', async ({ phone, code, ip }) => {
+  sendAdminMessage(`sent sms to user: ${phone}, code: ${code}, ip: ${ip}`, 'info');
 });
 
-emitter.on('user.sms.error', async ({ phone, code, err }) => {
-  sendAdminMessage(`ERROR: send sms to user: ${phone}, code: ${code}, err: ${err}`, 'error');
+emitter.on('user.sms.error', async ({ phone, code, ip, err }) => {
+  sendAdminMessage(`ERROR: send sms to user: ${phone}, code: ${code}, ip: ${ip}, err: ${err},`, 'error');
 });
 
 emitter.on('user.new', async ({ phone }) => {
@@ -36,7 +36,7 @@ emitter.on('request.limit', async ({ userId, ip }) => {
 });
 
 emitter.on('request.limit.sms', async ({ phone, ip }) => {
-  sendAdminMessage(`sent SMS limit reached: ${phone}, ${ip}`, 'warn');
+  sendAdminMessage(`sent SMS limit reached: ${phone}, ip: ${ip}`, 'warn');
 });
 
 emitter.on('payment.unknown', async ({ paySystem, label, amount }) => {
