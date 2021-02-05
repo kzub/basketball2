@@ -259,7 +259,7 @@ const getOptions = async (req, res) => {
             value: account.paymentGateMessage,
             type: 'text',
           },{
-            disabled: true,
+            // disabled: true,
             label: 'Разрешен возврат, часов до игры',
             output: 'hoursBeforeGameRefundAllowed',
             value: account.hoursBeforeGameRefundAllowed,
