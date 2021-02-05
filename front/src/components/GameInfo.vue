@@ -10,6 +10,13 @@
         <span class="font-weight-bold btn-lg">
           {{game.timeStart}} - {{game.timeEnd}}
         </span>
+
+        <div v-if="visible('openMode') && game.openingMode == 'auto' && game.status === 'disabled'" class="m-2 mt-3">
+          <span class="p-2 rounded autoOpenMode">
+            откроется {{ mxDateDayAndMonth(game.openingDate) }} в {{ game.openingTime }}
+          </span>
+        </div>
+
       </b-card-body>
     </div>
 
@@ -89,6 +96,11 @@ export default {
   border: 2px dotted #007bff;
   border-style: none none dotted;
   color: #007bff !important;
+}
+
+.autoOpenMode {
+  border: 1px solid #007bff;
+  color: #007bff;
 }
 
 .paymentInfoButton {

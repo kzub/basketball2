@@ -253,8 +253,17 @@ emitter.on('game.change.status', async ({ game, status }) => {
   }
   const notify = await createNotification(game.notifyId, 'game.change.status');
   const statusText = gameStatuses[status];
-  notify.send(`${game.organizer.name} ${statusText} игру ${game.place.title}, в ${game.timeStart} ${utils.getBeautifulDate(game.date)}`);
+  notify.send(`${game.organizer.name} ${statusText} игру ${game.place.title} в ${game.timeStart} ${utils.getBeautifulDate(game.date)}`);
 });
+
+emitter.on('game.change.status.auto', async ({ game }) => {
+  if (game.isTimePassed()) {
+    return;
+  }
+  const notify = await createNotification(game.notifyId, 'game.change.status');
+  notify.send(`Открыта запись на игру ${game.place.title} в ${game.timeStart} ${utils.getBeautifulDate(game.date)}`);
+});
+
 
 emitter.on('game.players.list', async ({ game, playersList }) => {
   const notify = await createNotification(game.notifyId, 'game.players.list');

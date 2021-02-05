@@ -49,14 +49,18 @@ const optionalText = (text) => {
 const addGame = async (game) => {
   const res = await execSQL.run(`INSERT INTO games
     (placeId, notifyId, date, timeStart, timeEnd, organizerId, playerSlots, waiterSlots, status,
-    paymentType, paymentAmount, paymentMessage, paymentGateAccount, paymentGateMessage, hoursBeforeGameRefundAllowed)
+    paymentType, paymentAmount, paymentMessage, paymentGateAccount, paymentGateMessage, hoursBeforeGameRefundAllowed,
+    openingMode, openingDate, openingTime)
     VALUES (${game.place.placeId}, ${game.notifyId}, '${game.date}', '${game.timeStart}',
     '${game.timeEnd}', ${game.organizer.userId}, ${game.playerSlots}, ${game.waiterSlots},
     '${game.status}', '${game.paymentType}', ${game.paymentAmount},
     ${optionalText(game.paymentMessage)},
     ${optionalText(game.paymentGateAccount)},
     ${optionalText(game.paymentGateMessage)},
-    ${game.hoursBeforeGameRefundAllowed})
+    ${game.hoursBeforeGameRefundAllowed},
+    '${game.openingMode}',
+    ${optionalText(game.openingDate)},
+    ${optionalText(game.openingTime)})
   `);
 
   return res && res.lastID;
@@ -64,6 +68,12 @@ const addGame = async (game) => {
 
 const updateGameStatus = async (game) => {
   let sql = `UPDATE games SET status = '${game.status}' WHERE gameId = ${game.gameId}`;
+  const res = await execSQL.run(sql);
+  return res && res.lastID;
+};
+
+const updateGameOpenMode = async (game) => {
+  let sql = `UPDATE games SET openingMode = '${game.openingMode}' WHERE gameId = ${game.gameId}`;
   const res = await execSQL.run(sql);
   return res && res.lastID;
 };
@@ -107,12 +117,18 @@ const getGameDetails = async (gameId) => {
 };
 
 const getGamesList = async (props = {}) => {
-  let condition = `date >= "${utils.getStartOfTheDate().toJSON().slice(0,10)}"`;
+  const today = utils.getLocalTime().toJSON().slice(0, 10);
+  let condition = `date >= "${today}"`;
   let order = 'date ASC, timeStart ASC';
 
   if (props.organizerId) {
     condition = `organizerId = ${props.organizerId}`;
     order = 'date DESC, timeStart DESC LIMIT 5';
+  }
+
+  if (props.autoOpen) {
+    condition = `status = "disabled" AND openingMode = "auto" AND openingDate <= "${today}"`;
+    order = 'date ASC, timeStart ASC';
   }
 
   let games = await execSQL.all(`SELECT g.*, usedPlayerSlots, usedWaiterSlots, chatLink FROM games g
@@ -256,6 +272,7 @@ module.exports = {
       getNotRefundedCanceledReservations,
       getPayedReservationsNumber,
       moveWaiters,
+      updateGameOpenMode,
       updateGameStatus,
     };
   }

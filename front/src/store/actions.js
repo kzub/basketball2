@@ -184,6 +184,11 @@ const addGame = ({ commit }, options) => {
     .catch(error => {
       console.log('/api/game/add error:', error)  // eslint-disable-line
       commit('setUpdatedFlag', true)
+      return {
+        error: true,
+        data: error.response.data,
+        statusCode: error.response.status,
+      }
     })
 }
 
@@ -290,6 +295,22 @@ const askToPay = ({ commit }, { gameId }) => {
     })
     .catch(error => {
       console.log('/api/game/askToPay/${gameId} error:', error)  // eslint-disable-line
+      commit('setUpdatedFlag', true)
+    })
+}
+
+const disableAutoOpen = ({ commit }, { gameId }) => {
+  console.log('actions::disableAutoOpen', gameId)  // eslint-disable-line
+  commit('setUpdatedFlag', false)
+  return axios
+    .get(`/api/game/disableAutoOpen/${gameId}`)
+    .then(response => {
+      console.log(`/api/game/disableAutoOpen/${gameId} response:`, response.data)  // eslint-disable-line
+      commit('gameDetails', response.data)
+      commit('setUpdatedFlag', true)
+    })
+    .catch(error => {
+      console.log('/api/game/disableAutoOpen/${gameId} error:', error)  // eslint-disable-line
       commit('setUpdatedFlag', true)
     })
 }
@@ -423,6 +444,7 @@ export default {
   changeReservationPay,
   clearReservationExpire,
   deleteReservation,
+  disableAutoOpen,
   doTransfer,
   exitUser,
   getCreditors,

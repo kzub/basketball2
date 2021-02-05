@@ -5,7 +5,8 @@ const uuid = require('uuid');
 
 const apiRoutes = require('./api/routes');
 const auth = require('./utils/auth');
-const autoCancelation = require('./utils/autoCancelation');
+const autoCancelation = require('./automation/expiredReservations');
+const autoOpening = require('./automation/gameOpening');
 const dal = require('./dal/dal');
 const logger = require('./utils/logger');
 const utils = require('./utils/misc');
@@ -43,4 +44,13 @@ app.get('*', function (req, res) {
 app.listen(config.server.port, config.server.host);
 log.info(`listen on: ${config.server.host}:${config.server.port}`);
 
-autoCancelation.startMonitoring();
+
+// run tasks every minute
+autoCancelation.act();
+autoOpening.act();
+
+setInterval(() => {
+  autoCancelation.act();
+  autoOpening.act();
+}, 60000);
+

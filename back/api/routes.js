@@ -29,7 +29,7 @@ const wrapper = (func, needAuth, statusCode = 401) => {
 
 const apiLimiter = rateLimit({
   windowMs: 10 * 60 * 1000, // 10 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
+  max: 500, // limit each IP to N requests per windowMs
   handler: (req, res, next) => { // function to handle requests once the max limit is exceeded
     events.emit('request.limit', { userId: req.userId, ip: req.ip });
     req.log.warn(`Too many requests from user: ${req.userId}, ip: ${req.ip}`);
@@ -56,6 +56,7 @@ const init = (app) => {
   app.get('/api/game/askToPay/:gameId', wrapper(game.askToPay, true));
   app.get('/api/game/changeStatus/:gameId/:status', wrapper(game.changeStatus, true));
   app.get('/api/game/details/:gameId', wrapper(game.get, false));
+  app.get('/api/game/disableAutoOpen/:gameId', wrapper(game.disableAutoOpen, true));
   app.get('/api/game/options', wrapper(game.getOptions, true));
   app.get('/api/game/sendPlayerList/:gameId', wrapper(game.sendPlayerList, true));
   app.get('/api/games', wrapper(games.list, false));

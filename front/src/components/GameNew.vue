@@ -28,7 +28,8 @@
     <!-- error window -->
     <div>
       <b-modal id="errNewGame" title="Ошибка" ok-variant="danger" ok-title="ОК" cancel-variant="hidden">
-        <p class="my-4">Возникла ошибка в процессе создания игры</p>
+        <p class="my-4">Возникла ошибка в процессе создания игры:</p>
+        <code>{{ errorMessage }}</code>
       </b-modal>
     </div>
   </div>
@@ -50,6 +51,7 @@ export default {
     return {
       choosedOptions: {},
       hideInputs: false,
+      errorMessage: '',
     }
   },
   computed: {
@@ -75,11 +77,14 @@ export default {
       const options = {}
 
       for (const [key, value] of choosedOptions) {
-        if (value.inputResults) {
-          options[key] = value.selected
+        if (value && value.inputResults) {
           for (const [inpKey, inpVal] of Object.entries(value.inputResults)) {
             options[inpKey] = inpVal
           }
+        }
+
+        if (typeof value === 'object') {
+          options[key] = value.selected
         } else {
           options[key] = value
         }
@@ -97,6 +102,7 @@ export default {
           })
         } else {
           self.hideInputs = false
+          self.errorMessage = result && result.data
           self.$bvModal.show('errNewGame')
         }
       })

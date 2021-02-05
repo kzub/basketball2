@@ -14,7 +14,7 @@
     </div>
     <div v-else>
       <!-- game and payment info -->
-      <GameInfo :game="mxGameDetails.game" show="place,time"/>
+      <GameInfo :game="mxGameDetails.game" show="place,time,openMode"/>
 
       <div v-if="mxGameDetails.game.freePlayerSlots == 0"
            class="card-title btn-danger p-2 mx-3 rounded">
@@ -73,6 +73,11 @@
             class="w-100 py-2 my-1" variant="danger">
             Включить запись
           </b-button>
+          <b-button v-if="showAdminButtons('disableAutoOpen')"
+            @click="disableAutoOpen"
+            class="w-100 py-2 my-1" variant="primary">
+            Отменить авто открытие
+          </b-button>
           <b-button
             v-if="showAdminButtons('askToPay')"
             @click="askToPay"
@@ -103,7 +108,7 @@
       <b-modal id="ackModal" title="Подтверждение"
         ok-variant="danger" ok-title="Да" cancel-title="Отмена"
         @ok="actionConfirmed">
-        <p class="my-4">Сменить режим?</p>
+        <p class="my-4">Изменить режим?</p>
       </b-modal>
     </div>
 
@@ -163,6 +168,9 @@ export default {
       if (button === 'askToPay' && this.mxGameDetails.game.paymentGateAccount) {
         return this.mxGameDetails.players.filter(rsv => rsv.ts > 0 && rsv.paymentStatus !== 'paid').length > 0
       }
+      if (button === 'disableAutoOpen' && this.mxGameDetails.game.openingMode === 'auto' && this.mxGameDetails.game.status === 'disabled') {
+        return true
+      }
     },
     back: function() {
       if (this.$store.state.myGamesOnly) {
@@ -185,6 +193,11 @@ export default {
     },
     askToPay () {
       this.$store.dispatch('askToPay', {
+        gameId: this.mxGameDetails.game.gameId,
+      });
+    },
+    disableAutoOpen () {
+      this.$store.dispatch('disableAutoOpen', {
         gameId: this.mxGameDetails.game.gameId,
       });
     },

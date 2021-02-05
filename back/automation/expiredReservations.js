@@ -10,7 +10,7 @@ const checkExpiredReservations = async () => {
     log.info(`start canceling reservation: ${reservation.gameId}/${reservation.bookId}/${reservation.playerName}`);
     reservation.cancel();
     const ok = await dal.reservation.update(reservation);
-    if (ok) { 
+    if (ok) {
       events.emit('reservation.expired', { reservation });
       const game = await dal.game.getGame(reservation.gameId);
       const promotedRsv = await dal.game.moveWaiters(game);
@@ -21,13 +21,11 @@ const checkExpiredReservations = async () => {
   }
 };
 
-const startMonitoring = () => {
+const act = () => {
   checkExpiredReservations();
-  setInterval(checkExpiredReservations, 60000);
 };
 
 module.exports = {
-  checkExpiredReservations,
-  startMonitoring,
+  act,
 };
 

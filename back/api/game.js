@@ -94,7 +94,18 @@ const add = async (req, res) => {
     usedPlayerSlots: 0,
     usedWaiterSlots: 0,
     waiterSlots: Number(newGame.waiterSlots),
+    openingMode: newGame.openingMode,
+    openingDate: newGame.openingDate,
+    openingTime: newGame.openingTime,
   });
+
+  if (game.openingMode === 'auto') {
+    const dateDiff = utils.compareDates(game.openingDate, game.date);
+    const timeDiff = utils.compareTimes(game.openingTime, game.timeStart);
+    if (dateDiff === undefined || timeDiff == undefined || dateDiff > 0 || (dateDiff === 0 && timeDiff >= 0)) {
+      throw new Error('wrong opening date and time');
+    }
+  }
 
   const gameId = await req.dal.game.addGame(game);
 
@@ -146,15 +157,13 @@ const getOptions = async (req, res) => {
   options.push({
     label: 'Начало',
     output: 'timeStart',
-    type: 'options',
-    options: utils.generateTimeOptions(),
+    type: 'time',
   });
 
   options.push({
     label: 'Окончание',
     output: 'timeEnd',
-    type: 'options',
-    options: utils.generateTimeOptions(),
+    type: 'time',
   });
 
   options.push({
@@ -234,12 +243,12 @@ const getOptions = async (req, res) => {
       const accId = idGenerator.next().value;
       // prepay
       paymentsOptions.push({
-        text: `Предоплата Яндекс.Деньги ${accId}`,
+        text: `Предоплата ЮMoney ${accId}`,
         value: {
           selected: 'prepay',
           inputs: [{
             disabled: true,
-            label: 'Аккаунт Яндекс.Деньги',
+            label: 'Аккаунт ЮMoney',
             output: 'paymentGateAccount',
             value: account.paymentGateAccount,
             type: 'text',
@@ -264,12 +273,12 @@ const getOptions = async (req, res) => {
       });
       // shared
       paymentsOptions.push({
-        text: `Постоплата Яндекс.Деньги ${accId}`,
+        text: `Постоплата ЮMoney ${accId}`,
         value: {
           selected: 'shared',
           inputs: [{
             disabled: true,
-            label: 'Аккаунт Яндекс.Деньги',
+            label: 'Аккаунт ЮMoney',
             output: 'paymentGateAccount',
             value: account.paymentGateAccount,
             type: 'text',
@@ -283,7 +292,7 @@ const getOptions = async (req, res) => {
             label: 'Сообщение об условиях оплаты',
             output: 'paymentMessage',
             type: 'text',
-            value: 'Перевод на Яндекс.Деньги, после игры.',
+            value: 'Перевод на ЮMoney, после игры.',
           },{
             label: 'Стоимость зала',
             output: 'paymentAmount',
@@ -299,6 +308,39 @@ const getOptions = async (req, res) => {
     output: 'paymentType',
     type: 'options',
     options: paymentsOptions,
+  });
+
+  // auto game open --------------------------------------
+  let gameOpenOptions = [];
+  gameOpenOptions.push({
+    text: 'Вручную',
+    value: {
+      selected: 'manual',
+    },
+  });
+
+  gameOpenOptions.push({
+    text: 'Автоматически',
+    value: {
+      selected: 'auto',
+      inputs: [{
+        label: 'Дата открытия',
+        output: 'openingDate',
+        placeholder: 'yyyy-mm-dd',
+        type: 'date',
+      },{
+        label: 'Время открытия',
+        output: 'openingTime',
+        type: 'time',
+      }],
+    },
+  });
+
+  options.push({
+    label: 'Открытие записи',
+    output: 'openingMode',
+    type: 'options',
+    options: gameOpenOptions,
   });
 
   res.status(200).send(options);
@@ -377,10 +419,29 @@ const askToPay = async (req, res) => {
   res.status(200).send({ok: true});
 };
 
+const disableAutoOpen = async (req, res) => {
+  const { gameId } = req.params;
+  const gameDetails = await req.dal.game.getGameDetails(gameId);
+
+  if (req.userId !== gameDetails.game.organizer.userId) {
+    res.status(403).send({
+      error: true,
+      reason: 'you are not game admin',
+    });
+    return;
+  }
+
+  gameDetails.game.openingMode = 'disabled';
+  await req.dal.game.updateGameOpenMode(gameDetails.game);
+
+  res.status(200).send(gameDetails);
+};
+
 module.exports = {
   add,
   askToPay,
   changeStatus,
+  disableAutoOpen,
   get,
   getOptions,
   sendPlayerList,

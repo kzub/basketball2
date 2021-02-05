@@ -110,8 +110,14 @@ db.run(`CREATE TABLE IF NOT EXISTS games (
   paymentMessage TEXT,
   paymentGateAccount TEXT,
   paymentGateMessage TEXT,
-  hoursBeforeGameRefundAllowed INTEGER DEFAULT 0
+  hoursBeforeGameRefundAllowed INTEGER DEFAULT 0,
+  openingMode TEXT NOT NULL DEFAULT 'manual',
+  openingDate DATETIME,
+  openingTime TEXT
 )`);
+// ALTER TABLE games ADD COLUMN openingMode TEXT NOT NULL DEFAULT 'manual';
+// ALTER TABLE games ADD COLUMN openingDate DATETIME;
+// ALTER TABLE games ADD COLUMN openingTime TEXT;
 
 db.run(`CREATE TABLE IF NOT EXISTS transfers (
   transferCode TEXT PRIMARY KEY NOT NULL,

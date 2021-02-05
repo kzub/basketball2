@@ -22,10 +22,12 @@
       </b-row>
 
       <!-- additional input fileds -->
-      <div v-if="storage[option.output] && storage[option.output].inputs">
-        <b-row v-for="input in storage[option.output].inputs" class="mx-0 my-1 text-left"
+      <div v-if="hasInputs()">
+        <b-row v-for="input in storage[option.output].inputs"
           :key="input.label"
-          :hidden="input.hidden">
+          :hidden="input.hidden"
+          class="mx-0 my-1 text-left"
+        >
           {{input.label}}
           <b-form-input required
             :disabled="input.disabled"
@@ -46,13 +48,23 @@ export default {
   name: 'GameOptions',
   props: ['option','storage'],
   methods: {
+    hasInputs: function () {
+      // check if selected item has inputs in model
+      // this.storage[this.option.output] - points to currently selected item
+      if (!this.storage[this.option.output] || !this.storage[this.option.output].inputs) {
+        return false
+      }
+      if (!this.storage[this.option.output].inputResults) {
+        this.storage[this.option.output].inputResults = {}
+      }
+      return true
+    },
     // need for disabled fields to fill up storage value without user action
     checkInputStorage: function (optionKey, inputKey, value) {
-      if (!this.storage[optionKey].inputResults) {
-        this.storage[optionKey].inputResults = {}
+      if (value !== undefined) {
+        this.storage[optionKey].inputResults[inputKey] = value
       }
-      this.storage[optionKey].inputResults[inputKey] = value
-      return value
+      return this.storage[optionKey].inputResults[inputKey] // otherwise if already selected, value will be rewritten by default value (undefined)
     },
   }
 }

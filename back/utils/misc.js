@@ -32,6 +32,59 @@ const minutesTo = (timestamp) => {
   return minutes;
 };
 
+const isTime = (time) => time && time.match && Boolean(time.match(/^\d\d:\d\d$/));
+
+const compareTimes = (t1, t2) => {
+  if (!isTime(t1) || !isTime(t2)) {
+    return;
+  }
+  const [h1, m1] = t1.split(':').map(a => Number(a));
+  const [h2, m2] = t2.split(':').map(a => Number(a));
+
+  if (h1 < h2) {
+    return -1;
+  }
+  if (h1 > h2) {
+    return +1;
+  }
+  if (m1 < m2) {
+    return -1;
+  }
+  if (m1 > m2) {
+    return +1;
+  }
+  return 0; // equal
+};
+
+const isDate = (date) => date && date.match && Boolean(date.match(/^\d\d\d\d-\d\d-\d\d$/));
+
+const compareDates = (date1, date2) => {
+  if (!isDate(date1) || !isDate(date2)) {
+    return;
+  }
+  const [y1, m1, d1] = date1.split('-').map(a => Number(a));
+  const [y2, m2, d2] = date2.split('-').map(a => Number(a));
+  if (y1 < y2) {
+    return -1;
+  }
+  if (y1 > y2) {
+    return +1;
+  }
+  if (m1 < m2) {
+    return -1;
+  }
+  if (m1 > m2) {
+    return +1;
+  }
+  if (d1 < d2) {
+    return -1;
+  }
+  if (d1 > d2) {
+    return +1;
+  }
+  return 0; // equal
+};
+
 const textMinutesTo = (timestamp) => {
   const minutes = minutesTo(timestamp);
   if (minutes < 20) {
@@ -103,6 +156,13 @@ const getBeautifulDate = (ts) => {
   return `${weekDay}, ${monthDay} ${month}`;
 };
 
+const GMT_OFFSET = 3;
+const getLocalTime = () => {
+  const now = new Date();
+  now.setUTCHours(now.getUTCHours() + GMT_OFFSET);
+  return now;
+};
+
 const getStartOfTheDate = (date) => {
   const today = date || new Date();
   today.setSeconds(0);
@@ -110,12 +170,6 @@ const getStartOfTheDate = (date) => {
   today.setHours(0);
   today.setMilliseconds(0);
   return today;
-};
-
-const getGameSettingsOld = async () => {
-  let data = await readFile('settings.game.json');
-  let mode = getMode();
-  return JSON.parse(data)[mode];
 };
 
 const getConfig = () => {
@@ -144,14 +198,17 @@ const sleep = (ms) => {
 };
 
 module.exports = {
+  compareDates,
+  compareTimes,
   dateDayAndMonth,
   dateWeekDay,
   eq,
   generateTimeOptions,
   getBeautifulDate,
   getConfig,
-  getGameSettingsOld,
+  getLocalTime,
   getStartOfTheDate,
+  isTime,
   minutesTo,
   sleep,
   textHoursMinutesTo,
