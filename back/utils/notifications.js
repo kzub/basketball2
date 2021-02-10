@@ -65,7 +65,11 @@ emitter.on('payment.wrong.userId', async ({ reservation, userId }) => {
 });
 
 emitter.on('game.new', async ({ game }) => {
-  sendAdminMessage(`${game.organizer.name} создал игру ${game.place.title} в ${game.timeStart} ${utils.getBeautifulDate(game.date)}`, 'info');
+  let message = `${game.organizer.name} создал игру ${game.place.title} в ${game.timeStart}, ${utils.getBeautifulDate(game.date)}`;
+  if (game.openingMode === 'auto') {
+    message += `. Откроется автоматически в ${game.openingTime}, ${utils.getBeautifulDate(game.openingDate)}`;
+  }
+  sendAdminMessage(message, 'info');
 });
 
 // --------------------- GAME USER NOTIFICATIONS ------------------------
