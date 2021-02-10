@@ -430,6 +430,29 @@ const getCreditors = ({ commit }) => {
 }
 
 
+const deleteDebt = ({ commit }, { userId }) => {
+  console.log('actions::deleteDebt', userId)  // eslint-disable-line
+  commit('setUpdatedFlag', false)
+  return axios
+    .get(`/api/payment/deleteDebt/${userId}`)
+    .then(response => {
+      if (response.data.ok) {
+        commit('creditorsReduce', {
+          amount: response.data.amount,
+          userId,
+        })
+      }
+      console.log(`/api/payment/deleteDebt/${userId} response:`, response.data)  // eslint-disable-line
+      commit('setUpdatedFlag', true)
+    })
+    .catch(error => {
+      console.log('/api/payment/deleteDebt/${userId} error:', error)  // eslint-disable-line
+      commit('setUpdatedFlag', true)
+    })
+}
+
+
+
 const init = ({ dispatch }) => {
   console.log('actions::init')  // eslint-disable-line
   dispatch('getUserInfo')
@@ -443,6 +466,7 @@ export default {
   changeGameStatus,
   changeReservationPay,
   clearReservationExpire,
+  deleteDebt,
   deleteReservation,
   disableAutoOpen,
   doTransfer,

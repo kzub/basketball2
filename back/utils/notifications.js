@@ -131,6 +131,15 @@ emitter.on('user.credits.added', async ({ gameId, playerName, receiverName, amou
   notify.send(`Начислено ${amount} кредитов для ${playerName} на счёт организатора ${receiverName} за игру в ${game.place.title},  в ${game.timeStart} ${utils.getBeautifulDate(game.date)}`);
 });
 
+emitter.on('user.credits.deleted', async ({ organizerName, creditorName, amount, notifyIds }) => {
+  // отправляем сообщение в любом случае, потому что деньги
+  // сообщение отправляется во все каналы, где пользователю начислялись деньги за всю историю
+  for (const notifyId of notifyIds) {
+    const notify = await createNotification(notifyId, 'user.credits.deleted');
+    notify.send(`${organizerName} списал со счёта предоплаты ${creditorName} ${amount} кредитов.`);
+  }
+});
+
 // RESERVATIONS CANCELATIONS ---------------------------------------------------------------
 emitter.on('reservation.expired', async ({ reservation }) => {
   const game = await dal.game.getGame(reservation.gameId);

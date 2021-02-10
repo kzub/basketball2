@@ -31,8 +31,9 @@
           :items="creditorsList">
 
           <template v-slot:cell(actions)="data">
-            <b-badge class="m-1 px-3 py-2">-</b-badge>
-            <b-badge class="m-1 px-3 py-2">+</b-badge>
+            <b-btn :disabled="data.item.total <= 0" v-b-modal.ackDelete class="btn-danger m-2 px-3 p-1" @click="clickedUser(data)">Удалить</b-btn>
+            <!-- <b-badge class="m-1 px-3 py-2">-</b-badge> -->
+            <!-- <b-badge class="m-1 px-3 py-2">+</b-badge> -->
 
           </template>
         </b-table>
@@ -44,6 +45,12 @@
           </b-btn>
         </b-card>
       </div>
+
+      <b-modal id="ackDelete" title="Внимание!"
+        ok-variant="danger" ok-title="Да" cancel-title="Отмена"
+        @ok="deleteConfirmed">
+        <p class="my-4">Удалить начисление?</p>
+      </b-modal>
     </div>
   </div>
 </template>
@@ -52,7 +59,10 @@
 
 export default {
   name: 'Credits',
-  components: {
+  data: function () {
+    return {
+      userId: null,
+    }
   },
   mounted: function(){
     this.$store.dispatch('getCreditors')
@@ -66,9 +76,9 @@ export default {
     },
     creditorsFields: function () {
       return [
-        { key: 'name', label: 'Игрок' },
-        { key: 'total', label: 'Баланс, р.' },
-        // { key: 'actions', label: 'Действия' },
+        { key: 'name', label: 'Игрок', tdClass: 'rowStyle' },
+        { key: 'total', label: 'Баланс, р.', tdClass: 'rowStyle' },
+        { key: 'actions', label: 'Действия', tdClass: 'rowStyle' },
       ]
     },
     creditorsList: function() {
@@ -90,11 +100,22 @@ export default {
         path: '/',
       })
     },
+    deleteConfirmed: function () {
+      this.$store.dispatch('deleteDebt', {
+        userId: this.userId,
+      });
+    },
+    clickedUser: function (data) {
+      this.userId = data.item.userId
+      // console.log(data.item.userId, data.item.name)
+    },
   },
 }
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
-
+<style >
+.rowStyle {
+  vertical-align: middle !important;
+}
 </style>

@@ -192,8 +192,52 @@ const getCreditors = async (req, res) => {
   });
 };
 
+// ------------------------------------------------------------------------------
+const deleteDebt = async (req, res) => {
+  const creditors = await req.dal.payment.getCreditors(req.userId);
+  const creditor = creditors.filter(c => c.userId == req.params.userId).pop();
+  if (!creditor) {
+    res.status(400).send({
+      error: true,
+      message: 'creditor not found',
+    });
+    return;
+  }
+  if (isNaN(creditor.total) || creditor.total == 0) {
+    res.status(400).send({
+      error: true,
+      message: 'creditor has no credits',
+    });
+    return;
+  }
+
+  const [organizerName, creditorName] = (await req.dal.user.getUsers([req.userId, req.params.userId])).map(a => a.name);
+  req.log.info(`delete credits for ${organizerName}: ${creditorName} ${creditor.total}`);
+
+  await req.dal.payment.addCreditTransaction(req.params.userId, req.userId, -creditor.total, 'organizer.delete');
+
+  const temp = await req.dal.payment.getUserWithCreditsNotifyIds(req.params.userId, req.userId);
+  const uniqueIds = temp.ids.split(',').filter((item, pos, self) => self.indexOf(item) == pos);
+
+  req.log.info(`notify about deleted credits by channels: ${uniqueIds.join()}`);
+
+  events.emit('user.credits.deleted', {
+    organizerName,
+    creditorName,
+    amount: creditor.total,
+    notifyIds: uniqueIds,
+  });
+
+  res.status(200).send({
+    ok: true,
+    amount: creditor.total,
+  });
+};
+
+
 module.exports = {
   complete,
+  deleteDebt,
   getAllOrganizerYMs,
   getCreditors,
   getOrganizerYM,

@@ -10,6 +10,13 @@ const setReservationExpire = (state, p) => state.reservationExpire = p
 const user = (state, p) => state.user = p
 const userName = (state, p) => state.user.name = p
 const creditors = (state, p) => state.creditors = p
+const creditorsReduce = (state, p) => {
+  state.creditors.creditorsList.map(c => {
+    if (c.userId == p.userId) {
+      c.total -= p.amount
+    }
+  })
+}
 const rsvTransferCode = (state, p) => state.rsvTransferCode = p && p.transferCode
 
 const setUpdatedFlag = (state, p) => {
@@ -23,6 +30,7 @@ const setUpdatedFlag = (state, p) => {
 export default {
   apiError,
   creditors,
+  creditorsReduce,
   freePayment,
   freePaymentList,
   gameDetails,

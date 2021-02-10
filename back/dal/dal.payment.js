@@ -56,7 +56,8 @@ const getCreditors = async (organizerId) => {
   const data = await execSQL.all(`SELECT userId, SUM(amount) total
     FROM credits
     WHERE organizerId = ${organizerId}
-    GROUP BY userId`);
+    GROUP BY userId
+    HAVING total > 0`);
 
   return data;
 };
@@ -98,6 +99,22 @@ const getUserCreditsForOrganizerId = async (userId, organizerId) => {
   return data.pop();
 };
 
+const getUserWithCreditsNotifyIds = async (userId, organizerId) => {
+  //transactionId,date,userId,organizerId,amount,sourceType,sourceId,comment
+  const data = await execSQL.all(`SELECT c.userId, group_concat(g2.notifyId) ids
+    FROM credits c
+    LEFT JOIN bookings b2 ON c.sourceId = b2.bookId
+    LEFT JOIN games g2 ON g2.gameId  = b2.gameId
+    WHERE c.userId = ${userId}
+    AND c.organizerId = ${organizerId}
+    AND c.sourceType = "reservation.cancel"
+    GROUP BY c.userId`
+  );
+
+  return data.pop();
+};
+
+
 module.exports = {
   init: (driver, dalInstance) => {
     if (!driver) { throw new Error(`${__filename}: undefined DAL driver`); }
@@ -118,6 +135,7 @@ module.exports = {
       getPrepayMethodsByOrganizerId,
       getUserCredits,
       getUserCreditsForOrganizerId,
+      getUserWithCreditsNotifyIds,
       MIN_PAYMENT_AMOUNT,
     };
   }
