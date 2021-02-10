@@ -109,6 +109,10 @@ const add = async (req, res) => {
 
   const gameId = await req.dal.game.addGame(game);
 
+  events.emit('game.new', {
+    game,
+  });
+
   res.status(200).send({ ok: true, gameId });
 };
 

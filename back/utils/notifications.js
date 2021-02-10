@@ -64,7 +64,11 @@ emitter.on('payment.wrong.userId', async ({ reservation, userId }) => {
   sendAdminMessage(`Ошибка. Не совпадает userId платежа, в брони: ${reservation.userId}, в платеже ${userId}`, 'error');
 });
 
-// --------------------- GAME ADMIN NOTIFICATIONS ------------------------
+emitter.on('game.new', async ({ game }) => {
+  sendAdminMessage(`${game.organizer.name} создал игру ${game.place.title} в ${game.timeStart} ${utils.getBeautifulDate(game.date)}`, 'info');
+});
+
+// --------------------- GAME USER NOTIFICATIONS ------------------------
 const createNotification = async (notifyId, event) => {
   try {
     const notification = await dal.notification.getNotification(notifyId);
