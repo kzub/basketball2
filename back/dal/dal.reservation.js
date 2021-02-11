@@ -7,10 +7,14 @@ let execSQL;
 const create = async (gameId, slotType, ttl, user) => {
   const status = slotType === 'player' ? 'reserved' : 'waiting';
   const res = await execSQL.run(`INSERT INTO bookings
-    (ts, gameId, userId, playerName, paymentAmount, paymentStatus, status, expireAt) VALUES
-    (${Date.now()}, ${gameId}, ${user.userId}, '${user.name}', 0, 'unpaid', '${status}', ${ttl})`);
+    (ts, gameId, userId, playerName, paymentAmount, paymentStatus, status, expireAt)
+    SELECT ${Date.now()}, ${gameId}, ${user.userId}, '${user.name}', 0, 'unpaid', '${status}', ${ttl}
+    WHERE
+     (SELECT COUNT(*) FROM bookings b WHERE gameId = ${gameId} AND status = '${status}')
+     <
+     (SELECT ${slotType}Slots FROM games WHERE gameId = ${gameId})`);
 
-  return res && res.lastID;
+  return res && res.changes && res.lastID;
 };
 
 const get = async (gameId, bookId) => {

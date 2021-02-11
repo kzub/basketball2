@@ -18,11 +18,8 @@ const book = async (req, res) => {
     return;
   }
 
-  let bookId = 0;
   const ttl = game.newReservationTTL(slotType);
-  if (game.freeSlotExists(slotType)) {
-    bookId = await req.dal.reservation.create(gameId, slotType, ttl, user);
-  }
+  const bookId = await req.dal.reservation.create(gameId, slotType, ttl, user);
 
   if (bookId > 0) {
     if (slotType === 'player') {
