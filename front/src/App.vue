@@ -68,7 +68,14 @@ export default {
   name: 'app',
   router,
   mounted () {
-    this.$store.dispatch('getUserInfo')
+    this.$store.dispatch('getUserInfo').then(user => {
+      // force to enter username for new users
+      if (user && user.auth && !user.name) {
+        this.$router.push({
+          path: '/profile',
+        })
+      }
+    })
   },
   computed: {
     apiError: function () {
