@@ -58,6 +58,7 @@ const router = new VueRouter({
     { path: '/myGames', component: MyGames },
     { path: '/payments', component: GamePayments },
     { path: '/profile', component: Profile },
+    { path: '/profile/login', component: Profile },
     { path: '/reservation', component: Reservation },
     { path: '/success', component: Success},
   ],
@@ -66,6 +67,9 @@ const router = new VueRouter({
 export default {
   name: 'app',
   router,
+  mounted () {
+    this.$store.dispatch('getUserInfo')
+  },
   computed: {
     apiError: function () {
       return this.$store.state.apiError;
@@ -73,7 +77,11 @@ export default {
   },
   methods: {
     reload: function () {
-      this.$store.dispatch('getUserInfo')
+      this.$store.dispatch('getUserInfo').then(() => {
+        this.$router.push({
+          path: '/',
+        })
+      })
     },
   },
 }

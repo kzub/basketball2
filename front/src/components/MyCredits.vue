@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div v-touch:swipe.right="back">
     <b-btn v-if="!refundAmount" @click="back" class="btn-lg mb-3 rounded-0" block variant="warning">
       <div class="arrow-left"><i class="left"></i></div>
       <span>Назад</span>

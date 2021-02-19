@@ -31,14 +31,27 @@ const botCmd = async (token, method, params, tryNum = 1) => {
 };
 
 //-----------------------------------------------------------
-const send = async (token, chatId, msg) => {
+const send = async (token, chatId, msg, options = {}) => {
   // console.log(token, chatId, msg)
   return botCmd(token, 'sendMessage', {
     chat_id: chatId,
     text: msg,
     parse_mode: 'markdown',
     disable_web_page_preview: 'true',
+    ...options,
   });
+};
+
+const registerWebhook = async () => {
+  try {
+    log.info('Registering webhook handler...');
+    let res = await botCmd(config.telegram.token, 'setWebhook', {
+      url: `${config.telegram.webhookUrl}/api/tgbot/${encodeURIComponent(config.telegram.token)}`,
+    });
+    log.info(res);
+  } catch (err) {
+    log.error(`cannot register webhook ${err}`);
+  }
 };
 
 //-----------------------------------------------------------
@@ -76,9 +89,32 @@ const getUpdates = (token) => {
 
 // send(config.telegram.token, 139323428, `
 //  оплатите игру по [ссылке](https://basket.msk.ru/#/payments?gameId=5)
-// `)
+// `);
+
+// async function main () {
+//   try {
+//     botCmd(config.telegram.token, 'sendMessage', {
+//       chat_id: 139323428,
+//       text: 'testmsg',
+//       reply_markup: JSON.stringify({
+//         keyboard: [
+//           [{ text: 'Подтвердить контакты', request_contact: true }],
+//         ],
+//         resize_keyboard: true,
+//         // one_time_keyboard: true
+//       }),
+//       parse_mode: 'markdown',
+//       disable_web_page_preview: 'true',
+//     });
+//   } catch (err) {
+//     console.log(err);
+//   }
+// }
+// main();
+
 
 module.exports = {
   send,
   getUpdates,
+  registerWebhook,
 };

@@ -4,8 +4,12 @@
       <div class="arrow-left"><i class="left"></i></div>
       <span>Назад</span>
     </b-btn>
-
-    <div v-if="!viewDataUpdated || !mxGameDetails || !user" class="my-2">
+    <div v-if="gameLoadError">
+      <div class="mt-4 mb-5">
+        <p>Страница недоступна</p>
+      </div>
+    </div>
+    <div v-else-if="!viewDataUpdated || !mxGameDetails || !user" class="my-2">
       <div class="d-flex justify-content-center flex-wrap-reverse loader">
         <div class="spinner-border" role="status">
           <span class="sr-only">Загружается...</span>
@@ -132,7 +136,7 @@ export default {
     }
   },
   mounted: function(){
-    this.$store.dispatch('updateGameData', this.mxLocationInfo.gameId);
+    this.$store.dispatch('updateGameData', { gameId: this.mxLocationInfo.gameId });
   },
   computed: {
     isAdmin () {
@@ -143,6 +147,9 @@ export default {
     },
     viewDataUpdated () {
       return this.$store.state.viewDataUpdated
+    },
+    gameLoadError () {
+      return this.mxGameDetails && this.mxGameDetails.error
     },
   },
   methods: {

@@ -89,7 +89,7 @@ const onFreePayment = async (req, paySystem, amount, labelData, organizer) => {
 
 // ------------------------------------------------------------------------------
 const complete = async (req, res) => {
-  req.log.info(req.body);
+  req.log.info(JSON.stringify(req.body, null, 2));
   res.status(200).send('OK');
   const paySystem = req.params.paySystem;
   const amount = Number(req.body.withdraw_amount);

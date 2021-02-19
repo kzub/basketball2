@@ -101,7 +101,7 @@ export default {
         if (data.result === 'ok') {
           newBooking.gameId = data.gameId
           newBooking.bookId = data.bookId
-          return this.$store.dispatch('updateGameData', mxLocationInfo.gameId)
+          return this.$store.dispatch('updateGameData',{ gameId: mxLocationInfo.gameId })
         }
         throw new Error('Cannot book')
       })

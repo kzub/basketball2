@@ -78,7 +78,7 @@
 
 <script>
   export default {
-    name: 'Register',
+    name: 'RegisterBySms',
     data () {
       return {
         form: {

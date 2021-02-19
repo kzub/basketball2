@@ -33,7 +33,7 @@ const changeReservationPay = ({ commit, state }, { gameId, bookId }) => {
     .get(`/api/reservation/changePay/${gameId}/${bookId}`)
     .then(response => {
       console.log('/api/reservation/changePay response:', response.data)  // eslint-disable-line
-      return updateGameData({ commit, state }, gameId)
+      return updateGameData({ commit, state }, { gameId })
       // commit('setUpdatedFlag', true)
     })
     .catch(error => {
@@ -52,7 +52,7 @@ const payByCredits = ({ commit, state }, { gameId, bookId }) => {
       return getUserInfo({ commit }) // update credits data
     })
     .then(() => {
-      return updateGameData({ commit, state }, gameId)
+      return updateGameData({ commit, state }, { gameId })
     })
     .catch(error => {
       console.log('/api/reservation/payByCredits error:', error)  // eslint-disable-line
@@ -67,7 +67,7 @@ const clearReservationExpire = ({ commit, state }, { gameId, bookId }) => {
     .get(`/api/reservation/clearExpire/${gameId}/${bookId}`)
     .then(response => {
       console.log('/api/reservation/clearExpire response:', response.data)  // eslint-disable-line
-      return updateGameData({ commit, state }, gameId)
+      return updateGameData({ commit, state }, { gameId })
       // commit('setUpdatedFlag', true)
     })
     .catch(error => {
@@ -152,7 +152,7 @@ const updateFreePaymentLinks = ({ commit }) => {
     })
 }
 
-const updateGameData = ({ commit }, gameId) => {
+const updateGameData = ({ commit }, { gameId }) => {
   console.log('actions::updateGameData', gameId)  // eslint-disable-line
   commit('setUpdatedFlag', false)
   return axios
@@ -315,23 +315,33 @@ const disableAutoOpen = ({ commit }, { gameId }) => {
     })
 }
 
-const getUserInfo = ({ commit }) => {
+const getUserInfo = async ({ commit, state }, skipFlagUpdate) => {
   console.log('actions::getUserInfo')  // eslint-disable-line
-  commit('setUpdatedFlag', false)
+  if (!skipFlagUpdate) {
+    commit('setUpdatedFlag', false)
+  }
   commit('apiError', false)
   return axios
-    .get(`/api/user/get`)
+    .get(`/api/user/get/${state.authCode}`)
     .then(response => {
-      console.log('/api/user/get response:', response.data)  // eslint-disable-line
+      console.log(`/api/user/get/${state.authCode} response:`, response.data)  // eslint-disable-line
       commit('user', response.data)
-      commit('setUpdatedFlag', true)
+      if (!skipFlagUpdate) {
+        commit('setUpdatedFlag', true)
+      }
+      if (response.data && response.data.auth) {
+        commit('resetAuthCode')
+      }
       return response.data
     })
-    .catch(error => {
+    .catch(async (error) => {
       commit('user', { auth: false })
+      await commit('resetAuthCode')
       commit('apiError', true)
-      commit('setUpdatedFlag', true)
-      console.log('/api/user/get error:', error)  // eslint-disable-line
+      if (!skipFlagUpdate) {
+        commit('setUpdatedFlag', true)
+      }
+      console.log(`/api/user/get/${state.authCode} error:`, error)  // eslint-disable-line
     })
 }
 
@@ -452,12 +462,6 @@ const deleteDebt = ({ commit }, { userId }) => {
 }
 
 
-
-const init = ({ dispatch }) => {
-  console.log('actions::init')  // eslint-disable-line
-  dispatch('getUserInfo')
-}
-
 export default {
   addGame,
   askToPay,
@@ -477,7 +481,6 @@ export default {
   getTransferCode,
   getTransferDetails,
   getUserInfo,
-  init,
   payByCredits,
   sendCheckCode,
   sendPlayersList,

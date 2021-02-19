@@ -8,8 +8,9 @@ const get = async (req, res) => {
   }
 
   const gameDetails = await req.dal.game.getGameDetails(req.params.gameId);
+  const unPayedPlayers = gameDetails.players.filter(p => !p.isPaid()).length;
 
-  if (!gameDetails || (gameDetails.game.isDisabled() && !gameDetails.game.isAdminUserId(req.userId))) {
+  if (!gameDetails || (gameDetails.game.isDisabled() && !gameDetails.game.isAdminUserId(req.userId) && !unPayedPlayers)) {
     res.status(200).send({
       error: true,
       reason: 'game disabled or not exists',

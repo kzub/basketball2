@@ -19,7 +19,15 @@
             Для продолжения необходимо зарегистрироваться
           </b-card-body>
         </div>
-        <Register/>
+        <div v-else-if="loginExpired" class="mb-4">
+          <b-card-body class="m-2">
+            <b-btn class="w-75" variant="danger">
+              Ссылка устарела<br>повторите регистрацию
+            </b-btn>
+          </b-card-body>
+          <hr>
+        </div>
+        <RegisterByTG/>
       </div>
       <div v-else-if="wantChange || newUser" class="my-2">
         <b-btn class="p-2 rounded-0" block variant="secondary">
@@ -69,12 +77,14 @@
 
 <script>
 
-import Register from './Register.vue'
+// import RegisterBySms from './RegisterBySms.vue'
+import RegisterByTG from './RegisterByTG.vue'
 
 export default {
   name: 'Profile',
   components: {
-    Register,
+    // RegisterBySms,
+    RegisterByTG
   },
   data: function() {
     return  {
@@ -98,6 +108,9 @@ export default {
     viewDataUpdated () {
       return this.$store.state.viewDataUpdated
     },
+    loginExpired () {
+      return this.$route.fullPath.includes('expired=true')
+    },
   },
   methods: {
     changeProfile: function () {
@@ -120,17 +133,23 @@ export default {
       })
     },
     exit: function () {
-      this.$store.dispatch('exitUser')
-      this.back()
+      this.$store.dispatch('exitUser').then(this.back)
     },
     back: function() {
       if (this.newUser) {
         return
       }
       if (this.wantChange) {
-        this.wantChange = false;
+        this.wantChange = false
         return
       }
+      if (this.$route.path.includes('/login')) {
+        this.$router.push({
+          path: '/',
+        })
+        return
+      }
+
       this.$router.back()
     },
   },
@@ -144,7 +163,11 @@ export default {
 }
 
 .warningText {
-  font-size: 20px;
+  font-size: 18px;
+}
+
+.warningColor {
+  background-color: red;
 }
 </style>
 

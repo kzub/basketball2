@@ -49,8 +49,9 @@ const findUserByPhone = async (phone) => {
   return user && new User(user);
 };
 
+// SMS auth ---------------------------------------------------------------
 const getVerificationCode = async (phone) => {
-  const code = await execSQL.all(`SELECT * FROM verifications
+  const code = await execSQL.all(`SELECT * FROM verificationsSMS
     WHERE phone = "${phone}"
     AND ttl > ${Date.now()}`
   );
@@ -58,20 +59,47 @@ const getVerificationCode = async (phone) => {
 };
 
 const deleteVerificationCode = async (phone) =>
-  execSQL.run(`DELETE FROM verifications
+  execSQL.run(`DELETE FROM verificationsSMS
     WHERE phone = ${phone} OR ttl < ${Date.now()}`);
 
 
 const createVerificationCode = async (phone) => {
   const code = 1000 + Math.floor(Math.random() * 8999);
-  const ttl = Date.now() + 10*60*1000;
+  const ttl = Date.now() + 5*60*1000;
 
   await deleteVerificationCode(phone);
-  await execSQL.run(`INSERT INTO verifications (phone, code, ttl)
+  await execSQL.run(`INSERT INTO verificationsSMS (phone, code, ttl)
     VALUES (${phone}, ${code}, ${ttl})`);
   return code;
 };
+// Telegramm auth ---------------------------------------------------------------
+const getTGVerificationPhoneByCode = async (code) => {
+  const res = await execSQL.all(`SELECT * FROM verificationsTG
+    WHERE code = "${code}"
+    AND phone NOT null
+    AND ttl > ${Date.now()}`
+  );
+  return res[0] && res[0].phone;
+};
 
+const deleteTGVerificationCode = async (tgId, code) =>
+  execSQL.run(`DELETE FROM verificationsTG
+    WHERE tgId = "${tgId}" OR code = "${code}" OR ttl < ${Date.now()}`);
+
+
+const insertTGUserVerificationCode = async (tgId, code) => {
+  const ttl = Date.now() + 5*60*1000;
+  await deleteTGVerificationCode(tgId, code);
+  await execSQL.run(`INSERT INTO verificationsTG (tgId, code, ttl)
+    VALUES ("${tgId}", "${code}", ${ttl})`);
+};
+
+const insertTGUserVerificationPhone = async (tgId, phone) => {
+  await execSQL.run(`UPDATE verificationsTG SET phone = "${phone}"
+    WHERE tgId = "${tgId}"`);
+};
+
+// ------------------------------------------------------------
 
 const findOrganizerByUserId = async (userId) => {
   const places = await execSQL.all(`SELECT * FROM organizersPlaces
@@ -94,12 +122,16 @@ module.exports = {
     return {
       createUserByPhone,
       createVerificationCode,
+      deleteTGVerificationCode,
       deleteVerificationCode,
       findOrganizerByUserId,
       findUserByPhone,
+      getTGVerificationPhoneByCode,
       getUser,
       getUsers,
       getVerificationCode,
+      insertTGUserVerificationCode,
+      insertTGUserVerificationPhone,
       updateUser,
     };
   }

@@ -51,7 +51,7 @@
         <b-btn class="btn-lg mt-2 mb-3 rounded-0" block :href="chatLink" variant="warning">
           Наш чат в телеграм <div class="arrow"><i class="right"></i></div>
         </b-btn>
-      </div>      
+      </div>
     </div>
 
   </div>
@@ -101,9 +101,9 @@ export default {
       return mode
     },
     gameClick: function (gameId) {
-      this.$router.push({ 
+      this.$router.push({
         path: '/game',
-        query: { gameId: gameId } 
+        query: { gameId: gameId }
       })
     },
   },

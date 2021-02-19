@@ -18,13 +18,13 @@ const checkGamesToOpen = async () => {
 
     const dateDiff = utils.compareDates(nowDate, game.openingDate);
     const timeDiff = utils.compareTimes(nowTime, game.openingTime);
-    log.debug(`nowDate ${nowDate}, nowTime ${nowTime}, game.openingDate ${game.openingDate}, game.openingTime ${game.openingTime}, dateDiff ${dateDiff}, timeDiff ${timeDiff}`)
+    log.debug(`nowDate ${nowDate}, nowTime ${nowTime}, game.openingDate ${game.openingDate}, game.openingTime ${game.openingTime}, dateDiff ${dateDiff}, timeDiff ${timeDiff}`);
     if (dateDiff > 0 || (dateDiff == 0 && timeDiff >= 0)) {
       log.info(`time to open game: ${game.gameId}/${game.date}/${game.timeStart}, for open: ${game.openingMode}/${game.openingDate}/${game.openingTime}`);
 
       game.status = 'settled';
       await dal.game.updateGameStatus(game);
-      game.openingMode = 'performed'
+      game.openingMode = 'performed';
       await dal.game.updateGameOpenMode(game);
 
       events.emit('game.change.status.auto', {

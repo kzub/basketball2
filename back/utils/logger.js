@@ -10,28 +10,30 @@ const consoleFormat = (name, req) => format.combine(
   format.colorize(),
   format.timestamp(),
   format.printf(info => {
-    if (typeof info.message === 'object') {
-      info.message = JSON.stringify(info.message, undefined, 2);
+    let msg = info.message; // some shit happens if log object contain message object =(. have no time to understand it
+    if (typeof msg === 'object') {
+      msg = JSON.stringify(msg, undefined, 2);
     }
     if (req) {
-      return `${info.timestamp} RQ ${req.id} [${info.level}]: ${info.message}`;
+      return `${info.timestamp} RQ ${req.id} [${info.level}]: ${msg}`;
     }
-    return `${info.timestamp} INT ${name} [${info.level}]: ${info.message}`;
+    return `${info.timestamp} INT ${name} [${info.level}]: ${msg}`;
   })
 );
 
 const jsonFormat = (name, req) => format.combine(
   format.timestamp(),
   format.printf(info => {
-    if (typeof info.message === 'object') {
-      info.data = JSON.stringify(info.message, undefined, 2);
-      delete info.message;
+    let msg = info.message;
+    if (typeof msg === 'object') {
+      msg = JSON.stringify(msg, undefined, 2);
     }
     return JSON.stringify({
       reqId: req && req.id,
       userId: req && req.userId,
       name: name,
       ...info,
+      message: msg,
     });
   }),
 );

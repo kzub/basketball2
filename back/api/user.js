@@ -5,10 +5,47 @@ const utils = require('../utils/misc');
 
 const config = utils.getConfig();
 const payEnv = {
-  payEnv: config.payproxy.env
+  payEnv: config.payproxy.env,
+  botName: config.telegram.botName,
 };
 
+// -------------------------------------------------------------------
+const findOrCreateUserByPhone = async (req, phone) => {
+  // check ok, find or create new user
+  let user = await req.dal.user.findUserByPhone(phone);
+  if (!user) {
+    user = await req.dal.user.createUserByPhone(phone);
+    events.emit('user.new', { phone });
+  }
+  if (!user) {
+    throw new Error('auth: cannot find/create user ${phone}');
+  }
+  return user;
+};
+
+// -------------------------------------------------------------------
+const setAuthCookie = async (req, res, user) => {
+  const authCookie = authLib.encode(user.userId);
+  req.log.debug(`set auth '${authCookie}' for userId: ${user.userId}`);
+  res.cookie('auth', authCookie, {
+    expires: new Date(Date.now() + 1000*60*60*24*365*10),
+    httpOnly: true,
+  });
+};
+
+// -------------------------------------------------------------------
 const get = async (req, res) => {
+  // автоматический вход, если ты подтвердил в телеграмме свой телефон и вернулся на любую страницу сайта
+  if (!req.userId && req.params.code) {
+    const userPhone = await req.dal.user.getTGVerificationPhoneByCode(req.params.code);
+    if (userPhone) {
+      req.log.info(`user with phone: ${userPhone} detected by auth code: ${req.params.code}`);
+      const user = await findOrCreateUserByPhone(req, userPhone);
+      setAuthCookie(req, res, user);
+      req.userId = user.userId;
+    }
+  }
+
   if (!req.userId) {
     res.status(200).send({
       auth: false,
@@ -30,6 +67,7 @@ const get = async (req, res) => {
   });
 };
 
+// -------------------------------------------------------------------
 const formatPhone = phoneNumber => {
   let phone = phoneNumber.toString();
   if (phone[0] === '8') { // 89154443322 -> 79154443322
@@ -42,6 +80,7 @@ const formatPhone = phoneNumber => {
   return phone;
 };
 
+// -------------------------------------------------------------------
 const sendCheckCode = async (req, res) => {
   const phone = formatPhone(req.params.phone);
   const code = await req.dal.user.createVerificationCode(phone);
@@ -67,6 +106,7 @@ const sendCheckCode = async (req, res) => {
   }, 1000);
 };
 
+// -------------------------------------------------------------------
 const auth = async (req, res) => {
   const phone = formatPhone(req.params.phone);
   const code = req.params.code;
@@ -75,34 +115,23 @@ const auth = async (req, res) => {
 
   if (!check || code !== check.code || phone !== check.phone) {
     req.log.warn(`Bad authorization attempt: ${phone}, ${code}, ${JSON.stringify(check)}`);
+    if (req.params.redirect) {
+      res.redirect(`https://${config.site}/#/profile/login?expired=true`);
+      return;
+    }
+
     res.status(200).send({
       auth: false,
     });
     return;
   }
 
-  // check ok, find or create new user
-  let user = await req.dal.user.findUserByPhone(phone);
-  if (!user) {
-    user = await req.dal.user.createUserByPhone(phone);
-    events.emit('user.new', { phone });
-  }
-  if (!user) {
-    throw new Error('auth: cannot find/create user ${phone}');
-  }
-
-  await req.dal.user.deleteVerificationCode(phone);
-
-  const authCookie = authLib.encode(user.userId);
-  req.log.debug(`set auth '${authCookie}' for userId: ${user.userId}`);
-  res.cookie('auth', authCookie, {
-    expires: new Date(Date.now() + 1000*60*60*24*365*10),
-    httpOnly: true,
-  });
+  const user = await findOrCreateUserByPhone(req, phone);
+  setAuthCookie(req, res, user);
 
   if (req.params.redirect) {
     events.emit('user.enter.by.link', { phone });
-    res.redirect(`https://${config.site}/`);
+    res.redirect(`https://${config.site}/#/profile/login`);
     return;
   }
 
@@ -148,6 +177,7 @@ const getLoginLinkByPhone = async (req, res) => {
   });
 };
 
+// -------------------------------------------------------------------
 const getUserAuthByPhone = async (req, res) => {
   if (req.userId !== config.ownerId) {
     res.status(403).send({
@@ -166,6 +196,7 @@ const getUserAuthByPhone = async (req, res) => {
   });
 };
 
+// -------------------------------------------------------------------
 const getUserAuthById = async (req, res) => {
   if (req.userId !== config.ownerId) {
     res.status(403).send({
@@ -183,6 +214,7 @@ const getUserAuthById = async (req, res) => {
   });
 };
 
+// -------------------------------------------------------------------
 module.exports = {
   auth,
   exit,

@@ -78,8 +78,15 @@ db.run(`CREATE TABLE IF NOT EXISTS users (
   phone TEXT NOT NULL
 )`);
 
-db.run(`CREATE TABLE IF NOT EXISTS verifications (
+db.run(`CREATE TABLE IF NOT EXISTS verificationsSMS (
   phone TEXT PRIMARY KEY NOT NULL,
+  code TEXT NOT NULL,
+  ttl INTEGER NOT NULL
+)`);
+
+db.run(`CREATE TABLE IF NOT EXISTS verificationsTG (
+  tgId TEXT NOT NULL,
+  phone TEXT,
   code TEXT NOT NULL,
   ttl INTEGER NOT NULL
 )`);

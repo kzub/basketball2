@@ -11,11 +11,13 @@ const mxLocationInfo = function () {
 // get current game from store or load data if store is empty
 const mxGameDetails = function () {
   const locationInfo = mxLocationInfo.call(this)
-  if (!this.$store.state.gameDetails ||
-        locationInfo.gameId !== this.$store.state.gameDetails.game.gameId) {
-          this.$store.dispatch('updateGameData', locationInfo.gameId);
-        return
-      }
+  if (this.$store.state.gameDetails && this.$store.state.gameDetails.error) {
+    return this.$store.state.gameDetails
+  }
+  if (!this.$store.state.gameDetails || locationInfo.gameId !== this.$store.state.gameDetails.game.gameId) {
+    this.$store.dispatch('updateGameData', { gameId: locationInfo.gameId });
+    return
+  }
   return this.$store.state.gameDetails
 }
 

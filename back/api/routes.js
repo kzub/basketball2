@@ -3,6 +3,7 @@ const rateLimit = require('express-rate-limit');
 const game = require('./game');
 const games = require('./games');
 const payment = require('./payment');
+const tgBot = require('./tg.bot');
 const reservation = require('./reservation');
 const user = require('./user');
 const events = require('../utils/notifications');
@@ -55,7 +56,7 @@ const init = (app) => {
   app.use(apiLimiter);
   app.get('/api/game/askToPay/:gameId', wrapper(game.askToPay, true));
   app.get('/api/game/changeStatus/:gameId/:status', wrapper(game.changeStatus, true));
-  app.get('/api/game/details/:gameId', wrapper(game.get, false));
+  app.get('/api/game/details/:gameId/:force?', wrapper(game.get, false));
   app.get('/api/game/disableAutoOpen/:gameId', wrapper(game.disableAutoOpen, true));
   app.get('/api/game/options', wrapper(game.getOptions, true));
   app.get('/api/game/sendPlayerList/:gameId', wrapper(game.sendPlayerList, true));
@@ -75,7 +76,7 @@ const init = (app) => {
   app.get('/api/reservation/setPlayer/:gameId/:bookId/:name', wrapper(reservation.setPlayer, true));
   app.get('/api/user/auth/:phone/:code/:redirect?', wrapper(user.auth, false));
   app.get('/api/user/exit', wrapper(user.exit, true));
-  app.get('/api/user/get', wrapper(user.get, false));
+  app.get('/api/user/get/:code?', wrapper(user.get, false));
   app.get('/api/user/getLoginLinkByPhone/:phone', wrapper(user.getLoginLinkByPhone, true));
   app.get('/api/user/getUserAuthById/:id', wrapper(user.getUserAuthById, true));
   app.get('/api/user/getUserAuthByPhone/:phone', wrapper(user.getUserAuthByPhone, true));
@@ -84,6 +85,7 @@ const init = (app) => {
   app.post('/api/game/add', wrapper(game.add, true));
   app.post('/api/payment/complete/:paySystem', wrapper(payment.complete, false));
   app.post('/api/reservation/book', wrapper(reservation.book, true));
+  app.post('/api/tgbot/:token', wrapper(tgBot.incommingWebhook, false));
 };
 
 module.exports = { init };

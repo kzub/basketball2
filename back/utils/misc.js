@@ -1,6 +1,4 @@
 const fs = require('fs');
-const promisify = require('util').promisify;
-const readFile = promisify(fs.readFile);
 
 const dictDays = ['Воскресенье', 'Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота'];
 const dictMonths = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'];

@@ -13,7 +13,7 @@ const proxyPayment = (paymentEnvironment, req) => {
 
   const uri = `http://${backend.host}:${backend.port}${req.originalUrl}`;
   req.log.info(`proxyPayment() proxing to ${uri}`);
-  
+
   request
     .post({
       uri,

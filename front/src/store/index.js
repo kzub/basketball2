@@ -1,5 +1,6 @@
 import mutations from './mutations'
 import actions from './actions'
+import localstorage from './localstorage'
 
 const Store = (Vuex) => {
   return new Vuex.Store({
@@ -17,8 +18,13 @@ const Store = (Vuex) => {
       rsvTransferCode: undefined,
       user: undefined,
       viewDataUpdated: true,
+      authCode: localstorage.getAuthCode(),
     },
-    mutations,
+    mutations: {
+      ...mutations,
+      createAuthCode: localstorage.createAuthCode,
+      resetAuthCode: localstorage.resetAuthCode,
+    },
     actions,
   })
 }

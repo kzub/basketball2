@@ -3,8 +3,12 @@
     <h3 class="btn-warning py-2">
       Оплата
     </h3>
-
-    <div v-if="!viewDataUpdated || !mxGameDetails || !user" class="my-2">
+    <div v-if="gameLoadError">
+      <div class="mt-4 mb-5">
+        <p>Страница недоступна</p>
+      </div>
+    </div>
+    <div v-else-if="!viewDataUpdated || !mxGameDetails || !user" class="my-2">
       <div class="d-flex justify-content-center flex-wrap-reverse loader">
         <div class="spinner-border" role="status">
           <span class="sr-only">Загружается...</span>
@@ -60,7 +64,7 @@
         Чат в телеграм <div class="arrow"><i class="right"></i></div>
       </b-btn>
 
-      <b-modal id="confirm-pay-modal" title="Подтверждение" 
+      <b-modal id="confirm-pay-modal" title="Подтверждение"
                ok-variant="success" ok-title="Оплатить" cancel-title="Отмена"
                @ok="confirmPayOk">
         <p class="my-4">
@@ -85,9 +89,6 @@
       GameInfo,
       PayButton,
     },
-    mounted: function(){
-      this.$store.dispatch('updateGameData', this.mxLocationInfo.gameId);
-    },
     data () {
       return {
         selectedPlayer: undefined,
@@ -95,6 +96,9 @@
       }
     },
     computed: {
+      gameLoadError () {
+        return this.mxGameDetails && this.mxGameDetails.error
+      },
       viewDataUpdated () {
         return this.$store.state.viewDataUpdated
       },
