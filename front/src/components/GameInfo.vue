@@ -28,7 +28,12 @@
       <div v-if="game.paymentType == 'prepay'">
         <div>Предоплата</div>
         <div>Стоимость: {{ game.paymentAmount }} р. </div>
-        <div v-if="game.hoursBeforeGameRefundAllowed">Бесплатная отмена: за {{game.hoursBeforeGameRefundAllowed}} ч.</div>
+        <div v-if="game.hoursBeforeGameRefundAllowed">
+          Бесплатная отмена: за {{game.hoursBeforeGameRefundAllowed}} ч.
+        </div>
+        <div v-else>
+          Нет бесплатной отмены
+        </div>
         <div><a class="dotted" v-b-modal.payReturnInfoGI>Полные условия возврата</a></div>
         <b-modal id="payReturnInfoGI" cancel-variant="hidden" title="Условия возврата" class="flex">
           <RefundRules :game="game" />
