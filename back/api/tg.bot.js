@@ -31,9 +31,9 @@ const incommingWebhook = async (req, res) => {
     await req.dal.user.insertTGUserVerificationCode(req.body.message.from.id, code);
 
     telegram.send(config.telegram.token, req.body.message.chat.id, `Привет!
-Чтобы иметь возможность связаться с участниками игры, мне нужен твой номер телефона.
+Чтобы иметь возможность связаться с участниками игры, нужен твой номер телефона.
 Номер будет доступен только организиторам игры, на которые ты запишешься.
-Для продолжения регистрации нажми кнопку "Зарегистрироваться" внизу.`, {
+Для продолжения нажми кнопку "Зарегистрироваться" внизу.`, {
       reply_markup: JSON.stringify({
         keyboard: [
           [{ text: 'Зарегистрироваться', request_contact: true }],
@@ -46,7 +46,7 @@ const incommingWebhook = async (req, res) => {
 
   if (req.body.message.contact) {
     if (req.body.message.contact.user_id !== req.body.message.from.id) {
-      telegram.send(config.telegram.token, req.body.message.chat.id, `Для продолжения нужен именно твой номер телефона.
+      telegram.send(config.telegram.token, req.body.message.chat.id, `Нужен именно твой номер телефона.
 Нажми кнопку "Зарегистрироваться" внизу.`, {
         reply_markup: JSON.stringify({
           keyboard: [
