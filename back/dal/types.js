@@ -247,6 +247,10 @@ Reservation.prototype.setExpire = function (time) {
   this.expireAt = time;
 };
 
+Reservation.prototype.isExpired = function () {
+  return (this.expireAt > 0) && (Date.now() > this.expireAt);
+};
+
 Reservation.prototype.makePaid = function (amount) {
   if (isFinite(amount)) {
     this.paymentAmount = Number(amount);

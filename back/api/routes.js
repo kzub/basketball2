@@ -72,6 +72,7 @@ const init = (app) => {
   app.get('/api/reservation/doTransfer/:transferCode', wrapper(reservation.doTransfer, true));
   app.get('/api/reservation/getTransferCode/:gameId/:bookId', wrapper(reservation.getTransferCode, true));
   app.get('/api/reservation/getTransferDetails/:transferCode', wrapper(reservation.getTransferDetails, true));
+  app.get('/api/reservation/mightBePaid/:gameId/:bookId/', wrapper(reservation.mightBePaid, true));
   app.get('/api/reservation/payByCredits/:gameId/:bookId/', wrapper(reservation.payByCredits, true));
   app.get('/api/reservation/setPlayer/:gameId/:bookId/:name', wrapper(reservation.setPlayer, true));
   app.get('/api/user/auth/:phone/:code/:redirect?', wrapper(user.auth, false));

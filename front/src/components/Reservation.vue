@@ -118,6 +118,7 @@
                 :label="paymentLabel"
                 :buttonText="`Оплатить ${mxGameDetails.game.paymentAmount - creditsToUse} р.`"
                 :retQueryParams="`gameId=${mxGameDetails.game.gameId}`"
+                :onSubmit="validateReservation"
               />
             </div>
             <div v-else-if="isPayAvailable">
@@ -129,6 +130,7 @@
                 :label="paymentLabel"
                 :buttonText="`Оплатить ${mxGameDetails.game.paymentAmount} р.`"
                 :retQueryParams="`gameId=${mxGameDetails.game.gameId}`"
+                :onSubmit="validateReservation"
               />
             </div>
             <div v-else>
@@ -197,6 +199,12 @@
                             placeholder="Фамилия и имя">
               </b-form-input>
             </b-form>
+          </b-modal>
+        </div>
+        <!-- error window -->
+        <div>
+          <b-modal ref="payErrModal" title="Ошибка оплаты" ok-variant="danger" ok-title="ОК" cancel-variant="hidden">
+            <h5 class="my-4 text">Бронирование нельзя оплатить.<br>Проверьте наличие бронирования или связь с интернетом.</h5>
           </b-modal>
         </div>
       </div>
@@ -352,6 +360,19 @@ export default {
       this.linkIsLoading = true
       this.$store.dispatch('getTransferCode', { ...this.mxLocationInfo })
       .then(() => { this.linkIsLoading = false })
+    },
+    validateReservation: function (proceedNext) {
+      this.$store.dispatch('validateReservation', {
+        gameId: this.mxBookInfo.gameId,
+        bookId: this.mxBookInfo.bookId,
+        userId: this.user.userId,
+      }).then((reservationOk) => {
+        if (!reservationOk) {
+          this.$refs.payErrModal.show()
+          return
+        }
+        proceedNext()
+      })
     },
     handleChangeOk: function() {
       if(!this.form.name) {

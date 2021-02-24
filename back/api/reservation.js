@@ -160,6 +160,18 @@ const setPlayer = async (req, res) => {
 };
 
 // ----------------------------------------------------------------------------------
+const mightBePaid = async (req, res) => {
+  const { gameId, bookId } = req.params;
+  const reservation = await req.dal.reservation.get(gameId, bookId);
+
+  let ok = false;
+  if (reservation.isOwnerUserId(req.userId) && !reservation.isPaid() && !reservation.isExpired()) {
+    ok = true;
+  }
+  res.status(200).send({ ok });
+};
+
+// ----------------------------------------------------------------------------------
 const getTransferCode = async (req, res) => {
   const { gameId, bookId } = req.params;
   const user = await req.dal.user.getUser(req.userId);
@@ -294,6 +306,7 @@ module.exports = {
   doTransfer,
   getTransferCode,
   getTransferDetails,
+  mightBePaid,
   payByCredits,
   setPlayer,
 };

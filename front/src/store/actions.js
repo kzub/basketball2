@@ -26,6 +26,19 @@ const updateReservationName = ({ commit }, { gameId, bookId, name }) => {
     })
 }
 
+const validateReservation = ({ commit }, { gameId, bookId, userId }) => {
+  console.log('actions::validateReservation', gameId, bookId, userId) // eslint-disable-line no-console
+  return axios
+    .get(`/api/reservation/mightBePaid/${gameId}/${bookId}/`)
+    .then(response => {
+      console.log('/api/reservation/mightBePaid/ response:', response.data)  // eslint-disable-line
+      return response.data && response.data.ok
+    })
+    .catch(error => {
+      console.log('/api/reservation/mightBePaid/ error:', error)  // eslint-disable-line
+    })
+}
+
 const changeReservationPay = ({ commit, state }, { gameId, bookId }) => {
   console.log('actions::changeReservationPay', gameId, bookId)  // eslint-disable-line no-console
   commit('setUpdatedFlag', false)
@@ -490,4 +503,5 @@ export default {
   updateGameData,
   updateGamesData,
   updateReservationName,
+  validateReservation,
 }
