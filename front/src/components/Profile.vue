@@ -27,7 +27,8 @@
           </b-card-body>
           <hr>
         </div>
-        <RegisterByTG/>
+        <RegisterByTG v-if="user.userConfirmation == 'telegram'"/>
+        <RegisterBySms v-else/>
       </div>
       <div v-else-if="wantChange || newUser" class="my-2">
         <b-btn class="p-2 rounded-0" block variant="secondary">
@@ -77,13 +78,13 @@
 
 <script>
 
-// import RegisterBySms from './RegisterBySms.vue'
+import RegisterBySms from './RegisterBySms.vue'
 import RegisterByTG from './RegisterByTG.vue'
 
 export default {
   name: 'Profile',
   components: {
-    // RegisterBySms,
+    RegisterBySms,
     RegisterByTG
   },
   data: function() {

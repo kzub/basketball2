@@ -72,7 +72,7 @@ const incommingWebhook = async (req, res) => {
     }
 
     await telegram.send(config.telegram.token, req.body.message.chat.id, `Ура!
-Пользователь с номером +${contact.phone_number} подтвержден.
+Пользователь с номером ${contact.phone_number} подтвержден.
 Возвращайся обратно на сайт!`, {
       reply_markup: JSON.stringify({
         remove_keyboard: true,

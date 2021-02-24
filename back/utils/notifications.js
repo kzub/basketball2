@@ -31,8 +31,16 @@ emitter.on('user.enter.by.link', async ({ phone }) => {
   sendAdminMessage(`user entered by link: ${phone}`, 'info');
 });
 
+let lastLimitNotification = 0;
+let lastLimitCounter = 1;
 emitter.on('request.limit', async ({ userId, ip }) => {
-  sendAdminMessage(`request limit reached: ${userId}, ${ip}`, 'warn');
+  if (Date.now() - lastLimitNotification < 60000) {
+    lastLimitCounter++;
+    return;
+  }
+  lastLimitNotification = Date.now();
+  sendAdminMessage(`request limit reached: ${userId}, ${ip}, counter:${lastLimitCounter}`, 'warn');
+  lastLimitCounter = 1;
 });
 
 emitter.on('request.limit.sms', async ({ phone, ip }) => {

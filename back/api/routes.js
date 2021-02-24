@@ -29,8 +29,8 @@ const wrapper = (func, needAuth, statusCode = 401) => {
 };
 
 const apiLimiter = rateLimit({
-  windowMs: 10 * 60 * 1000, // 10 minutes
-  max: 500, // limit each IP to N requests per windowMs
+  windowMs: 1 * 60 * 1000, // 1 minutes
+  max: 75, // limit each IP to N requests per windowMs
   handler: (req, res, next) => { // function to handle requests once the max limit is exceeded
     events.emit('request.limit', { userId: req.userId, ip: req.ip });
     req.log.warn(`Too many requests from user: ${req.userId}, ip: ${req.ip}`);

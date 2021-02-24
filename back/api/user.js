@@ -7,6 +7,7 @@ const config = utils.getConfig();
 const payEnv = {
   payEnv: config.payproxy.env,
   botName: config.telegram.botName,
+  userConfirmation: config.auth.userConfirmation,
 };
 
 // -------------------------------------------------------------------
