@@ -31,6 +31,10 @@ emitter.on('user.enter.by.link', async ({ phone }) => {
   sendAdminMessage(`user entered by link: ${phone}`, 'info');
 });
 
+emitter.on('auth.tg.verification.error', async ({ stage, tgId, phone = '-', tgName = '-' }) => {
+  sendAdminMessage(`TG auth error: ${stage}, ${tgId}, ${phone}, ${tgName}`, 'error');
+});
+
 let lastLimitNotification = 0;
 let lastLimitCounter = 1;
 emitter.on('request.limit', async ({ userId, ip }) => {

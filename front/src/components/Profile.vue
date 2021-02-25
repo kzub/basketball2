@@ -5,7 +5,7 @@
       <span v-if="!newUser">Назад</span> &nbsp;
     </b-btn>
 
-    <div v-if="!viewDataUpdated" class="my-2">
+    <div v-if="!viewDataUpdated || !user" class="my-2">
       <div class="d-flex justify-content-center">
         <div class="spinner-border" role="status">
           <span class="sr-only">Загружается...</span>
@@ -13,23 +13,26 @@
       </div>
     </div>
     <div v-else>
-      <div v-if="!user || !user.auth" class="my-2">
+      <!-- ------------------------------------------------------ -->
+      <div v-if="loginExpired" class="mb-4">
+        <b-card-body class="m-2">
+          <b-btn class="w-75" variant="danger">
+            Ссылка устарела<br>повторите регистрацию
+          </b-btn>
+        </b-card-body>
+        <hr>
+      </div>
+      <!-- ------------------------------------------------------ -->
+      <div v-if="!user.auth" class="my-2">
         <div v-if="wentFromGame" class="mb-4">
           <b-card-body class="m-2 size-4 warningText">
             Для продолжения необходимо зарегистрироваться
           </b-card-body>
         </div>
-        <div v-else-if="loginExpired" class="mb-4">
-          <b-card-body class="m-2">
-            <b-btn class="w-75" variant="danger">
-              Ссылка устарела<br>повторите регистрацию
-            </b-btn>
-          </b-card-body>
-          <hr>
-        </div>
         <RegisterByTG v-if="user.userConfirmation == 'telegram'"/>
-        <RegisterBySms v-else/>
+        <RegisterBySms v-else-if="user.userConfirmation == 'sms'"/>
       </div>
+      <!-- ------------------------------------------------------ -->
       <div v-else-if="wantChange || newUser" class="my-2">
         <b-btn class="p-2 rounded-0" block variant="secondary">
             Фамилия и имя
@@ -50,6 +53,7 @@
           <b-btn class="mx-4 my-2 w-75" type="submit" variant="primary">Сохранить</b-btn>
         </b-form>
       </div>
+      <!-- ------------------------------------------------------ -->
       <div v-else>
         <b-card no-body class="mb-1">
           <b-btn class="p-2 rounded-0" block v-b-toggle.regStep2 variant="secondary">
@@ -66,6 +70,7 @@
           <b-btn class="mx-4 my-2 w-75" @click="exit" variant="danger">Выйти</b-btn>
         </div>
       </div>
+      <!-- ------------------------------------------------------ -->
     </div>
 
     <div>
@@ -94,7 +99,15 @@ export default {
     }
   },
   mounted: function () {
-    this.$store.dispatch('getUserInfo')
+    if(this.$route.query.ac) {
+      this.$store.commit('setAuthCode', this.$route.query.ac + '/true') // wentByAuthLink
+      this.$router.replace({
+        query: {},
+      })
+      return;
+    }
+
+    this.$store.dispatch('getUserInfo', {})
   },
   computed: {
     user () {
@@ -110,7 +123,7 @@ export default {
       return this.$store.state.viewDataUpdated
     },
     loginExpired () {
-      return this.$route.fullPath.includes('expired=true')
+      return this.$route.query.expired || (this.user && this.user.authLinkExpired)
     },
   },
   methods: {

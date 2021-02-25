@@ -26,7 +26,7 @@ const updateReservationName = ({ commit }, { gameId, bookId, name }) => {
     })
 }
 
-const validateReservation = ({ commit }, { gameId, bookId, userId }) => {
+const validateReservation = (store, { gameId, bookId, userId }) => {
   console.log('actions::validateReservation', gameId, bookId, userId) // eslint-disable-line no-console
   return axios
     .get(`/api/reservation/mightBePaid/${gameId}/${bookId}/`)
@@ -62,7 +62,7 @@ const payByCredits = ({ commit, state }, { gameId, bookId }) => {
     .get(`/api/reservation/payByCredits/${gameId}/${bookId}`)
     .then(response => {
       console.log('/api/reservation/payByCredits response:', response.data)  // eslint-disable-line
-      return getUserInfo({ commit }) // update credits data
+      return getUserInfo({ commit }, {}) // update credits data
     })
     .then(() => {
       return updateGameData({ commit, state }, { gameId })
@@ -328,7 +328,7 @@ const disableAutoOpen = ({ commit }, { gameId }) => {
     })
 }
 
-const getUserInfo = async ({ commit, state }, skipFlagUpdate) => {
+const getUserInfo = async ({ commit, state }, { skipFlagUpdate = false }) => {
   console.log('actions::getUserInfo')  // eslint-disable-line
   if (!skipFlagUpdate) {
     commit('setUpdatedFlag', false)
@@ -342,7 +342,7 @@ const getUserInfo = async ({ commit, state }, skipFlagUpdate) => {
       if (!skipFlagUpdate) {
         commit('setUpdatedFlag', true)
       }
-      if (response.data && response.data.auth) {
+      if (response.data && (response.data.auth || response.data.authLinkExpired)) {
         commit('resetAuthCode')
       }
       return response.data

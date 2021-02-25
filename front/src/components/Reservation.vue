@@ -388,7 +388,7 @@ export default {
       this.$store.dispatch('deleteReservation', { ...this.mxLocationInfo })
       .then((res) => {
         refundAmount = res && res.refundAmount
-        this.$store.dispatch('getUserInfo')
+        this.$store.dispatch('getUserInfo', {})
       })
       .then(() => {
         if (refundAmount) {

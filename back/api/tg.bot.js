@@ -7,12 +7,6 @@ const config = utils.getConfig();
 
 // ------------------------------------------------------------------------------
 const incommingWebhook = async (req, res) => {
-  // const [paymentEnvironment, paymentEvent, ...labelData] = label.split('|');
-  // if (config.payproxy.backends && paymentEnvironment != config.payproxy.env) {
-  //   req.log.info(`proxy payment to ${paymentEnvironment}`);
-  //   payproxy.proxyPayment(paymentEnvironment, req);
-  //   return;
-  // }
   req.log.info(JSON.stringify(req.body, null, 2));
   res.status(200).send('OK');
   if (decodeURIComponent(req.params.token) !== config.telegram.token) {
@@ -28,7 +22,28 @@ const incommingWebhook = async (req, res) => {
   if (req.body.message.text && req.body.message.text.startsWith('/start')) {
     const [ , code] = req.body.message.text.split(' ');
 
-    await req.dal.user.insertTGUserVerificationCode(req.body.message.from.id, code);
+    if (!code) {
+      req.log.error('/start without code');
+      events.emit('auth.tg.verification.error', {
+        stage: 'startWithoutCode',
+        tgId: req.body.message.from.id,
+      });
+      telegram.send(config.telegram.token, req.body.message.chat.id, `Что-то пошло не так =(
+Попробуй пройти регистрацию с самого начала.`);
+      return;
+    }
+
+    const insert = await req.dal.user.insertTGUserVerificationCode(req.body.message.from.id, code);
+    if (!insert.changes) {
+      req.log.error(`insertTGUserVerificationCode result: ${JSON.stringify(insert)}`);
+      events.emit('auth.tg.verification.error', {
+        stage: 'insertCodeByTGId',
+        tgId: req.body.message.from.id,
+      });
+      telegram.send(config.telegram.token, req.body.message.chat.id, `Неизвестная ошибка =(
+Попробуй пройти регистрацию с самого начала.`);
+      return;
+    }
 
     telegram.send(config.telegram.token, req.body.message.chat.id, `Привет!
 Чтобы иметь возможность связаться с участниками игры, нужен твой номер телефона.
@@ -58,9 +73,22 @@ const incommingWebhook = async (req, res) => {
       });
       return;
     }
+
     // check ok, find or create new user
     const contact = req.body.message.contact;
-    await req.dal.user.insertTGUserVerificationPhone(req.body.message.from.id, contact.phone_number);
+    let update = await req.dal.user.updateTGUserVerificationPhone(req.body.message.from.id, contact.phone_number);
+    if (!update.changes) {
+      req.log.error(`updateTGUserVerificationPhone result: ${JSON.stringify(update)}`);
+      events.emit('auth.tg.verification.error', {
+        stage: 'updatePhoneInDB',
+        tgId: req.body.message.from.id,
+        phone: contact.phone_number,
+        tgName: `${contact.first_name} ${contact.last_name}`,
+      });
+      telegram.send(config.telegram.token, req.body.message.chat.id, `Неизвестная ошибка =(
+Попробуй пройти регистрацию с самого начала.`);
+      return;
+    }
 
     let user = await req.dal.user.findUserByPhone(contact.phone_number);
     if (!user) {
@@ -71,9 +99,23 @@ const incommingWebhook = async (req, res) => {
       });
     }
 
+    const code = await req.dal.user.getTGVerificationCodeByPhone(contact.phone_number);
+    if (!code) {
+      req.log.error(`getTGVerificationCodeByPhone result: ${JSON.stringify(code)}, contact.phone_number: ${contact.phone_number}`);
+      events.emit('auth.tg.verification.error', {
+        stage: 'getCodeForAuthLink',
+        tgId: req.body.message.from.id,
+        phone: contact.phone_number,
+        tgName: `${contact.first_name} ${contact.last_name}`,
+      });
+      telegram.send(config.telegram.token, req.body.message.chat.id, `Неизвестная ошибка =(
+Попробуй пройти регистрацию с самого начала.`);
+      return;
+    }
+
     await telegram.send(config.telegram.token, req.body.message.chat.id, `Ура!
 Пользователь с номером ${contact.phone_number} подтвержден.
-Возвращайся обратно на сайт!`, {
+Возвращайся на сайт или перейди по [ссылке](https://${config.site}/#/profile/login?ac=${code})`, {
       reply_markup: JSON.stringify({
         remove_keyboard: true,
       }),

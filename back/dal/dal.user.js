@@ -82,6 +82,13 @@ const getTGVerificationPhoneByCode = async (code) => {
   return res[0] && res[0].phone;
 };
 
+const getTGVerificationCodeByPhone = async (phone) => {
+  const res = await execSQL.all(`SELECT * FROM verificationsTG
+    WHERE phone = "${phone}"`
+  );
+  return res[0] && res[0].code;
+};
+
 const deleteTGVerificationCode = async (tgId, code) =>
   execSQL.run(`DELETE FROM verificationsTG
     WHERE tgId = "${tgId}" OR code = "${code}" OR ttl < ${Date.now()}`);
@@ -90,12 +97,12 @@ const deleteTGVerificationCode = async (tgId, code) =>
 const insertTGUserVerificationCode = async (tgId, code) => {
   const ttl = Date.now() + 5*60*1000;
   await deleteTGVerificationCode(tgId, code);
-  await execSQL.run(`INSERT INTO verificationsTG (tgId, code, ttl)
+  return execSQL.run(`INSERT INTO verificationsTG (tgId, code, ttl)
     VALUES ("${tgId}", "${code}", ${ttl})`);
 };
 
-const insertTGUserVerificationPhone = async (tgId, phone) => {
-  await execSQL.run(`UPDATE verificationsTG SET phone = "${phone}"
+const updateTGUserVerificationPhone = async (tgId, phone) => {
+  return execSQL.run(`UPDATE verificationsTG SET phone = "${phone}"
     WHERE tgId = "${tgId}"`);
 };
 
@@ -126,12 +133,13 @@ module.exports = {
       deleteVerificationCode,
       findOrganizerByUserId,
       findUserByPhone,
+      getTGVerificationCodeByPhone,
       getTGVerificationPhoneByCode,
       getUser,
       getUsers,
       getVerificationCode,
       insertTGUserVerificationCode,
-      insertTGUserVerificationPhone,
+      updateTGUserVerificationPhone,
       updateUser,
     };
   }

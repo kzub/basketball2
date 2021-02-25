@@ -2,7 +2,7 @@
   <div>
     <div v-if="processing" class="my-4">
       <b-card-body class="m-2">
-        Следуйте инструкциям в чате с ботом
+        Нажмите на кнопку <b>/start</b> в чате с ботом и следуйте инструкциям
       </b-card-body>
       <div class="d-flex justify-content-center">
         <div class="spinner-border" role="status">
@@ -13,7 +13,7 @@
     <b-card-body v-else>
       <b-card-body class="m-2">
         <div class="">Для регистрации необходим <b>Telegram</b></div>
-        <div class="mt-2">Отправьте боту команду <b>/start</b></div>
+        <div class="mt-2">Нажмите на кнопку <b>/start</b> в чате с ботом</div>
       </b-card-body>
 
       <b-card-body class="m-2 warningText">
@@ -45,7 +45,7 @@
             return
           }
 
-          let res = await this.$store.dispatch('getUserInfo', true /*skipFlagUpdate*/)
+          let res = await this.$store.dispatch('getUserInfo', { skipFlagUpdate: true })
           if (res && res.auth) {
             this.processing = false
             if (res.user && res.user.name) {
@@ -62,15 +62,11 @@
         this.processing = false
       },
       async sleep (ms) {
-        // console.log('sleep', ms)
         return new Promise(f => setTimeout(f, ms))
       },
       getLinkWithCode () {
         this.$store.commit('createAuthCode')
         return `tg://resolve?domain=${this.$store.state.user.botName}&start=${this.$store.state.authCode}`
-      },
-      onCodeError: function () {
-        this.$root.$emit('bv::toggle::collapse', 'regStep1')
       },
       back: function() {
         this.$router.back()

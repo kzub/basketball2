@@ -25,15 +25,21 @@ const getAuthCode = () => {
   return storage['code'] || '';
 }
 
-
 const resetAuthCode = (state) => {
   let storage = getStorage()
   delete storage['code']
   state.authCode = ''
 }
 
+const setAuthCode = (state, prop = '') => {
+  let storage = getStorage();
+  storage['code'] = prop
+  state.authCode = prop
+}
+
 export default {
   createAuthCode,
-  resetAuthCode,
   getAuthCode,
+  resetAuthCode,
+  setAuthCode,
 }

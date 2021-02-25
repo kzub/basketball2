@@ -68,7 +68,7 @@ export default {
   name: 'app',
   router,
   mounted () {
-    this.$store.dispatch('getUserInfo').then(user => {
+    this.$store.dispatch('getUserInfo', {}).then(user => {
       // force to enter username for new users
       if (user && user.auth && !user.name) {
         this.$router.push({
@@ -84,7 +84,7 @@ export default {
   },
   methods: {
     reload: function () {
-      this.$store.dispatch('getUserInfo').then(() => {
+      this.$store.dispatch('getUserInfo', {}).then(() => {
         this.$router.push({
           path: '/',
         })

@@ -24,6 +24,7 @@ const Store = (Vuex) => {
       ...mutations,
       createAuthCode: localstorage.createAuthCode,
       resetAuthCode: localstorage.resetAuthCode,
+      setAuthCode: localstorage.setAuthCode,
     },
     actions,
   })

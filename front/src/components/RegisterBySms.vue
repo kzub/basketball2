@@ -120,7 +120,7 @@
             this.form.code = ''
             return
           }
-          return this.$store.dispatch('getUserInfo')
+          return this.$store.dispatch('getUserInfo', {})
         })
         .then(user => {
           if (user && user.name) {

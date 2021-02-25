@@ -77,7 +77,7 @@ const init = (app) => {
   app.get('/api/reservation/setPlayer/:gameId/:bookId/:name', wrapper(reservation.setPlayer, true));
   app.get('/api/user/auth/:phone/:code/:redirect?', wrapper(user.auth, false));
   app.get('/api/user/exit', wrapper(user.exit, true));
-  app.get('/api/user/get/:code?', wrapper(user.get, false));
+  app.get('/api/user/get/:code?/:isLink?', wrapper(user.get, false));
   app.get('/api/user/getLoginLinkByPhone/:phone', wrapper(user.getLoginLinkByPhone, true));
   app.get('/api/user/getUserAuthById/:id', wrapper(user.getUserAuthById, true));
   app.get('/api/user/getUserAuthByPhone/:phone', wrapper(user.getUserAuthByPhone, true));

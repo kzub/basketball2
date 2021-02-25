@@ -37,6 +37,7 @@ const setAuthCookie = async (req, res, user) => {
 // -------------------------------------------------------------------
 const get = async (req, res) => {
   // автоматический вход, если ты подтвердил в телеграмме свой телефон и вернулся на любую страницу сайта
+  let authLinkExpired;
   if (!req.userId && req.params.code) {
     const userPhone = await req.dal.user.getTGVerificationPhoneByCode(req.params.code);
     if (userPhone) {
@@ -44,6 +45,8 @@ const get = async (req, res) => {
       const user = await findOrCreateUserByPhone(req, userPhone);
       setAuthCookie(req, res, user);
       req.userId = user.userId;
+    } else if (req.params.isLink) {
+      authLinkExpired = true;
     }
   }
 
@@ -51,6 +54,7 @@ const get = async (req, res) => {
     res.status(200).send({
       auth: false,
       ...payEnv,
+      authLinkExpired,
     });
     return;
   }
