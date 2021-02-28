@@ -19,7 +19,7 @@ const incommingWebhook = async (req, res) => {
     return;
   }
 
-  if (req.body.message.text && req.body.message.text.startsWith('/start')) {
+  if (req.body.message.text && req.body.message.text.startsWith('/start auth')) {
     const [ , code] = req.body.message.text.split(' ');
 
     if (!code) {

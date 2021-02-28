@@ -14,7 +14,7 @@ const createAuthCode = (state) => {
   if (storage['code']) {
     state.authCode = storage['code']
   } else {
-    const newCode = Math.random().toString().slice(2)
+    const newCode = 'auth' + Math.random().toString().slice(2)
     storage['code'] = newCode
     state.authCode = newCode
   }
