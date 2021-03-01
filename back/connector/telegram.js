@@ -32,7 +32,7 @@ const botCmd = async (token, method, params, tryNum = 1) => {
 
 //-----------------------------------------------------------
 const send = async (token, chatId, msg, options = {}) => {
-  // console.log(token, chatId, msg)
+  log.info(`SEND: ${token}, ${chatId}, ${msg}, ${JSON.stringify(options)}`);
   return botCmd(token, 'sendMessage', {
     chat_id: chatId,
     text: msg,
