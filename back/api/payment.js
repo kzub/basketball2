@@ -10,7 +10,7 @@ const onReservationPayment = async (req, paySystem, amount, labelData, organizer
   const creditsToUse = Number(strCreditsToUse);
   let amountForRsv = Number(amount);
 
-  const paymentId = await req.dal.payment.addTransaction(organizer.userId, paySystem, amount, gameId, bookId, userId, req.body);
+  const paymentId = await req.dal.payment.addTransaction(organizer.userId, paySystem, amount, gameId, bookId, userId || 0, req.body);
 
   const reservation = await req.dal.reservation.get(gameId, bookId);
   if (reservation.userId != userId) {

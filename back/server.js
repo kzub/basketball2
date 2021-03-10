@@ -8,12 +8,23 @@ const auth = require('./utils/auth');
 const autoCancelation = require('./automation/expiredReservations');
 const autoOpening = require('./automation/gameOpening');
 const dal = require('./dal/dal');
+const events = require('./utils/notifications');
 const logger = require('./utils/logger');
 const utils = require('./utils/misc');
 
 const app = express();
 const config = utils.getConfig();
 const log = logger.create('SERVER');
+
+process.on('unhandledRejection', function(reason){
+  log.error(`unhandledRejection at promise with reason: ${JSON.stringify(reason)}`);
+  events.emit('system.unhandledRejection');
+});
+
+process.on('uncaughtException', function(error) {
+  log.error(`uncaughtException: ${error && error.stack || error}`);
+  events.emit('system.uncaughtException');
+});
 
 app.use(bodyParser.json()); // support json encoded bodies
 app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies

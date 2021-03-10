@@ -9,11 +9,21 @@ const emitter = new EventEmitter();
 const log = logger.create('NOTIFICATION');
 
 // --------------------- SITE ADMIN NOTIFICATIONS ------------------------
-const sendAdminMessage = async (msg, type) => {
-  log[type](msg);
+const sendAdminMessage = async (msg, logType) => {
+  if (logType) {
+    log[logType](msg);
+  }
   const site = `\n${config.site}`;
   telegram.send(config.telegram.token, config.telegram.owner, `*[ADMIN]* ${msg}${site}`);
 };
+
+emitter.on('system.uncaughtException', () => {
+  sendAdminMessage('Error: uncaughtException');
+});
+
+emitter.on('system.unhandledRejection', () => {
+  sendAdminMessage('Error: unhandledRejection');
+});
 
 emitter.on('user.sms', async ({ phone, code, ip }) => {
   sendAdminMessage(`sent sms to user: ${phone}, code: ${code}, ip: ${ip}`, 'info');
