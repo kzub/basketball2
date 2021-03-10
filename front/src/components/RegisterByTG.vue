@@ -13,12 +13,12 @@
     <b-card-body v-else>
       <b-card-body class="m-2">
         <div class="">Для регистрации необходим <b>Telegram</b></div>
-        <div class="mt-2">Нажмите на кнопку <b>/start</b> в чате с ботом</div>
+        <div class="mt-2">Перейдтите по кнопке ниже в чат с ботом и следуйте инструкциям</div>
       </b-card-body>
 
       <b-card-body class="m-2 warningText">
         <b-btn class="w-75" variant="primary" @click="onGoTelegram" :href="getLinkWithCode()">
-          Перейти в чат с ботом
+          Продолжить
         </b-btn>
       </b-card-body>
     </b-card-body>
