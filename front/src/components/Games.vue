@@ -12,7 +12,7 @@
     <div v-else>
       <div v-for="game in games" :key="game.gameId">
         <b-card no-body class="my-2 mx-1">
-          <b-btn :class="gameBorderColor(game)" block variant="primary" @click="gameClick(game.gameId)">
+          <b-btn :class="gameBorderColor(game)" block variant="primary" @click="gameClick(game)">
             <div class="d-flex flex-row  justify-content-between">
               <div class="d-flex flex-column justify-content-start align-items-start">
                 <div>
@@ -21,7 +21,7 @@
                 <div>
                   {{game.timeStart}} - {{game.timeEnd}}
                 </div>
-                <div>
+                <div class="statusLine mt-1">
                   {{gameType(game)}}
                 </div>
               </div>
@@ -85,6 +85,9 @@ export default {
       if (game.status === 'settled') {
         return '' //'Игра запланирована'
       }
+      if (game.openingMode === 'auto') {
+        return `откроется ${this.mxDateDayAndMonth(game.openingDate)} в ${game.openingTime}`
+      }
       if (game.status === 'disabled') {
         return 'выключена'
       }
@@ -92,7 +95,10 @@ export default {
     },
     gameBorderColor: function (game) {
       let mode = '';
-      if (game.status === 'disabled') {
+      if (game.openingMode === 'auto') {
+        mode += ' btn-secondary'
+      }
+      else if (game.status === 'disabled') {
         mode += ' btn-danger'
       }
       if (this.$store.state.user && this.$store.state.user.userId === game.organizer.userId) {
@@ -100,10 +106,13 @@ export default {
       }
       return mode
     },
-    gameClick: function (gameId) {
+    gameClick: function (game) {
+      if (game.openingMode === 'auto' && this.$store.state.user.userId !== game.organizer.userId) {
+        return
+      }
       this.$router.push({
         path: '/game',
-        query: { gameId: gameId }
+        query: { gameId: game.gameId }
       })
     },
   },
@@ -128,6 +137,10 @@ export default {
   font-size: 14px;
   line-height: 14px;
   vertical-align: sub;
+}
+
+.statusLine {
+  font-size: 12px;
 }
 
 .place-title {

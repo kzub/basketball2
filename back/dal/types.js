@@ -81,6 +81,10 @@ Game.prototype.isAdminUserId = function (userId) {
   return this.organizer.userId === userId;
 };
 
+Game.prototype.isAutoOpening = function () {
+  return this.openingMode === 'auto';
+};
+
 Game.prototype.isDisabled = function () {
   return this.status === 'disabled';
 };
