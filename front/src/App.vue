@@ -32,6 +32,7 @@ import FreePayment from './components/FreePayment.vue'
 import FreePaymentLinks from './components/FreePaymentLinks.vue'
 import Game from './components/Game.vue'
 import GameNew from './components/GameNew.vue'
+import GameNewCopy from './components/GameNewCopy.vue'
 import GamePayments from './components/GamePayments.vue'
 import LoginLink from './components/LoginLink.vue'
 import Main from './components/Main.vue'
@@ -52,6 +53,7 @@ const router = new VueRouter({
     { path: '/fpList', component: FreePaymentLinks},
     { path: '/game', component: Game },
     { path: '/game/new', component: GameNew },
+    { path: '/game/new/copy', component: GameNewCopy },
     { path: '/loginLink', component: LoginLink },
     { path: '/map', component: MapView},
     { path: '/myCredits', component: MyCredits },
@@ -140,5 +142,10 @@ export default {
 
   transition: margin-left 0.3s, opacity 0.3s;
 }
+
+* {
+  touch-action: manipulation;
+}
+
 
 </style>

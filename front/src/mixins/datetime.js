@@ -79,11 +79,35 @@ const mxTextHoursMinutesTo = (timestamp) => {
   return `${textHours} ${textMinutes}`;
 };
 
+const mxAddDaysToDate = (isoDate, daysCount = 0) => {
+  const date = new Date(`${isoDate}T00:00:00Z`)
+  date.setDate(date.getDate() + daysCount)
+  return date.toJSON().slice(0, 10)
+}
+
+const mxNearestDayFromNow = (isoDate) => {
+  const dayNum = new Date(`${isoDate}T00:00:00Z`).getDay()
+  let date = new Date()
+  while (date.getDay() != dayNum) {
+    date.setDate(date.getDate() + 1)
+  }
+  return date.toJSON().slice(0, 10)
+}
+
+const mxDateDiff = (isoDate1, isoDate2) => {
+  const date1 = new Date(`${isoDate1}T00:00:00Z`)
+  const date2 = new Date(`${isoDate2}T00:00:00Z`)
+  return Math.round(date1.valueOf() - date2.valueOf())/(1000*60*60*24)
+}
+
 export default {
   methods: {
+    mxAddDaysToDate,
     mxDateDayAndMonth,
+    mxDateDiff,
     mxDateWeekDay,
     mxMinutesTo,
+    mxNearestDayFromNow,
     mxTextHoursMinutesTo,
     mxTextHoursTo,
     mxTextMinutesTo,

@@ -40,7 +40,7 @@ const getGame = async (gameId) => {
 };
 
 const optionalText = (text) => {
-  if (text === undefined) {
+  if (text === undefined || text === null) {
     return 'null';
   }
   return `'${text}'`;

@@ -135,9 +135,6 @@ export default {
       action: ''
     }
   },
-  mounted: function(){
-    this.$store.dispatch('updateGameData', { gameId: this.mxLocationInfo.gameId });
-  },
   computed: {
     isAdmin () {
       return this.user.userId === this.mxGameDetails.game.organizer.userId

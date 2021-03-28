@@ -64,7 +64,7 @@ import UserIcon from './UserIcon.vue'
 
 export default {
   name: 'Games',
-  props: ['games', 'myGamesOnly'],
+  props: ['games', 'myGamesOnly', 'clickHandler'],
   mixins: [DateTime],
   mounted () {
     this.$store.dispatch('updateGamesData', {
@@ -82,6 +82,9 @@ export default {
   },
   methods: {
     gameType: function (game) {
+      if (game.status === 'past') {
+        return 'прошла'
+      }
       if (game.status === 'settled') {
         return '' //'Игра запланирована'
       }
@@ -95,6 +98,9 @@ export default {
     },
     gameBorderColor: function (game) {
       let mode = '';
+      if (game.status === 'past') {
+        return 'btn-light';
+      }
       if (game.openingMode === 'auto') {
         mode += ' btn-secondary'
       }
@@ -107,6 +113,10 @@ export default {
       return mode
     },
     gameClick: function (game) {
+      if (typeof this.clickHandler === 'function') {
+        this.clickHandler(game)
+        return
+      }
       if (game.openingMode === 'auto' && this.$store.state.user.userId !== game.organizer.userId) {
         return
       }

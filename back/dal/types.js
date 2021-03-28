@@ -69,6 +69,10 @@ function Game (obj) {
   this.organizer = obj.organizer;
   this.place = obj.place;
 
+  if (this.isTimePassed()) {
+    this.status = 'past';
+  }
+
   if (!(this.place instanceof Place)) throw new Error('Game constructor: place not instanceof Place');
   if (!(this.organizer instanceof User)) throw new Error('Game constructor: organizer not instanceof User');
 }

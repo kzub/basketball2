@@ -21,6 +21,12 @@
         </b-btn>
       </router-link>
 
+      <router-link to="/game/new/copy" tag="div">
+        <b-btn class="btn-lg mt-2 mb-3 rounded-0" block variant="danger">
+          Скопировать игру <div class="arrow"><i class="right"></i></div>
+        </b-btn>
+      </router-link>
+
       <router-link v-if="user.hasYM" to="/fpList" tag="div">
         <b-btn class="btn-lg mt-2 mb-3 rounded-0" block variant="secondary">
           Ссылка на оплату <div class="arrow"><i class="right"></i></div>
