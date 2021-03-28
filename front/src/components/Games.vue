@@ -83,6 +83,9 @@ export default {
   methods: {
     gameType: function (game) {
       if (game.status === 'past') {
+        if (game.openingMode === 'performed') {
+          return 'прошла (автооткрытие)'
+        }
         return 'прошла'
       }
       if (game.status === 'settled') {
