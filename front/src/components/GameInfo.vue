@@ -1,7 +1,9 @@
 <template>
   <div>
     <div v-if="visible('place')">
-      <h3 class="mt-4"> {{ game.place.title }} </h3>
+      <router-link :to="'/map?gameId=' + game.gameId">
+        <h3 class="mt-4 blackColor"> {{ game.place.title }} </h3>
+      </router-link>
 
       <b-card-body v-if="visible('time')" class="p-2 m-2">
         <h5>
@@ -117,5 +119,8 @@ export default {
 
 <style>
 @import '../assets/backarrow.css';
+.blackColor {
+  color: black;
+}
 </style>
 
