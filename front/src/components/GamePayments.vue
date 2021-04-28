@@ -26,7 +26,7 @@
               :onSubmit="confirmPay(slot)"
               :account="mxGameDetails.game.paymentGateAccount"
               :message="mxGameDetails.game.paymentGateMessage"
-              :amount="mxGameDetails.game.paymentAmount"
+              :amount="paymentAmount"
               :label="paymentLabel(slot)"
               :buttonText="slot.playerName"
             />
@@ -43,12 +43,12 @@
       <h5 class="text-left">
         <div v-if="paymentType == 'prepay'">
           <div>Игроков пришло: {{totalPlayers}}</div>
-          Стоимость участия: {{ mxGameDetails.game.paymentAmount }} р.
+          Стоимость участия: {{ paymentAmount }} р.
         </div>
         <div v-else-if="paymentType == 'shared'">
           <div>Игроков пришло: {{totalPlayers}}</div>
           <div>Стоимость зала: {{mxGameDetails.game.paymentAmount}} р.</div>
-          <div>Стоимость участия: {{ Math.ceil(mxGameDetails.game.paymentAmount / totalPlayers) }} р.</div>
+          <div>Стоимость участия: {{ paymentAmount }} р.</div>
         </div>
       </h5>
 
@@ -107,6 +107,12 @@
       },
       paymentType () {
         return this.mxGameDetails.game.paymentType
+      },
+      paymentAmount () {
+        if (this.paymentType === 'shared') {
+          return Math.ceil(this.mxGameDetails.game.paymentAmount / this.totalPlayers)
+        }
+        return this.mxGameDetails.game.paymentAmount
       },
       unpaidPlayers () {
         return this.mxGameDetails.players.filter(slot => slot.bookId != 0 && slot.paymentStatus != 'paid')

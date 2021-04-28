@@ -17,7 +17,7 @@ const config = utils.getConfig();
 const log = logger.create('SERVER');
 
 process.on('unhandledRejection', function(reason){
-  log.error(`unhandledRejection at promise with reason: ${JSON.stringify(reason)}`);
+  log.error(`unhandledRejection at promise with reason: ${reason.stack}`);
   events.emit('system.unhandledRejection');
 });
 
