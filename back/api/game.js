@@ -233,6 +233,23 @@ const getOptions = async (req, res) => {
     }
   });
 
+  // payafter without yandex.money
+  paymentsOptions.push({
+    text: 'После игры, фикс сумма',
+    value: {
+      selected: 'payafter',
+      inputs: [{
+        label: 'Сумма с каждого участника',
+        output: 'paymentAmount',
+        type: 'number',
+      },{
+        label: 'Сообщение об условиях оплаты',
+        output: 'paymentMessage',
+        type: 'text',
+      }],
+    }
+  });
+
   const accounts = await req.dal.payment.getPrepayMethodsByOrganizerId(req.userId);
   const idGenerator = (function* () {
     let index = 1;
@@ -248,7 +265,7 @@ const getOptions = async (req, res) => {
       const accId = idGenerator.next().value;
       // prepay
       paymentsOptions.push({
-        text: `Предоплата ЮMoney ${accId}`,
+        text: `Предоплата, ЮMoney ${accId}`,
         value: {
           selected: 'prepay',
           inputs: [{
@@ -263,7 +280,14 @@ const getOptions = async (req, res) => {
             output: 'paymentGateMessage',
             value: account.paymentGateMessage,
             type: 'text',
-          },{
+          },
+          // {
+          //   label: 'Предварительный опрос',
+          //   output: 'poll',
+          //   value: false,
+          //   type: 'checkbox',
+          // },
+          {
             // disabled: true,
             label: 'Разрешен возврат, часов до игры',
             output: 'hoursBeforeGameRefundAllowed',
@@ -278,7 +302,7 @@ const getOptions = async (req, res) => {
       });
       // shared
       paymentsOptions.push({
-        text: `Постоплата ЮMoney ${accId}`,
+        text: `Постоплата, делим на всех ЮMoney ${accId}`,
         value: {
           selected: 'shared',
           inputs: [{
@@ -300,6 +324,30 @@ const getOptions = async (req, res) => {
             value: 'Перевод на ЮMoney, после игры.',
           },{
             label: 'Стоимость зала',
+            output: 'paymentAmount',
+            type: 'number',
+          }],
+        }
+      });
+      // payafter
+      paymentsOptions.push({
+        text: `Постоплата, фикс ЮMoney ${accId}`,
+        value: {
+          selected: 'payafter',
+          inputs: [{
+            disabled: true,
+            label: 'Аккаунт ЮMoney',
+            output: 'paymentGateAccount',
+            value: account.paymentGateAccount,
+            type: 'text',
+          },{
+            disabled: true,
+            label: 'Сообщение при оплате',
+            output: 'paymentGateMessage',
+            value: account.paymentGateMessage,
+            type: 'text',
+          },{
+            label: 'Сумма с каждого участника',
             output: 'paymentAmount',
             type: 'number',
           }],

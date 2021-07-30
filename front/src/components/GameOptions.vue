@@ -26,18 +26,25 @@
         <b-row v-for="input in storage[option.output].inputs"
           :key="input.label"
           :hidden="input.hidden"
-          class="mx-0 my-1 text-left"
+          class="mx-0 my-1 text-left p-1"
         >
           {{input.label}}
-          <b-form-input required
+          <b-form-checkbox v-if="input.type=='checkbox'" required style="margin-left: 10px"
+            :disabled="input.disabled"
+            :hidden="input.hidden"
+            :type="input.type"
+            :placeholder="input.placeholder"
+            :status="checkInputStorage(option.output, input.output, input.value)"
+            v-model="storage[option.output].inputResults[input.output]"
+          />
+          <b-form-input v-else required
             :disabled="input.disabled"
             :hidden="input.hidden"
             :type="input.type"
             :placeholder="input.placeholder"
             :value="checkInputStorage(option.output, input.output, input.value)"
             v-model="storage[option.output].inputResults[input.output]"
-          >
-          </b-form-input>
+          />
         </b-row>
       </div>
     </div>
@@ -69,3 +76,10 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+  .checkbox {
+    margin-left: 10px;
+    color: red;
+  }
+</style>

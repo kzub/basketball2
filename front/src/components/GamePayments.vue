@@ -41,7 +41,7 @@
 
       <hr class="mt-4"/>
       <h5 class="text-left">
-        <div v-if="paymentType == 'prepay'">
+        <div v-if="paymentType == 'prepay' || paymentType == 'payafter'">
           <div>Игроков пришло: {{totalPlayers}}</div>
           Стоимость участия: {{ paymentAmount }} р.
         </div>

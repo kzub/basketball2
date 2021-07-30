@@ -50,9 +50,9 @@
           <b-table small borderless striped :items="calculations"></b-table>
         </b-modal>
       </div>
-      <div v-if="game.paymentMessage">
-        <hr/>
-        {{ game.paymentMessage }}
+      <div v-else-if="game.paymentType == 'payafter'">
+        <div>Оплата после игры</div>
+        <div>Стоимость: {{ game.paymentAmount }} р.</div>
       </div>
     </div>
 
