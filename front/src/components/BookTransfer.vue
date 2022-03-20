@@ -5,7 +5,7 @@
         <span class="sr-only">Загружается...</span>
       </div>
     </div>
-    <div v-else-if="!user.auth">
+    <div v-else-if="!user.auth || !user.name">
       <h4 class="my-5">
         Для передачи бронирования необходимо
       </h4>
@@ -152,7 +152,7 @@ export default {
       const self = this
       this.$store.dispatch('doTransfer', { rsvTransferCode: this.rsvTransferCode })
       .then(result => {
-        if (!result) {
+        if (!result || !result.ok) {
           self.transferError = true
           return
         }

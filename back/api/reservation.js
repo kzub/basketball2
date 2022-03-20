@@ -214,6 +214,13 @@ const doTransfer = async (req, res) => {
     return;
   }
 
+  if (!user.name) {
+    req.log.error(`doTransfer(): user hasn't set his name
+      ${transferDetails.gameId}/${transferDetails.bookId}/${req.userId}/${transferCode}`);
+    res.status(200).send({ ok: false });
+    return;
+  }
+
   const reservation = await req.dal.reservation.get(transferDetails.gameId, transferDetails.bookId);
   const oldPlayerName = reservation.playerName;
   reservation.userId = user.userId; // set new reservation's owner
