@@ -66,6 +66,7 @@ const init = (app) => {
   app.get('/api/payment/getCreditors', wrapper(payment.getCreditors, true));
   app.get('/api/payment/getOrganizerYM/:organizerId/:account', wrapper(payment.getOrganizerYM, false));
   app.get('/api/payment/deleteDebt/:userId', wrapper(payment.deleteDebt, true));
+  app.get('/api/payment/getStatistics', wrapper(payment.getPaymentsStatistics, true));
   app.get('/api/reservation/cancel/:gameId/:bookId/', wrapper(reservation.cancel, true));
   app.get('/api/reservation/changePay/:gameId/:bookId/', wrapper(reservation.changePay, true));
   app.get('/api/reservation/clearExpire/:gameId/:bookId/', wrapper(reservation.clearExpire, true));

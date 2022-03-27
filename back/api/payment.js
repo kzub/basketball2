@@ -234,6 +234,46 @@ const deleteDebt = async (req, res) => {
   });
 };
 
+// ------------------------------------------------------------------------------
+const getPaymentsStatistics = async (req, res) => {
+  const details = await req.dal.payment.getOrginizerPaymentStatistics(req.userId);
+
+  const stats = details.reduce((acc, elm) => {
+    if (!acc[elm.month]) {
+      acc[elm.month] = {};
+    }
+
+    if (!acc[elm.month][elm.place]) {
+      acc[elm.month][elm.place] = {
+        monthTotal: 0,
+        games: 0,
+        data: []
+      };
+    }
+
+    const cur = acc[elm.month][elm.place];
+    cur.data.push(elm);
+    cur.monthTotal += elm.totalSum;
+    cur.games++;
+
+    return acc;
+  }, {});
+
+  const flattenStats = [];
+
+  for (let [month, places] of Object.entries(stats)) {
+    for (let [place, stats] of Object.entries(places)) {
+      flattenStats.push({
+        month, place, ...stats
+      });
+    }
+  }
+
+  res.status(200).send({
+    ok: true,
+    stats: flattenStats,
+  });
+};
 
 module.exports = {
   complete,
@@ -241,4 +281,5 @@ module.exports = {
   getAllOrganizerYMs,
   getCreditors,
   getOrganizerYM,
+  getPaymentsStatistics,
 };

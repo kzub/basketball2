@@ -44,6 +44,12 @@
           Мои последние игры <div class="arrow"><i class="right"></i></div>
         </b-btn>
       </router-link>
+
+      <router-link to="/myStats" tag="div">
+        <b-btn class="btn-lg mt-2 mb-3 rounded-0" block variant="secondary">
+          Статистика <div class="arrow"><i class="right"></i></div>
+        </b-btn>
+      </router-link>
     </div>
 
     <div v-if="user && user.isSystemOwner">

@@ -6,11 +6,13 @@ const Store = (Vuex) => {
   return new Vuex.Store({
     state: {
       apiError: undefined,
+      authCode: localstorage.getAuthCode(),
       creditors: undefined,
       freePayment: undefined,
       freePaymentList: undefined,
       gameDetails: undefined,
       games: [],
+      gamesStats: undefined,
       myGamesOnly: false,
       newGameOptions: undefined,
       place: undefined,
@@ -18,7 +20,6 @@ const Store = (Vuex) => {
       rsvTransferCode: undefined,
       user: undefined,
       viewDataUpdated: true,
-      authCode: localstorage.getAuthCode(),
     },
     mutations: {
       ...mutations,

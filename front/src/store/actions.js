@@ -475,6 +475,24 @@ const deleteDebt = ({ commit }, { userId }) => {
 }
 
 
+const getGamesStatistics = ({ commit }) => {
+  console.log('actions::getGamesStatistics')  // eslint-disable-line
+  commit('setUpdatedFlag', false)
+  return axios
+    .get(`api/payment/getStatistics`)
+    .then(response => {
+      console.log('/api/payment/getStatistics response:', response.data)  // eslint-disable-line
+      commit('gamesStats', response.data)
+      commit('setUpdatedFlag', true)
+      return response.data
+    })
+    .catch(error => {
+      commit('gamesStats', undefined)
+      commit('setUpdatedFlag', true)
+      console.log('/api/payment/getStatistics error:', error)  // eslint-disable-line
+    })
+}
+
 export default {
   addGame,
   askToPay,
@@ -489,6 +507,7 @@ export default {
   doTransfer,
   exitUser,
   getCreditors,
+  getGamesStatistics,
   getLoginLink,
   getNewGameOptions,
   getTransferCode,

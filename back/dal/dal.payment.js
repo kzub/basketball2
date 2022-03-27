@@ -114,6 +114,18 @@ const getUserWithCreditsNotifyIds = async (userId, organizerId) => {
   return data.pop();
 };
 
+const getOrginizerPaymentStatistics = async (organizerId) => {
+  const data = await execSQL.all(`SELECT p.title place, PRINTF("%s %s", g.date,  g.timeStart) datetime,
+    SUBSTR(g.date, 1, 7) month, SUM(1) players,
+    CASE WHEN g.paymentType = "prepay" OR g.paymentType = "payafter" THEN SUM(g.paymentAmount) ELSE g.paymentAmount END totalSum
+    FROM games g
+    INNER JOIN bookings b ON b.gameId = g.gameId
+    INNER JOIN places p ON p.placeId = g.placeId
+    WHERE g.organizerId = ${organizerId}  AND b.status = "reserved" AND b.paymentStatus ="paid"
+    GROUP by g.placeId, g.gameId
+    ORDER by month DESC, g.placeId ASC, g.gameId DESC`);
+  return data;
+};
 
 module.exports = {
   init: (driver, dalInstance) => {
@@ -132,6 +144,7 @@ module.exports = {
       getCreditors,
       getPayment,
       getPaymentReciever,
+      getOrginizerPaymentStatistics,
       getPrepayMethodsByOrganizerId,
       getUserCredits,
       getUserCreditsForOrganizerId,

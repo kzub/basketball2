@@ -1,5 +1,6 @@
 const dictDays = ['Воскресенье', 'Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота']
 const dictMonths = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря']
+const dictMonths2 = ['январь', 'февраль', 'март', 'апрель', 'май', 'июнь', 'июль', 'август', 'сентябрь', 'октябрь', 'ноябрь', 'декабрь']
 
 const mxDateWeekDay = (isoDate) => {
   const date = new Date(`${isoDate}T00:00:00`)
@@ -13,6 +14,13 @@ const mxDateDayAndMonth = (isoDate) => {
   const month = dictMonths[date.getMonth()]
 
   return `${day} ${month}`
+}
+
+const mxMonth = (isoDate) => {
+  const date = new Date(`${isoDate}T00:00:00`)
+  const month = dictMonths2[date.getMonth()]
+
+  return `${month}`
 }
 
 const dictMinutes = ['минут', 'минута', 'минуты', 'минуты', 'минуты', 'минут', 'минут', 'минут', 'минут', 'минут',
@@ -107,6 +115,7 @@ export default {
     mxDateDiff,
     mxDateWeekDay,
     mxMinutesTo,
+    mxMonth,
     mxNearestDayFromNow,
     mxTextHoursMinutesTo,
     mxTextHoursTo,

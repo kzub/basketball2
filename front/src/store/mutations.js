@@ -18,7 +18,6 @@ const creditorsReduce = (state, p) => {
   })
 }
 const rsvTransferCode = (state, p) => state.rsvTransferCode = p && p.transferCode
-
 const setUpdatedFlag = (state, p) => {
   console.log('setUpdatedFlag', p) // eslint-disable-line no-console
   if (typeof p !== 'boolean') {
@@ -26,6 +25,7 @@ const setUpdatedFlag = (state, p) => {
   }
   state.viewDataUpdated = p
 }
+const gamesStats = (state, p) => state.gamesStats = p
 
 export default {
   apiError,
@@ -35,6 +35,7 @@ export default {
   freePaymentList,
   gameDetails,
   games,
+  gamesStats,
   myGamesOnly,
   newGameOptions,
   returnInfo,

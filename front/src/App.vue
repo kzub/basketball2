@@ -39,6 +39,7 @@ import Main from './components/Main.vue'
 import MapView from './components/MapView.vue'
 import MyCredits from './components/MyCredits.vue'
 import MyGames from './components/MyGames.vue'
+import MyStats from './components/MyStats.vue'
 import Profile from './components/Profile.vue'
 import Reservation from './components/Reservation.vue'
 import Success from './components/Success.vue'
@@ -58,6 +59,7 @@ const router = new VueRouter({
     { path: '/map', component: MapView},
     { path: '/myCredits', component: MyCredits },
     { path: '/myGames', component: MyGames },
+    { path: '/myStats', component: MyStats },
     { path: '/payments', component: GamePayments },
     { path: '/profile', component: Profile },
     { path: '/profile/login', component: Profile },
