@@ -59,8 +59,7 @@ db.run(`CREATE TABLE IF NOT EXISTS organizersYM (
   organizerId INTEGER NOT NULL,
   paySystem TEXT NOT NULL,
   paymentGateAccount TEXT NOT NULL,
-  paymentGateMessage TEXT NOT NULL,
-  hoursBeforeGameRefundAllowed INTEGER DEFAULT 0
+  paymentGateMessage TEXT NOT NULL
 )`);
 
 db.run(`CREATE TABLE IF NOT EXISTS places (

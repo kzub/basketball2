@@ -28,7 +28,7 @@ const findOrganizerByPaySystem = async (paySystem) => {
 };
 
 const getPrepayMethodsByOrganizerId = async (organizerId) => {
-  const prepays = await execSQL.all(`SELECT paymentGateAccount, paymentGateMessage, hoursBeforeGameRefundAllowed
+  const prepays = await execSQL.all(`SELECT paymentGateAccount, paymentGateMessage
     FROM organizersYM WHERE organizerId = '${organizerId}'`);
 
   return prepays;

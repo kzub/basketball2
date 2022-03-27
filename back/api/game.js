@@ -291,7 +291,7 @@ const getOptions = async (req, res) => {
             // disabled: true,
             label: 'Разрешен возврат, часов до игры',
             output: 'hoursBeforeGameRefundAllowed',
-            value: account.hoursBeforeGameRefundAllowed,
+            // value: account.hoursBeforeGameRefundAllowed,
             type: 'number',
           },{
             label: 'Сумма с каждого участника',
