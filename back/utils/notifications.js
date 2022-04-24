@@ -140,11 +140,15 @@ emitter.on('reservation.waiter.new', async ({ game, user }) => {
 });
 
 // RESERVATIONS PAYMENTS ---------------------------------------------------------------
-emitter.on('reservation.paid', async ({ reservation }) => {
+emitter.on('reservation.paid', async ({ reservation, creditsUsed }) => {
   // отправляем сообщение в любом случае, потому что это оплаченная деньгами бронь
   const game = await dal.game.getGame(reservation.gameId);
   const notify = await createNotification(game.notifyId, 'reservation.paid');
-  notify.send(`${reservation.playerName} оплатил игру в ${game.place.title}, в ${game.timeStart} ${utils.getBeautifulDate(game.date)}, свободных мест: ${game.freePlayerSlots}`);
+  let creditText = '';
+  if (creditsUsed) {
+    creditText = ` использовал ${creditsUsed} кредитов,`;
+  }
+  notify.send(`${reservation.playerName} оплатил игру в ${game.place.title}, в ${game.timeStart} ${utils.getBeautifulDate(game.date)},${creditText} свободных мест: ${game.freePlayerSlots}`);
 });
 
 emitter.on('reservation.postpay.paid', async ({ reservation }) => {

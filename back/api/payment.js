@@ -36,7 +36,7 @@ const onReservationPayment = async (req, paySystem, amount, labelData, organizer
   reservation.setExpire(0);
   reservation.paymentId = paymentId;
   await req.dal.reservation.update(reservation);
-  events.emit('reservation.paid', { reservation });
+  events.emit('reservation.paid', { reservation, creditsUsed: creditsToUse });
 
   // refund previous player with canceled reservation if there are any of them
   if (game.isPrepay()) {

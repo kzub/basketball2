@@ -136,7 +136,7 @@ const payByCredits = async (req, res) => {
   reservation.paymentId = paymentId;
 
   const ok = await req.dal.reservation.update(reservation);
-  events.emit('reservation.paid', { reservation });
+  events.emit('reservation.paid', { reservation, creditsUsed: game.paymentAmount });
 
   res.status(200).send({ ok });
 };
