@@ -111,32 +111,32 @@ const payByCredits = async (req, res) => {
     res.status(200).send({ ok: false, reason: 'reservation already paid' });
     return;
   }
-
+  const currentPaymentAmount = game.paymentAmountPerPlayer();
   const currentCredits = await req.dal.payment.getUserCreditsForOrganizerId(req.userId, game.organizer.userId);
-  if (currentCredits.total < game.paymentAmount) {
-    req.log.error(`to enough credits for reservation pay ${gameId}/${bookId}`);
+  if (currentCredits.total < currentPaymentAmount) {
+    req.log.error(`not enough credits for reservation pay ${gameId}/${bookId}`);
     res.status(200).send({ ok: false, reason: 'not enought credits for reservation' });
     return;
   }
 
   // userId, organizerId, amount, sourceType, sourceId = null, comment = null
   const creditTransId = await req.dal.payment.addCreditTransaction(
-    req.userId, game.organizer.userId, -game.paymentAmount, 'reservation.pay', bookId
+    req.userId, game.organizer.userId, -currentPaymentAmount, 'reservation.pay', bookId
   );
 
   // recipientId, paySystem, amount, gameId, bookId, userId, rawData
   const paymentId = await req.dal.payment.addTransaction(
-    game.organizer.userId, 'credits', game.paymentAmount, gameId, bookId, req.userId, {
+    game.organizer.userId, 'credits', currentPaymentAmount, gameId, bookId, req.userId, {
       creditTransactionId: creditTransId,
     }
   );
 
-  reservation.makePaid(game.paymentAmount);
+  reservation.makePaid(currentPaymentAmount);
   reservation.setExpire(0);
   reservation.paymentId = paymentId;
 
   const ok = await req.dal.reservation.update(reservation);
-  events.emit('reservation.paid', { reservation, creditsUsed: game.paymentAmount });
+  events.emit('reservation.paid', { reservation, creditsUsed: currentPaymentAmount });
 
   res.status(200).send({ ok });
 };

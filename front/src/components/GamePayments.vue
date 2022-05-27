@@ -22,11 +22,16 @@
         <div class="text-left mt-3">Ожидается оплата:</div>
         <div class="my-2">
           <div class="w-100" v-for="(slot, index) in unpaidPlayers" :key="'p'+index">
-            <PayButton
+            <div v-if="isFullPayByCreditsAvailable">
+              <b-btn @click="confirmPayByCredits(slot)" class="my-1 w-100" variant="success">
+                {{slot.playerName}} <div class="arrow"><i class="right"></i></div>
+              </b-btn>
+            </div>
+            <PayButton v-else
               :onSubmit="confirmPay(slot)"
               :account="mxGameDetails.game.paymentGateAccount"
               :message="mxGameDetails.game.paymentGateMessage"
-              :amount="paymentAmount"
+              :amount="paymentAmount - creditsToUse"
               :label="paymentLabel(slot)"
               :buttonText="slot.playerName"
             />
@@ -54,6 +59,13 @@
 
       <div class="text-left">
         <hr/>
+        <div v-if="creditsTotal">
+          <div class="text-right my-3">
+            <h5 class="py-2">Ваш счет предоплаты: {{creditsTotal}} р.</h5>
+          </div>
+
+          <hr/>
+        </div>
         <GameInfo :game="mxGameDetails.game" show="organizer"/>
       </div>
 
@@ -92,10 +104,17 @@
     data () {
       return {
         selectedPlayer: undefined,
-        selectedSubmitFn: undefined
+        selectedSubmitFn: undefined,
+        selectedSlot: undefined,
       }
     },
     computed: {
+      creditsToUse: function () {
+        return this.mxGameDetails.creditsToUse || 0;
+      },
+      creditsTotal: function () {
+        return this.mxGameDetails.creditsTotal
+      },
       gameLoadError () {
         return this.mxGameDetails && this.mxGameDetails.error
       },
@@ -120,6 +139,9 @@
       user () {
         return this.$store.state.user
       },
+      isFullPayByCreditsAvailable: function () {
+        return this.creditsToUse && this.creditsToUse >= this.paymentAmount
+      },
     },
     methods: {
       confirmPay (slot) {
@@ -134,7 +156,29 @@
         this.selectedSubmitFn()
       },
       paymentLabel (slot) {
-        return [this.user.payEnv, 'RPP', slot.gameId, slot.bookId, slot.userId].join('|')
+        return [this.user.payEnv, 'RPP', slot.gameId, slot.bookId, slot.userId, this.user.userId, this.creditsToUse].join('|')
+      },
+      confirmPayByCredits (slot) {
+        const self = this
+        self.selectedPlayer = slot.playerName
+        self.selectedSlot = slot
+        self.selectedSubmitFn = function () {
+        self.$store.dispatch('payByCredits', {
+            gameId: self.selectedSlot.gameId,
+            bookId: self.selectedSlot.bookId,
+          })
+          .then((res) => {
+            if (res) {
+              self.$router.push({
+                path: '/success',
+                query: {
+                  gameId: self.selectedSlot.gameId,
+                },
+              })
+            }
+          })
+        }
+        self.$bvModal.show('confirm-pay-modal');
       },
     }
   }

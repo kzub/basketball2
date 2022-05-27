@@ -35,18 +35,20 @@ const get = async (req, res) => {
     gameDetails.users = users;
   }
 
-  if (req.userId && gameDetails.game.isPrepay()) {
+  if (req.userId && gameDetails.game.isPayWithPG()) {
     const credits = await req.dal.payment.getUserCreditsForOrganizerId(req.userId, gameDetails.game.organizer.userId);
     if (credits && credits.total > 0) {
       gameDetails.creditsTotal = credits.total;
-      if (credits.total >= gameDetails.game.paymentAmount) {
-        gameDetails.creditsToUse = gameDetails.game.paymentAmount;
+      const curPaymentAmount = gameDetails.game.paymentAmountPerPlayer();
+
+      if (credits.total >= curPaymentAmount) {
+        gameDetails.creditsToUse = curPaymentAmount;
       }
-      else if (gameDetails.game.paymentAmount - credits.total >= req.dal.payment.MIN_PAYMENT_AMOUNT){
+      else if (curPaymentAmount - credits.total >= req.dal.payment.MIN_PAYMENT_AMOUNT) {
         gameDetails.creditsToUse = credits.total;
       }
       else {
-        gameDetails.creditsToUse = gameDetails.game.paymentAmount - req.dal.payment.MIN_PAYMENT_AMOUNT;
+        gameDetails.creditsToUse = curPaymentAmount - req.dal.payment.MIN_PAYMENT_AMOUNT;
       }
     }
   }

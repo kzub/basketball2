@@ -8,7 +8,7 @@ const config = utils.getConfig();
 const onReservationPayment = async (req, paySystem, amount, labelData, organizer) => {
   const [gameId, bookId, userId, strCreditsToUse] = labelData;
   const creditsToUse = Number(strCreditsToUse);
-  let amountForRsv = Number(amount);
+  let amountForRsv = amount;
 
   const paymentId = await req.dal.payment.addTransaction(organizer.userId, paySystem, amount, gameId, bookId, userId || 0, req.body);
 
@@ -58,16 +58,31 @@ const onReservationPayment = async (req, paySystem, amount, labelData, organizer
 
 // ------------------------------------------------------------------------------
 const onReservationPostPay = async (req, paySystem, amount, labelData, organizer) => {
-  const [gameId, bookId, userId] = labelData;
+  const [gameId, bookId, userId, payerUserId, strCreditsToUse] = labelData;
+  const creditsToUse = Number(strCreditsToUse);
+  const whoisPayUserId = Number(payerUserId || null);
 
   const paymentId = await req.dal.payment.addTransaction(organizer.userId, paySystem, amount, gameId, bookId, userId, req.body);
   const reservation = await req.dal.reservation.get(gameId, bookId);
+  const game = await req.dal.game.getGame(gameId);
+
+  if (amount < game.paymentAmountPerPlayer()) {
+    const currentCreditsObj = await req.dal.payment.getUserCreditsForOrganizerId(whoisPayUserId, organizer.userId);
+    const currentCredits = (currentCreditsObj && currentCreditsObj.total) || 0;
+
+    if ((amount + creditsToUse < game.paymentAmountPerPlayer()) || (currentCredits < creditsToUse)) {
+      events.emit('payment.wrong.amount', { game, amount, creditsToUse, currentCredits });
+      return;
+    }
+    await req.dal.payment.addCreditTransaction(whoisPayUserId, organizer.userId, -creditsToUse, 'reservation.pay', reservation.bookId);
+  }
 
   reservation.makePaid(amount);
   reservation.setExpire(0);
   reservation.paymentId = paymentId;
   await req.dal.reservation.update(reservation);
-  events.emit('reservation.postpay.paid', { reservation });
+
+  events.emit('reservation.postpay.paid', { reservation, creditsToUse });
 };
 
 // ------------------------------------------------------------------------------

@@ -62,7 +62,7 @@ const payByCredits = ({ commit, state }, { gameId, bookId }) => {
     .get(`/api/reservation/payByCredits/${gameId}/${bookId}`)
     .then(response => {
       console.log('/api/reservation/payByCredits response:', response.data)  // eslint-disable-line
-      return getUserInfo({ commit }, {}) // update credits data
+      return getUserInfo({ commit, state }, {}) // update credits data
     })
     .then(() => {
       return updateGameData({ commit, state }, { gameId })

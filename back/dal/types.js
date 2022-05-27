@@ -97,6 +97,25 @@ Game.prototype.isPrepay = function () {
   return this.paymentType === 'prepay';
 };
 
+Game.prototype.isSharedPay = function () {
+  return this.paymentType === 'shared';
+};
+
+Game.prototype.isPayAfter = function () {
+  return this.paymentType === 'payafter';
+};
+
+Game.prototype.isPayWithPG = function () {
+  return this.paymentGateAccount != '';
+};
+
+Game.prototype.paymentAmountPerPlayer = function () {
+  if (this.paymentType == 'shared') {
+    return Math.ceil(this.paymentAmount / this.usedPlayerSlots);
+  }
+  return this.paymentAmount;
+};
+
 Game.prototype.hoursToGameBegin = function () {
   const tsGameStart = (new Date(`${this.date}T${this.timeStart}:00+0300`)).valueOf();
   const hoursToGameBegin = Math.ceil((tsGameStart - Date.now())/1000/60/60);
