@@ -148,7 +148,11 @@ emitter.on('reservation.paid', async ({ reservation, creditsUsed }) => {
   if (creditsUsed) {
     creditText = ` использовал ${creditsUsed} кредитов,`;
   }
-  notify.send(`${reservation.playerName} оплатил игру в ${game.place.title}, в ${game.timeStart} ${utils.getBeautifulDate(game.date)},${creditText} свободных мест: ${game.freePlayerSlots}`);
+  let freeSlotsText = '';
+  if (game.isTimePassed() == false) {
+    freeSlotsText = ` свободных мест: ${game.freePlayerSlots}`;
+  }
+  notify.send(`${reservation.playerName} оплатил игру в ${game.place.title}, в ${game.timeStart} ${utils.getBeautifulDate(game.date)},${creditText}${freeSlotsText}`);
 });
 
 emitter.on('reservation.postpay.paid', async ({ reservation, creditsToUse }) => {
