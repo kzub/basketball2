@@ -123,7 +123,7 @@ Game.prototype.hoursToGameBegin = function () {
 };
 
 Game.prototype.isRefundAllowed = function () {
-  return this.isPrepay() && (this.hoursToGameBegin() > this.hoursBeforeGameRefundAllowed);
+  return this.isPayWithPG() && (this.hoursToGameBegin() > this.hoursBeforeGameRefundAllowed);
 };
 
 Game.prototype.isTimePassed = function () {
