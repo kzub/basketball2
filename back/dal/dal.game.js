@@ -1,5 +1,6 @@
 const utils = require('../utils/misc');
 const { Game, GameDetails, Reservation } = require('./types');
+const events = require('../utils/notifications');
 
 let log; // eslint-disable-line
 let dal; // eslint-disable-line
@@ -218,7 +219,23 @@ const moveWaiters = async (game) => {
       promotedRsv.paymentId = paymentId;
       const ok = await dal.reservation.update(promotedRsv);
       if (!ok) {
-        log.error(`moveWaiters error, ok: ${ok}`);
+        log.error(`moveWaiters() error, ok: ${ok}`);
+        return;
+      }
+
+      // refund previous player with canceled reservation if there are any of them
+      const rsvs = await dal.game.getNotRefundedCanceledReservations(game.gameId);
+      if (rsvs.length) {
+        const reservation = rsvs[0];
+        log.info(`moveWaiters(), new payment will cause refund for ${reservation.gameId}/${reservation.bookId}`);
+        const refundAmount = reservation.paymentAmount;
+        await dal.payment.addCreditTransaction(reservation.userId, game.organizer.userId, refundAmount, 'reservation.cancel', reservation.bookId, 'new payment (credits)');
+        events.emit('user.credits.added', {
+          gameId: game.gameId,
+          playerName: reservation.playerName,
+          receiverName: game.organizer.name,
+          amount: refundAmount,
+        });
       }
     }
   }
