@@ -138,6 +138,23 @@ const payByCredits = async (req, res) => {
   const ok = await req.dal.reservation.update(reservation);
   events.emit('reservation.paid', { reservation, creditsUsed: currentPaymentAmount });
 
+  // refund previous player with canceled reservation if there are any of them
+  if (game.isPrepay()) {
+    const rsvs = await req.dal.game.getNotRefundedCanceledReservations(gameId);
+    if (rsvs.length) {
+      const reservation = rsvs[0];
+      req.log.info(`payByCredits(), new payment will cause refund for ${reservation.gameId}/${reservation.bookId}`);
+      const refundAmount = reservation.paymentAmount;
+      await req.dal.payment.addCreditTransaction(reservation.userId, game.organizer.userId, refundAmount, 'reservation.cancel', reservation.bookId, 'new payment');
+      events.emit('user.credits.added', {
+        gameId,
+        playerName: reservation.playerName,
+        receiverName: game.organizer.name,
+        amount: refundAmount,
+      });
+    }
+  }
+
   res.status(200).send({ ok });
 };
 
