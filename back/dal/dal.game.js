@@ -229,7 +229,7 @@ const moveWaiters = async (game) => {
         const reservation = rsvs[0];
         log.info(`moveWaiters(), new payment will cause refund for ${reservation.gameId}/${reservation.bookId}`);
         const refundAmount = reservation.paymentAmount;
-        await dal.payment.addCreditTransaction(reservation.userId, game.organizer.userId, refundAmount, 'reservation.cancel', reservation.bookId, 'new payment (credits)');
+        await dal.payment.addCreditTransaction(reservation.userId, game.organizer.userId, refundAmount, 'reservation.cancel', reservation.bookId, 'refund transfered from new player with autopay by credits');
         events.emit('user.credits.added', {
           gameId: game.gameId,
           playerName: reservation.playerName,

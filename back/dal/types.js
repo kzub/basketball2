@@ -294,6 +294,7 @@ Reservation.prototype.realPaymentComplete = function () {
 };
 
 Reservation.prototype.cancel = function () {
+  this.ts = Date.now();
   this.status = 'canceled';
 };
 

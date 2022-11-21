@@ -145,7 +145,7 @@ const payByCredits = async (req, res) => {
       const reservation = rsvs[0];
       req.log.info(`payByCredits(), new payment will cause refund for ${reservation.gameId}/${reservation.bookId}`);
       const refundAmount = reservation.paymentAmount;
-      await req.dal.payment.addCreditTransaction(reservation.userId, game.organizer.userId, refundAmount, 'reservation.cancel', reservation.bookId, 'new payment');
+      await req.dal.payment.addCreditTransaction(reservation.userId, game.organizer.userId, refundAmount, 'reservation.cancel', reservation.bookId, 'refund transfered from new player with credits');
       events.emit('user.credits.added', {
         gameId,
         playerName: reservation.playerName,
