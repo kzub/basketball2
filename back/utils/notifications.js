@@ -1,12 +1,18 @@
-const dal = require('../dal/dal');
 const EventEmitter = require('events');
+const emitter = new EventEmitter();
+module.exports = emitter; // !!! обязательно раньше подключения dal
+// иначе все кто подлючали нотификации получали ссылку на undefined вместо emitter
+// ----------------------------------------------------------------
+
 const logger = require('./logger');
 const telegram = require('../connector/telegram');
 const utils = require('../utils/misc');
 
 const config = utils.getConfig();
-const emitter = new EventEmitter();
+
 const log = logger.create('NOTIFICATION');
+
+const dal = require('../dal/dal'); /* циклическая зависимость, bug prone, переделывать лень */
 
 // --------------------- SITE ADMIN NOTIFICATIONS ------------------------
 const sendAdminMessage = async (msg, logType) => {
@@ -331,4 +337,3 @@ ${game.place.title}, в ${game.timeStart} ${utils.getBeautifulDate(game.date)}
 ${playersList.join('\n')}`, true);
 });
 
-module.exports = emitter;
