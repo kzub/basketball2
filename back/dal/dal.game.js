@@ -198,7 +198,7 @@ const moveWaiters = async (game) => {
 
   const promotedRsv = await dal.reservation.get(game.gameId, promotedRsvId);
 
-  if (game.isPrepay()) {
+  if (game.isPrepay() && !game.isStarted()) {
     const credits = await dal.payment.getUserCreditsForOrganizerId(promotedRsv.userId, game.organizer.userId);
     if (credits && credits.total >= game.paymentAmount) {
       // userId, organizerId, amount, sourceType, sourceId = null, comment = null

@@ -131,6 +131,11 @@ Game.prototype.isTimePassed = function () {
   return Date.now() > tsGameEnd;
 };
 
+Game.prototype.isStarted = function () {
+  const tsGameStart = (new Date(`${this.date}T${this.timeStart}:00+0300`)).valueOf();
+  return Date.now() > tsGameStart;
+};
+
 Game.prototype.freeSlotExists = function (slotType) {
   return (
     (slotType === 'player' && this.freePlayerSlots > 0) ||
