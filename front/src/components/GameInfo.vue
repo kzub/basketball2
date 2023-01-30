@@ -54,6 +54,11 @@
         <div>Оплата после игры</div>
         <div>Стоимость: {{ game.paymentAmount }} р.</div>
       </div>
+
+      <div v-if="game.paymentMessage" class="alert alert-dark mt-3" role="alert">
+         <div>{{ game.paymentMessage }}</div>
+      </div>
+
     </div>
 
   </div>
