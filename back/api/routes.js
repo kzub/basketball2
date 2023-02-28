@@ -56,6 +56,7 @@ const init = (app) => {
   app.use(apiLimiter);
   app.get('/api/game/askToPay/:gameId', wrapper(game.askToPay, true));
   app.get('/api/game/changeStatus/:gameId/:status', wrapper(game.changeStatus, true));
+  app.get('/api/game/clone/:gameId/:times/:clearPayment?', wrapper(game.clone, true));
   app.get('/api/game/details/:gameId/:force?', wrapper(game.get, false));
   app.get('/api/game/disableAutoOpen/:gameId', wrapper(game.disableAutoOpen, true));
   app.get('/api/game/options', wrapper(game.getOptions, true));

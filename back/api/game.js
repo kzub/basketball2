@@ -119,8 +119,6 @@ const add = async (req, res) => {
   res.status(200).send({ ok: true, gameId });
 };
 
-// TODO: метод отправить нотификацию игрокам без оплаты с определенной игры, перечислите деньги
-
 const getOptions = async (req, res) => {
   const options = [];
 
@@ -492,10 +490,82 @@ const disableAutoOpen = async (req, res) => {
   res.status(200).send(gameDetails);
 };
 
+const clone =  async (req, res) => {
+  const { gameId, times, clearPayment } = req.params;
+  req.log.info(`/game/clone: ${gameId}, times: ${times}`);
+
+  const user = await req.dal.user.getUser(req.userId);
+  const gameDetails = await req.dal.game.getGameDetails(gameId);
+
+  if (!gameDetails.game.isAdminUser(user)) {
+    res.status(403).send({
+      error: true,
+      reason: 'you are not game admin',
+    });
+    return;
+  }
+
+  if (isNaN(times)) {
+    res.status(400).send({
+      error: true,
+      reason: 'bad times',
+    });
+    return;
+  }
+
+  const newIds = [];
+  for (let i = 0; i < times; i++ ) {
+    req.log.info(`/game/clone: ${gameId}, iter: ${i}`);
+
+    const clonedGame = new Game({
+      chatLink: gameDetails.game.chatLink,
+      date: utils.dateAddDays(gameDetails.game.date, 7 * (1 + i)),
+      gameId: 0,
+      notifyId: Number(gameDetails.game.notifyId),
+      organizer: gameDetails.game.organizer,
+      paymentAmount: clearPayment ? 0 : Number(gameDetails.game.paymentAmount),
+      paymentGateAccount: clearPayment ? undefined : gameDetails.game.paymentGateAccount,
+      paymentGateMessage: clearPayment ? undefined : gameDetails.game.paymentGateMessage,
+      paymentMessage: clearPayment ? undefined : gameDetails.game.paymentMessage,
+      paymentType: clearPayment ? 'manual' : gameDetails.game.paymentType,
+      hoursBeforeGameRefundAllowed: Number(gameDetails.game.hoursBeforeGameRefundAllowed),
+      place: gameDetails.game.place,
+      playerSlots: Number(gameDetails.game.playerSlots),
+      status: gameDetails.game.status,
+      timeEnd: gameDetails.game.timeEnd,
+      timeStart: gameDetails.game.timeStart,
+      usedPlayerSlots: gameDetails.game.usedPlayerSlots,
+      usedWaiterSlots: gameDetails.game.usedWaiterSlots,
+      waiterSlots: Number(gameDetails.game.waiterSlots),
+      openingMode: gameDetails.game.openingMode,
+      openingDate: gameDetails.game.openingDate,
+      openingTime: gameDetails.game.openingTime,
+    });
+
+    const clonedGameId = await req.dal.game.addGame(clonedGame);
+    newIds.push(clonedGameId);
+
+    for (let player of gameDetails.players) {
+      req.log.info(`/game/clone: Clone player ${player.playerName} for new gameId ${clonedGameId}`);
+      const bookId = await req.dal.reservation.create(clonedGameId, 'player', 0,
+        { userId: player.userId, name: player.playerName });
+    }
+  }
+
+  events.emit('game.cloned', {
+    gameDetails,
+    times,
+    newIds,
+  });
+
+  res.status(200).send({ ok: true, gameId, times, newIds });
+};
+
 module.exports = {
   add,
   askToPay,
   changeStatus,
+  clone,
   disableAutoOpen,
   get,
   getOptions,

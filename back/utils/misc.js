@@ -30,6 +30,14 @@ const minutesTo = (timestamp) => {
   return minutes;
 };
 
+
+const dateAddDays = (isoDate, days) => {
+  const date = new Date(isoDate);
+  const newDate = new Date(date.valueOf() + days * 86400000);
+  return newDate.toJSON().slice(0, 10);
+};
+
+
 const isTime = (time) => time && time.match && Boolean(time.match(/^\d\d:\d\d$/));
 
 const compareTimes = (t1, t2) => {
@@ -200,6 +208,7 @@ module.exports = {
   compareTimes,
   dateDayAndMonth,
   dateWeekDay,
+  dateAddDays,
   eq,
   generateTimeOptions,
   getBeautifulDate,
