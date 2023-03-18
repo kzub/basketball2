@@ -34,10 +34,6 @@ const apiLimiter = rateLimit({
   handler: (req, res, next) => { // function to handle requests once the max limit is exceeded
     events.emit('request.limit', { userId: req.userId, ip: req.ip });
     req.log.warn(`Too many requests from user: ${req.userId}, ip: ${req.ip}`);
-    if (req.userId) {
-      next();
-      return;
-    }
     res.status(429).send('Too many requests, please try again later.');
   }
 });
