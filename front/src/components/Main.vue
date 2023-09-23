@@ -61,6 +61,12 @@
       </router-link>
     </div>
 
+    <div v-if="user && user.auth"  class="mt-5">
+      <b-btn class="btn-lg mt-2 mb-3 rounded-0" block variant="secondary">
+        <b-link target="_blank" class="text-white" href="https://t.me/playbasket">Связаться с нами</b-link >
+      </b-btn>
+    </div>
+
   </div>
 </template>
 
