@@ -96,6 +96,7 @@ const mxAddDaysToDate = (isoDate, daysCount = 0) => {
 const mxNearestDayFromNow = (isoDate) => {
   const dayNum = new Date(`${isoDate}T00:00:00Z`).getDay()
   let date = new Date()
+  date.setDate(date.getDate() + 1)
   while (date.getDay() != dayNum) {
     date.setDate(date.getDate() + 1)
   }
@@ -108,12 +109,17 @@ const mxDateDiff = (isoDate1, isoDate2) => {
   return Math.round(date1.valueOf() - date2.valueOf())/(1000*60*60*24)
 }
 
+const mxGetToday = () => {
+  return new Date().toJSON().slice(0, 10)
+}
+
 export default {
   methods: {
     mxAddDaysToDate,
     mxDateDayAndMonth,
     mxDateDiff,
     mxDateWeekDay,
+    mxGetToday,
     mxMinutesTo,
     mxMonth,
     mxNearestDayFromNow,

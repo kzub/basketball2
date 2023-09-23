@@ -19,40 +19,46 @@
 
       <Games :games="games" myGamesOnly="true" :clickHandler="copyGameData" />
 
-      <div v-if="newGame">
+      <div v-if="selectedGame">
         <h3 class="pt-4">Будет создано</h3>
         <b-btn class="btn-primary weekCtrl" variant="primary" @click="addWeek(-1)"> - </b-btn>
         неделя
         <b-btn class="btn-primary weekCtrl" variant="primary" @click="addWeek(+1)"> + </b-btn>
-        <b-card no-body class="my-2 mx-1">
-          <b-btn class="btn-danger" block>
-            <div class="d-flex flex-row  justify-content-between">
-              <div class="d-flex flex-column justify-content-start align-items-start">
-                <div>
-                  {{mxDateWeekDay(newGame.date)}}, {{mxDateDayAndMonth(newGame.date)}}
-                </div>
-                <div>
-                  {{newGame.timeStart}} - {{newGame.timeEnd}}
-                </div>
-                <div class="statusLine mt-1">
-                  {{gameType(newGame)}}
-                </div>
-              </div>
-              <div class="d-flex flex-column align-items-end">
-                <div>
-                  <div class="badge px-2 mt-2 badge-light">
-                    <UserIcon/>
-                    <span class="player-count">0 из {{newGame.playerSlots}}</span>
+
+        <b-btn class="btn-primary weekCtrl" variant="primary" @click="setCopies(-1)"> - </b-btn>
+        игры
+        <b-btn class="btn-primary weekCtrl" variant="primary" @click="setCopies(+1)"> + </b-btn>
+
+        <div v-for="newGame in newGames" :key="newGame.date">
+          <b-card no-body class="my-2 mx-1">
+            <b-btn class="btn-danger" block>
+              <div class="d-flex flex-row  justify-content-between">
+                <div class="d-flex flex-column justify-content-start align-items-start">
+                  <div>
+                    {{mxDateWeekDay(newGame.date)}}, {{mxDateDayAndMonth(newGame.date)}}
+                  </div>
+                  <div>
+                    {{newGame.timeStart}} - {{newGame.timeEnd}}
+                  </div>
+                  <div class="statusLine mt-1">
+                    {{gameType(newGame)}}
                   </div>
                 </div>
-                <div class="badge p-2 mt-2 mb-1 badge-light w-100 place-title">
-                  {{ newGame.place.title }}
+                <div class="d-flex flex-column align-items-end">
+                  <div>
+                    <div class="badge px-2 mt-2 badge-light">
+                      <UserIcon/>
+                      <span class="player-count">0 из {{newGame.playerSlots}}</span>
+                    </div>
+                  </div>
+                  <div class="badge p-2 mt-2 mb-1 badge-light w-100 place-title">
+                    {{ newGame.place.title }}
+                  </div>
                 </div>
               </div>
-            </div>
-          </b-btn>
-        </b-card>
-
+            </b-btn>
+          </b-card>
+        </div>
 
         <form @submit="onCreate">
           <b-btn class="w-75 mt-4 mb-5" variant="primary" type="submit">Создать</b-btn>
@@ -63,7 +69,7 @@
 
     <!-- error window -->
     <div>
-      <b-modal id="errNewGame" title="Ошибка" ok-variant="danger" ok-title="ОК" cancel-variant="hidden">
+      <b-modal id="errselectedGame" title="Ошибка" ok-variant="danger" ok-title="ОК" cancel-variant="hidden">
         <p class="my-4">Возникла ошибка в процессе создания игры:</p>
         <code>{{ errorMessage }}</code>
       </b-modal>
@@ -90,8 +96,10 @@ export default {
       choosedOptions: {},
       hideInputs: false,
       errorMessage: '',
-      newGame: undefined,
+      selectedGame: undefined,
+      newGames: [],
       weekNum: 0,
+      copies: 1,
       additionalDaysShift: 0,
     }
   },
@@ -110,23 +118,39 @@ export default {
     back: function () {
       this.$router.back()
     },
-    setNewDate: function () {
-      let openDateDiff = 0;
-      if(this.newGame.openingDate) {
-        openDateDiff = this.mxDateDiff(this.newGame.openingDate, this.newGame.date)
-      }
+    setNewDates: function () {
+      this.newGames = []
+      for (let idx = 0; idx < this.copies; idx++) {
+        this.newGames.push(JSON.parse(JSON.stringify(this.selectedGame)))
+        const newGame = this.newGames[idx];
 
-      let nearestDay = this.mxNearestDayFromNow(this.newGame.date)
-      this.newGame.date = this.mxAddDaysToDate(nearestDay, 7 * this.weekNum + this.additionalDaysShift)
-      if (this.newGame.openingDate) {
-        this.newGame.openingDate = this.mxAddDaysToDate(this.newGame.date, openDateDiff)
+        let openDateRelativeDiff = 0; // на сколько день открытия ранее дня игры
+        if(newGame.openingDate) {
+          openDateRelativeDiff = this.mxDateDiff(newGame.openingDate, this.selectedGame.date)
+        }
+
+        let nearestDay = this.mxNearestDayFromNow(this.selectedGame.date)
+        newGame.date = this.mxAddDaysToDate(nearestDay, 7 * (this.weekNum + idx) + this.additionalDaysShift)
+        if (newGame.openingDate) {
+          newGame.openingDate = this.mxAddDaysToDate(newGame.date, openDateRelativeDiff)
+        }
       }
     },
     addWeek: function (amount) {
       if ((this.weekNum > 0 && amount < 0) || amount > 0) {
         this.weekNum = this.weekNum + amount
       }
-      this.setNewDate()
+      this.setNewDates()
+    },
+    setCopies: function (amount) {
+      this.copies += amount
+      if (this.copies > 8) {
+        this.copies = 8
+      }
+      else if (this.copies < 1) {
+        this.copies = 1
+      }
+      this.setNewDates()
     },
     gameType: function (game) {
       if (game.openingMode === 'auto') {
@@ -135,19 +159,21 @@ export default {
       return 'выключена'
     },
     copyGameData: function (game) {
-      this.newGame = JSON.parse(JSON.stringify(game))
-      this.newGame.placeId = this.newGame.place.placeId
-      this.newGame.status = 'disabled'
-      if (this.newGame.openingMode == 'performed') {
-        this.newGame.openingMode = 'auto'
+      this.selectedGame = JSON.parse(JSON.stringify(game))
+      this.selectedGame.placeId = this.selectedGame.place.placeId
+      this.selectedGame.status = 'disabled'
+      if (this.selectedGame.openingMode == 'performed') {
+        this.selectedGame.openingMode = 'auto'
       }
       this.weekNum = 0
       this.additionalDaysShift = 0
-      let nearestDay = this.mxNearestDayFromNow(this.newGame.date)
-      if (nearestDay === this.newGame.date) {
+      let nearestDay = this.mxNearestDayFromNow(this.selectedGame.date)
+
+      if (nearestDay === this.selectedGame.date || this.mxDateDiff(this.mxGetToday(), nearestDay) == 0) {
         this.additionalDaysShift = 7
       }
-      this.setNewDate()
+
+      this.setNewDates()
 
       setTimeout(() => {
         window.scrollBy(0, 1000)
@@ -158,11 +184,12 @@ export default {
       const self = this;
 
       self.hideInputs = true // after game being created inputs are shown, but transition to new game screen is not started yet
-      self.$store.dispatch('addGame', this.newGame)
+
+      Promise.all(this.newGames.map(newGame => self.$store.dispatch('addGame', newGame)))
       .then(function(result){
-        if (result && result.ok) {
+        if (result && result.every(r => r.ok)) {
           self.$router.push({
-            path: '/game',
+            path: '/',
             query: {
               gameId: result.gameId,
             },
@@ -170,7 +197,7 @@ export default {
         } else {
           self.hideInputs = false
           self.errorMessage = result && result.data
-          self.$bvModal.show('errNewGame')
+          self.$bvModal.show('errselectedGame')
         }
       })
     }
