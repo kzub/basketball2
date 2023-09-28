@@ -14,8 +14,7 @@ const onReservationPayment = async (req, paySystem, amount, labelData, organizer
 
   const reservation = await req.dal.reservation.get(gameId, bookId);
   if (reservation.userId != userId) {
-    events.emit('payment.wrong.userId', { userId, reservation });
-    return;
+    events.emit('payment.wrong.userId', { userId, reservation, amount, labelData});
   }
 
   const game = await req.dal.game.getGame(gameId);

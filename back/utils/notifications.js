@@ -88,8 +88,9 @@ emitter.on('payment.wrong.amount', async ({ game, amount, creditsToUse, currentC
   sendAdminMessage(`Ошибка суммы платежа, ожидается: ${game.paymentAmount}р., получено: ${amount}р., запрошены кредиты: ${creditsToUse}р., есть кредитов: ${currentCredits}р.`, 'error');
 });
 
-emitter.on('payment.wrong.userId', async ({ reservation, userId }) => {
-  sendAdminMessage(`Ошибка. Не совпадает userId платежа, в брони: ${reservation.userId}, в платеже ${userId}`, 'error');
+emitter.on('payment.wrong.userId', async ({ reservation, userId, amount, labelData }) => {
+  sendAdminMessage(`Внимание. Не совпадает userId платежа, в брони: '${reservation.userId}', в платеже: '${userId}'.\n` +
+    `Игрок: ${reservation.playerName}.\nLabel: ${labelData}.\nПоступление: ${amount}р.`, 'error');
 });
 
 emitter.on('game.new', async ({ game }) => {

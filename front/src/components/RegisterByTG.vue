@@ -48,7 +48,8 @@
           let res = await this.$store.dispatch('getUserInfo', { skipFlagUpdate: true })
           if (res && res.auth) {
             this.processing = false
-            if (res.user && res.user.name) {
+
+            if (res.name) {
               if (this.$router.currentRoute.query.retUrl) {
                 this.$router.push(this.$router.currentRoute.query.retUrl)
                 return

@@ -547,8 +547,7 @@ const clone =  async (req, res) => {
 
     for (let player of gameDetails.players) {
       req.log.info(`/game/clone: Clone player ${player.playerName} for new gameId ${clonedGameId}`);
-      const bookId = await req.dal.reservation.create(clonedGameId, 'player', 0,
-        { userId: player.userId, name: player.playerName });
+      await req.dal.reservation.create(clonedGameId, 'player', 0, { userId: player.userId, name: player.playerName });
     }
   }
 
