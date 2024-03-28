@@ -298,13 +298,15 @@ const cancel = async (req, res) => {
     return;
   }
 
-  const promotedRsv = await req.dal.game.moveWaiters(game);
+  let { promotedRsv, refundAmount } = await req.dal.game.moveWaiters(game);
   if (promotedRsv) {
     events.emit('reservation.waiter.promoted', { reservation: promotedRsv });
   }
 
-  let refundAmount;
-  if (reservation.realPaymentComplete() && game.isRefundAllowed()) {
+  if (refundAmount) {
+    req.log.info(`reservation.cancel() Reservation ${gameId}/${bookId} is already REFUNDED`);
+  }
+  else if (reservation.realPaymentComplete() && game.isRefundAllowed()) {
     req.log.info(`reservation.cancel() Reservation ${gameId}/${bookId} is REFUNDABLE`);
     refundAmount = reservation.paymentAmount;
     await req.dal.payment.addCreditTransaction(reservation.userId, game.organizer.userId, refundAmount, 'reservation.cancel', reservation.bookId);

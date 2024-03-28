@@ -177,7 +177,7 @@ const moveWaiters = async (game) => {
     LIMIT 1`);
 
   if (bookIds.length == 0) {
-    return;
+    return {};
   }
 
   // always set expire time as waiterReservationTTL, because previuos reservation has expire time,
@@ -193,10 +193,11 @@ const moveWaiters = async (game) => {
     // он это может сделать и сам
 
   if (!res || res.changes !== 1) {
-    return;
+    return {};
   }
 
   const promotedRsv = await dal.reservation.get(game.gameId, promotedRsvId);
+  let refundAmount;
 
   if (game.isPrepay() && !game.isStarted()) {
     const credits = await dal.payment.getUserCreditsForOrganizerId(promotedRsv.userId, game.organizer.userId);
@@ -220,7 +221,7 @@ const moveWaiters = async (game) => {
       const ok = await dal.reservation.update(promotedRsv);
       if (!ok) {
         log.error(`moveWaiters() error, ok: ${ok}`);
-        return;
+        return {};
       }
 
       // refund previous player with canceled reservation if there are any of them
@@ -228,7 +229,7 @@ const moveWaiters = async (game) => {
       if (rsvs.length) {
         const reservation = rsvs[0];
         log.info(`moveWaiters(), new payment will cause refund for ${reservation.gameId}/${reservation.bookId}`);
-        const refundAmount = reservation.paymentAmount;
+        refundAmount = reservation.paymentAmount;
         await dal.payment.addCreditTransaction(reservation.userId, game.organizer.userId, refundAmount, 'reservation.cancel', reservation.bookId, 'refund transfered from new player with autopay by credits');
         events.emit('user.credits.added', {
           gameId: game.gameId,
@@ -240,7 +241,7 @@ const moveWaiters = async (game) => {
     }
   }
 
-  return promotedRsv;
+  return { promotedRsv, refundAmount };
 };
 
 const getNotRefundedCanceledReservations = async (gameId) => {
