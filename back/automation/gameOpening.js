@@ -23,9 +23,8 @@ const checkGamesToOpen = async () => {
       log.info(`time to open game: ${game.gameId}/${game.date}/${game.timeStart}, for open: ${game.openingMode}/${game.openingDate}/${game.openingTime}`);
 
       game.status = 'settled';
-      await dal.game.updateGameStatus(game);
       game.openingMode = 'performed';
-      await dal.game.updateGameOpenMode(game);
+      await dal.game.updateGameStatus(game);
 
       events.emit('game.change.status.auto', {
         game

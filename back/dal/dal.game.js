@@ -68,7 +68,7 @@ const addGame = async (game) => {
 };
 
 const updateGameStatus = async (game) => {
-  let sql = `UPDATE games SET status = '${game.status}' WHERE gameId = ${game.gameId}`;
+  let sql = `UPDATE games SET status = '${game.status}', openingMode = '${game.openingMode}' WHERE gameId = ${game.gameId}`;
   const res = await execSQL.run(sql);
   return res && res.lastID;
 };

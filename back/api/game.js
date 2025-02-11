@@ -412,6 +412,7 @@ const changeStatus = async (req, res) => {
   }
 
   gameDetails.game.status = status;
+  gameDetails.game.openingMode = 'disabled';
   await req.dal.game.updateGameStatus(gameDetails.game);
 
   events.emit('game.change.status', {
