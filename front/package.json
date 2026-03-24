@@ -2,6 +2,9 @@
   "name": "basketfront2",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "scripts": {
     "serve": "vue-cli-service serve --host basket.host",
     "build": "vue-cli-service build",
@@ -9,21 +12,22 @@
   },
   "dependencies": {
     "axios": "^0.18.1",
-    "babel-polyfill": "^6.26.0",
-    "bootstrap-vue": "^2.21.2",
-    "vue": "^2.6.12",
-    "vue-router": "^3.5.1",
+    "bootstrap-vue": "^2.23.1",
+    "core-js": "^3.37.1",
+    "vue": "^2.7.16",
+    "vue-router": "^3.6.5",
     "vue2-google-maps": "^0.10.7",
     "vuex": "^3.6.2"
   },
   "devDependencies": {
-    "@vue/cli-plugin-babel": "^3.12.1",
-    "@vue/cli-plugin-eslint": "^3.12.1",
-    "@vue/cli-service": "^3.12.1",
-    "babel-eslint": "^10.1.0",
-    "eslint": "^5.16.0",
-    "eslint-plugin-vue": "^5.2.3",
-    "vue-template-compiler": "^2.6.12"
+    "@babel/core": "^7.24.7",
+    "@babel/eslint-parser": "^7.24.7",
+    "@vue/cli-plugin-babel": "~5.0.8",
+    "@vue/cli-plugin-eslint": "~5.0.8",
+    "@vue/cli-service": "~5.0.8",
+    "eslint": "^8.57.0",
+    "eslint-plugin-vue": "^9.26.0",
+    "vue-template-compiler": "^2.7.16"
   },
   "eslintConfig": {
     "root": true,
@@ -34,9 +38,14 @@
       "plugin:vue/essential",
       "eslint:recommended"
     ],
-    "rules": {},
+    "rules": {
+      "vue/multi-word-component-names": "off",
+      "vue/no-mutating-props": "off",
+      "vue/no-reserved-component-names": "off"
+    },
     "parserOptions": {
-      "parser": "babel-eslint"
+      "parser": "@babel/eslint-parser",
+      "requireConfigFile": false
     }
   },
   "postcss": {
