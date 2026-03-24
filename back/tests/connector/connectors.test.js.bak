@@ -1,0 +1,110 @@
+const request = require('request-promise-native');
+
+jest.mock('request-promise-native', () => jest.fn());
+
+jest.mock('../../utils/misc', () => ({
+  getConfig: () => ({
+    twilio: { sid: 'sid', token: 'token', phone: 'phone' },
+    telegram: { token: 'token', site: 'site' },
+    payproxy: {
+      dev: 'http://localhost:3000'
+    }
+  })
+}));
+
+const mockTwilioCreate = jest.fn().mockResolvedValue({});
+jest.mock('twilio', () => {
+  return jest.fn(() => ({
+    messages: {
+      create: mockTwilioCreate
+    }
+  }));
+});
+
+const payproxy = require('../../connector/payproxy');
+const telegram = require('../../connector/telegram');
+const twilio = require('../../connector/twilio');
+
+
+describe('Connectors', () => {
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  describe('payproxy', () => {
+    it('should proxy payment', () => {
+      const req = { body: { test: '123' }, path: '/test/path' };
+      payproxy.proxyPayment('dev', req);
+      expect(request).toHaveBeenCalledWith(expect.objectContaining({
+        method: 'POST',
+        uri: 'http://localhost:3000/test/path',
+        form: { test: '123' }
+      }));
+    });
+    
+    it('should catch proxy error', async () => {
+      const req = { body: { test: '123' }, path: '/test/path' };
+      request.mockRejectedValueOnce(new Error('Proxy error'));
+      await payproxy.proxyPayment('dev', req);
+      // Wait for async execution
+      await new Promise(process.nextTick);
+    });
+  });
+
+  describe('telegram', () => {
+    it('should send message', async () => {
+      request.mockResolvedValue({});
+      await telegram.send('token', 'chatId', 'text');
+      expect(request).toHaveBeenCalledWith(expect.objectContaining({
+        method: 'POST',
+        uri: 'https://api.telegram.org/bottoken/sendMessage'
+      }));
+    });
+
+    it('should catch send error', async () => {
+      request.mockRejectedValue(new Error('Test error'));
+      await expect(telegram.send('token', 'chatId', 'text')).resolves.toBeUndefined();
+    });
+
+    it('should send message to multiple channels', async () => {
+      request.mockResolvedValue({});
+      await telegram.sendToChannels('token', 'ch1,ch2', 'text');
+      expect(request).toHaveBeenCalledTimes(2);
+    });
+
+    it('should send answer callback query', async () => {
+      request.mockResolvedValue({});
+      await telegram.sendAnswerCallbackQuery('token', 'id', 'text', true);
+      expect(request).toHaveBeenCalledWith(expect.objectContaining({
+        uri: 'https://api.telegram.org/bottoken/answerCallbackQuery'
+      }));
+    });
+
+    it('should set webhook', async () => {
+      request.mockResolvedValue({});
+      await telegram.registerWebhook();
+      expect(request).toHaveBeenCalled();
+    });
+  });
+
+  describe('twilio', () => {
+    it('should send SMS', async () => {
+      await twilio.sendSMS('79991234567', '1234');
+      const twilioMock = require('twilio');
+      expect(twilioMock).toHaveBeenCalled();
+      expect(mockTwilioCreate).toHaveBeenCalledWith({
+         body: 'Код подтверждения: 1234',
+         from: 'phone',
+         to: '+79991234567'
+      });
+    });
+    
+    it('should handle twilio error', async () => {
+      mockTwilioCreate.mockRejectedValueOnce({ code: 21211, message: 'Invalid phone' });
+      await expect(twilio.sendSMS('79991234567', '1234')).rejects.toBe('BAD_PHONE_NUMBER');
+      
+      mockTwilioCreate.mockRejectedValueOnce(new Error('Other error'));
+      await expect(twilio.sendSMS('79991234567', '1234')).rejects.toThrow('Other error');
+    });
+  });
+});

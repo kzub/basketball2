@@ -1,0 +1,111 @@
+const auth = require('../utils/auth');
+const misc = require('../utils/misc');
+
+describe('Utils Auth', () => {
+  it('should encode and decode userId', () => {
+    const userId = 123;
+    const token = auth.encode(userId);
+    expect(token).toBeDefined();
+    
+    const decoded = auth.decode(token);
+    expect(decoded).toBe(userId);
+  });
+
+  it('should return undefined for bad token', () => {
+    expect(auth.decode('invalid_token')).toBeUndefined();
+    expect(auth.decode(null)).toBeUndefined();
+  });
+
+  it('should throw error for bad userId in encode', () => {
+    expect(() => auth.encode(null)).toThrow();
+    expect(() => auth.encode('not_a_number')).toThrow();
+  });
+});
+
+describe('Utils Misc', () => {
+  it('should handle dates correctly', () => {
+    const testDate = '2023-10-15'; // Sunday
+    expect(misc.dateWeekDay(testDate)).toBe('Воскресенье');
+    expect(misc.dateDayAndMonth(testDate)).toBe('15 октября');
+    expect(misc.dateAddDays(testDate, 2)).toBe('2023-10-17');
+  });
+
+  it('should handle times correctly', () => {
+    expect(misc.compareTimes('10:00', '12:00')).toBe(-1);
+    expect(misc.compareTimes('12:00', '10:00')).toBe(1);
+    expect(misc.compareTimes('12:00', '12:00')).toBe(0);
+    expect(misc.compareTimes('12:15', '12:30')).toBe(-1);
+    expect(misc.compareTimes('invalid', '12:00')).toBeUndefined();
+  });
+
+  it('should handle dates comparison correctly', () => {
+    expect(misc.compareDates('2023-10-10', '2023-10-12')).toBe(-1);
+    expect(misc.compareDates('2023-10-12', '2023-10-10')).toBe(1);
+    expect(misc.compareDates('2023-10-10', '2023-10-10')).toBe(0);
+    expect(misc.compareDates('invalid', '2023-10-10')).toBeUndefined();
+  });
+
+  it('should match eq function', () => {
+    expect(misc.eq('ABC', 'abc')).toBe(true);
+    expect(misc.eq('ABC', 'DEF')).toBe(false);
+    expect(!!misc.eq(null, 'abc')).toBe(false);
+  });
+  
+  it('should handle sleep', async () => {
+    const start = Date.now();
+    await misc.sleep(10);
+    expect(Date.now() - start).toBeGreaterThanOrEqual(9);
+  });
+
+  it('should handle zeroPad and generateTimeOptions', () => {
+    const options = misc.generateTimeOptions();
+    expect(options).toContain('00:00');
+    expect(options).toContain('23:45');
+    expect(options).toContain('09:15');
+    expect(options.length).toBe(24 * 4);
+  });
+  
+  it('should run getStartOfTheDate', () => {
+    const date = new Date('2023-10-10T15:30:00Z');
+    const start = misc.getStartOfTheDate(date);
+    expect(start.getHours()).toBe(0);
+    expect(start.getMinutes()).toBe(0);
+    expect(start.getSeconds()).toBe(0);
+  });
+});
+
+describe('Utils Dates And Times formatting', () => {
+  it('textMinutesTo', () => {
+    // Math.ceil((timestamp - now) / 60000)
+    const now = Date.now();
+    expect(misc.textMinutesTo(now + 60000)).toBe('1 минута');
+    expect(misc.textMinutesTo(now + 120000)).toBe('2 минуты');
+    expect(misc.textMinutesTo(now + 300000)).toBe('5 минут');
+    expect(misc.textMinutesTo(now - 300000)).toBe('0 минут');
+    expect(misc.textMinutesTo(now + 21 * 60000)).toBe('21 минута');
+  });
+
+  it('textHoursTo', () => {
+    const now = Date.now();
+    expect(misc.textHoursTo(now + 60 * 60000)).toBe('1 час');
+    expect(misc.textHoursTo(now + 2 * 60 * 60000)).toBe('2 часа');
+    expect(misc.textHoursTo(now + 5 * 60 * 60000)).toBe('5 часов');
+    expect(misc.textHoursTo(now + 21 * 60 * 60000)).toBe('21 час');
+  });
+
+  it('textHoursMinutesTo', () => {
+    const now = Date.now();
+    expect(misc.textHoursMinutesTo(now + 30 * 60000)).toBe('30 минут');
+    expect(misc.textHoursMinutesTo(now + 60 * 60000)).toBe('1 час');
+    expect(misc.textHoursMinutesTo(now + 90 * 60000)).toBe('1 час 30 минут');
+    expect(misc.textHoursMinutesTo(now + 22 * 60 * 60000 + 1 * 60000)).toBe('22 часа 1 минута');
+  });
+
+  it('getBeautifulDate', () => {
+    expect(misc.getBeautifulDate('2023-10-15')).toContain('Воскресенье, 15 октября');
+  });
+  
+  it('getLocalTime', () => {
+    expect(misc.getLocalTime()).toBeDefined();
+  });
+});

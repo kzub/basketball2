@@ -1,0 +1,154 @@
+const { Game, Place, User, Reservation, Notification } = require('../dal/types');
+const misc = require('../utils/misc');
+
+describe('DAL Types: Place', () => {
+  it('should initialize correctly', () => {
+    const p = new Place({
+      placeId: 1, lng: 12.34, lat: 56.78, title: 'Title', description: 'Desc',
+      howToGet: 'How', howToGetPic: 'pic', placeLink: 'link', 
+      priceListLink: 'price', conditionsLink: 'cond', siteLink: 'site'
+    });
+    expect(p.placeId).toBe(1);
+    expect(p.lng).toBe(12.34);
+    expect(p.title).toBe('Title');
+  });
+
+  it('should throw on invalid fields', () => {
+    expect(() => new Place({ lng: 1 })).toThrow(/Place constructor: bad placeId/);
+    expect(() => new Place({ placeId: 1, lng: 'abc' })).toThrow(/Place constructor: bad lng/);
+    expect(() => new Place({ placeId: 1, lng: 12.34, lat: 56.78, title: 123 })).toThrow(/Place constructor: bad title/);
+  });
+});
+
+describe('DAL Types: User', () => {
+  it('should initialize correctly', () => {
+    const u = new User({ userId: 1, name: 'John', phone: '123' });
+    expect(u.userId).toBe(1);
+    expect(u.name).toBe('John');
+    expect(u.phone).toBe('+123'); // normalizes to + prefix
+  });
+
+  it('should throw on invalid', () => {
+    expect(() => new User({ userId: 'abc' })).toThrow(/User constructor: bad userId/);
+    expect(() => new User({ userId: 1 })).toThrow(/User constructor: bad phone/);
+  });
+});
+
+describe('DAL Types: Reservation', () => {
+  it('should initialize and have correct methods', () => {
+    const r = new Reservation({
+      gameId: 1, bookId: 10, userId: 5, playerName: 'P1',
+      slotType: 'player', paymentStatus: 'paid', status: 'reserved',
+      ts: 1600000000, expireAt: 0, paymentId: 1,
+      paymentAmount: 100
+    });
+    expect(r.isOwnerUserId(5)).toBe(true);
+    expect(r.isOwnerUserId('5')).toBe(false); // strict equality
+    expect(r.isOwnerUserId(1)).toBe(false);
+    expect(r.isPaid()).toBe(true);
+    expect(r.isPlayer()).toBe(true);
+    expect(r.isWaiter()).toBe(false);
+
+    const u = new User({ userId: 5, phone: '1' });
+    expect(r.isOwnerUser(u)).toBe(true);
+
+    r.cancel();
+    expect(r.status).toBe('canceled');
+    expect(r.isCanceled()).toBe(true);
+    
+    r.makePaid(50);
+    expect(r.paymentStatus).toBe('paid');
+    expect(r.paymentAmount).toBe(50);
+    
+    r.makeUnpaid();
+    expect(r.paymentStatus).toBe('unpaid');
+    expect(r.paymentAmount).toBe(50);
+  });
+
+  it('realPaymentComplete', () => {
+    const r = new Reservation({
+      gameId: 1, bookId: 10, userId: 5, playerName: 'P1',
+      slotType: 'player', paymentStatus: 'paid', status: 'reserved',
+      ts: 1600000000, expireAt: 0, paymentId: 10, paymentAmount: 100
+    });
+    expect(r.realPaymentComplete()).toBe(true);
+    
+    const r2 = new Reservation({
+      gameId: 1, bookId: 10, userId: 5, playerName: 'P1',
+      slotType: 'player', paymentStatus: 'paid', status: 'reserved',
+      ts: 1600000000, expireAt: 0, paymentId: 0, paymentAmount: 100
+    });
+    expect(r2.realPaymentComplete()).toBe(false);
+  });
+
+  it('isExpired', () => {
+    const r = new Reservation({
+      gameId: 1, bookId: 10, userId: 5, playerName: 'P1',
+      slotType: 'player', paymentStatus: 'paid', status: 'reserved',
+      ts: Date.now() - 10000, expireAt: Date.now() - 5000, paymentId: 1, paymentAmount: 100
+    });
+    expect(r.isExpired()).toBe(true);
+
+    r.setExpire(0);
+    expect(r.isExpired()).toBe(false);
+  });
+});
+
+describe('DAL Types: Game', () => {
+  let g;
+  beforeEach(() => {
+    const p = new Place({ placeId: 1, lng: 0, lat: 0, title: 'T', description: 'D', howToGet: 'H' });
+    const u = new User({ userId: 2, phone: '1' });
+    // mock game date in the future to keep it 'open' and not 'past'
+    const futureDate = new Date(Date.now() + 86400000).toJSON().slice(0, 10);
+    g = new Game({
+      gameId: 1, playerSlots: 10, waiterSlots: 5, paymentAmount: 100,
+      notifyId: 1, date: futureDate, timeStart: '18:00', timeEnd: '20:00',
+      status: 'open', openingMode: 'manual', paymentType: 'pg', hoursBeforeGameRefundAllowed: 24,
+      place: p, organizer: u
+    });
+  });
+
+  it('should initialize', () => {
+    expect(g.gameId).toBe(1);
+    expect(g.status).toBe('open');
+    expect(g.isDisabled()).toBe(false);
+    expect(g.isAutoOpening()).toBe(false);
+    expect(g.isAdminUserId(2)).toBe(true);
+    expect(g.isAdminUserId(3)).toBe(false);
+    expect(g.isAdminUser(new User({ userId: 2, phone: '2' }))).toBe(true);
+  });
+
+  it('newReservationTTL', () => {
+    expect(g.newReservationTTL('waiter')).toBe(0);
+    expect(g.newReservationTTL('player')).toBe(0); // If more than 2 days
+    g.paymentType = 'cash';
+    expect(g.newReservationTTL('player')).toBe(0);
+  });
+  
+  it('refund allowed', () => {
+    const futureDate = new Date(Date.now() + 48 * 3600 * 1000);
+    g.date = futureDate.toJSON().slice(0, 10);
+    g.timeStart = "23:59";
+    expect(g.isRefundAllowed()).toBe(true);
+
+    const pastDate = new Date(Date.now() - 48 * 3600 * 1000);
+    g.date = pastDate.toJSON().slice(0, 10);
+    expect(g.isRefundAllowed()).toBe(false);
+  });
+});
+
+describe('DAL Types: Notification', () => {
+  it('should initialize Notification', () => {
+    const n = new Notification({
+      notifyId: 1, label: 'L', chatLink: 'http', botToken: 'tkn', adminChatId: '1', userChatId: '2', userEvents: 'event1,event2'
+    });
+    expect(n.notifyId).toBe(1);
+    
+    
+  });
+
+  it('should throw on invalid', () => {
+    expect(() => new Notification({ notifyId: 1 })).toThrow(/Notification constructor: bad botToken/);
+  });
+});
