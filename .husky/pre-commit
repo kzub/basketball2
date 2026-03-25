@@ -1,0 +1,23 @@
+#!/usr/bin/env sh
+
+echo "🏀 Running backend tests..."
+cd back
+BASKET_MODE=dev npm test
+BACK_STATUS=$?
+if [ $BACK_STATUS -ne 0 ]; then
+  echo "❌ Backend tests failed. Commit aborted."
+  exit 1
+fi
+cd ..
+
+echo "🏀 Running frontend unit tests..."
+cd front
+npm run test:unit
+FRONT_STATUS=$?
+if [ $FRONT_STATUS -ne 0 ]; then
+  echo "❌ Frontend tests failed. Commit aborted."
+  exit 1
+fi
+cd ..
+
+echo "✅ All tests passed! Committing..."

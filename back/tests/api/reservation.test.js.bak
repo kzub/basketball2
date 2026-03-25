@@ -1,0 +1,272 @@
+const reservationController = require('../../api/reservation');
+const events = require('../../utils/notifications');
+
+jest.mock('../../utils/notifications', () => ({
+  emit: jest.fn()
+}));
+
+describe('Reservation Controller', () => {
+  let req, res;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+
+    req = {
+      params: {},
+      body: {},
+      userId: 1,
+      log: { info: jest.fn(), warn: jest.fn(), error: jest.fn() },
+      dal: {
+        user: {
+          getUser: jest.fn(),
+        },
+        game: {
+          getGame: jest.fn(),
+          getGameDetails: jest.fn(),
+          moveWaiters: jest.fn(),
+          getNotRefundedCanceledReservations: jest.fn(),
+        },
+        reservation: {
+          get: jest.fn(),
+          create: jest.fn(),
+          update: jest.fn(),
+        },
+        payment: {
+          getUserCreditsForOrganizerId: jest.fn(),
+          addCreditTransaction: jest.fn(),
+          addTransaction: jest.fn(),
+        },
+        transfer: {
+          create: jest.fn(),
+          get: jest.fn(),
+          finish: jest.fn(),
+        }
+      }
+    };
+
+    res = {
+      status: jest.fn().mockReturnThis(),
+      send: jest.fn(),
+    };
+  });
+
+  describe('book()', () => {
+    it('should return error if not admin and game time passed', async () => {
+      req.body = { gameId: 1, slotType: 'player' };
+      req.dal.user.getUser.mockResolvedValue({ name: 'User1' });
+      req.dal.game.getGame.mockResolvedValue({ isAdminUser: () => false, isTimePassed: () => true });
+
+      await reservationController.book(req, res);
+      expect(res.send).toHaveBeenCalledWith({ ok: false });
+    });
+
+    it('should return error if no user name', async () => {
+      req.body = { gameId: 1, slotType: 'player' };
+      req.dal.user.getUser.mockResolvedValue({ userId: 1 }); // no name
+      req.dal.game.getGame.mockResolvedValue({ isAdminUser: () => false, isTimePassed: () => false });
+
+      await reservationController.book(req, res);
+      expect(res.send).toHaveBeenCalledWith({ ok: false });
+    });
+
+    it('should book successfully for player', async () => {
+      req.body = { gameId: 1, slotType: 'player' };
+      req.dal.user.getUser.mockResolvedValue({ name: 'User1' });
+      const mockGame = { isAdminUser: () => false, isTimePassed: () => false, newReservationTTL: () => 10, freePlayerSlots: 5 };
+      req.dal.game.getGame.mockResolvedValue(mockGame);
+      req.dal.reservation.create.mockResolvedValue(100);
+
+      await reservationController.book(req, res);
+      expect(mockGame.freePlayerSlots).toBe(4);
+      expect(events.emit).toHaveBeenCalledWith('reservation.player.new', expect.any(Object));
+      expect(res.send).toHaveBeenCalledWith({ result: 'ok', gameId: 1, bookId: 100, freePlayerSlots: 4, freeWaiterSlots: undefined });
+    });
+  });
+
+  describe('changePay()', () => {
+    it('should return error if not admin', async () => {
+      req.params = { gameId: 1, bookId: 1 };
+      req.dal.game.getGame.mockResolvedValue({ isAdminUser: () => false });
+      req.dal.reservation.get.mockResolvedValue({});
+      
+      await reservationController.changePay(req, res);
+      expect(res.send).toHaveBeenCalledWith({ ok: false, reason: 'you are not game admin' });
+    });
+
+    it('should return error if real payment complete', async () => {
+      req.params = { gameId: 1, bookId: 1 };
+      req.dal.game.getGame.mockResolvedValue({ isAdminUser: () => true });
+      req.dal.reservation.get.mockResolvedValue({ realPaymentComplete: () => true });
+      
+      await reservationController.changePay(req, res);
+      expect(res.send).toHaveBeenCalledWith({ ok: false, reason: 'real payment cannot be canceled' });
+    });
+
+    it('should make paid if unpaid', async () => {
+      req.params = { gameId: 1, bookId: 1 };
+      req.dal.game.getGame.mockResolvedValue({ isAdminUser: () => true });
+      const mockReservation = { realPaymentComplete: () => false, isPaid: () => false, makePaid: jest.fn(), setExpire: jest.fn() };
+      req.dal.reservation.get.mockResolvedValue(mockReservation);
+      req.dal.reservation.update.mockResolvedValue(true);
+
+      await reservationController.changePay(req, res);
+      expect(mockReservation.makePaid).toHaveBeenCalled();
+      expect(events.emit).toHaveBeenCalledWith('reservation.admin.make.paid', expect.any(Object));
+      expect(res.send).toHaveBeenCalledWith({ ok: true, reason: undefined });
+    });
+
+    it('should make unpaid if paid', async () => {
+      req.params = { gameId: 1, bookId: 1 };
+      req.dal.game.getGame.mockResolvedValue({ isAdminUser: () => true });
+      const mockReservation = { realPaymentComplete: () => false, isPaid: () => true, makeUnpaid: jest.fn() };
+      req.dal.reservation.get.mockResolvedValue(mockReservation);
+      req.dal.reservation.update.mockResolvedValue(true);
+
+      await reservationController.changePay(req, res);
+      expect(mockReservation.makeUnpaid).toHaveBeenCalled();
+      expect(events.emit).toHaveBeenCalledWith('reservation.admin.make.unpaid', expect.any(Object));
+      expect(res.send).toHaveBeenCalledWith({ ok: true, reason: undefined });
+    });
+  });
+
+  describe('clearExpire()', () => {
+    it('should clear expire if admin', async () => {
+      req.params = { gameId: 1, bookId: 1 };
+      req.dal.game.getGame.mockResolvedValue({ isAdminUser: () => true });
+      const mockReservation = { setExpire: jest.fn() };
+      req.dal.reservation.get.mockResolvedValue(mockReservation);
+      req.dal.reservation.update.mockResolvedValue(true);
+
+      await reservationController.clearExpire(req, res);
+      expect(mockReservation.setExpire).toHaveBeenCalledWith(0);
+      expect(res.send).toHaveBeenCalledWith({ ok: true, reason: undefined });
+    });
+  });
+
+  describe('payByCredits()', () => {
+    it('should return error if not owner', async () => {
+      req.params = { gameId: 1, bookId: 1 };
+      req.dal.game.getGame.mockResolvedValue({});
+      req.dal.reservation.get.mockResolvedValue({ isOwnerUserId: () => false });
+
+      await reservationController.payByCredits(req, res);
+      expect(res.send).toHaveBeenCalledWith({ ok: false, reason: 'you are not a reservation owner' });
+    });
+
+    it('should return error if not enough credits', async () => {
+      req.params = { gameId: 1, bookId: 1 };
+      req.dal.game.getGame.mockResolvedValue({ paymentAmountPerPlayer: () => 100, organizer: { userId: 2 } });
+      req.dal.reservation.get.mockResolvedValue({ isOwnerUserId: () => true, isPaid: () => false });
+      req.dal.payment.getUserCreditsForOrganizerId.mockResolvedValue({ total: 50 });
+
+      await reservationController.payByCredits(req, res);
+      expect(res.send).toHaveBeenCalledWith({ ok: false, reason: 'not enought credits for reservation' });
+    });
+
+    it('should pay by credits successfully and refund if prepay', async () => {
+      req.params = { gameId: 1, bookId: 1 };
+      const mockGame = { paymentAmountPerPlayer: () => 100, organizer: { userId: 2, name: 'Org' }, isPrepay: () => true };
+      req.dal.game.getGame.mockResolvedValue(mockGame);
+      const mockReservation = { isOwnerUserId: () => true, isPaid: () => false, makePaid: jest.fn(), setExpire: jest.fn() };
+      req.dal.reservation.get.mockResolvedValue(mockReservation);
+      req.dal.payment.getUserCreditsForOrganizerId.mockResolvedValue({ total: 150 });
+      req.dal.payment.addCreditTransaction.mockResolvedValue(123);
+      req.dal.payment.addTransaction.mockResolvedValue(456);
+      req.dal.reservation.update.mockResolvedValue(true);
+      req.dal.game.getNotRefundedCanceledReservations.mockResolvedValue([{ userId: 3, gameId: 1, bookId: 2, paymentAmount: 100, playerName: 'Canceled' }]);
+
+      await reservationController.payByCredits(req, res);
+      
+      expect(req.dal.payment.addCreditTransaction).toHaveBeenCalledWith(1, 2, -100, 'reservation.pay', 1);
+      expect(mockReservation.makePaid).toHaveBeenCalledWith(100);
+      expect(req.dal.payment.addCreditTransaction).toHaveBeenCalledWith(3, 2, 100, 'reservation.cancel', 2, expect.any(String));
+      expect(res.send).toHaveBeenCalledWith({ ok: true });
+    });
+  });
+
+  describe('setPlayer()', () => {
+    it('should update player name', async () => {
+      req.params = { gameId: 1, bookId: 1, name: 'NewName' };
+      req.dal.game.getGame.mockResolvedValue({ isAdminUser: () => true });
+      const mockReservation = { playerName: 'OldName' };
+      req.dal.reservation.get.mockResolvedValue(mockReservation);
+      req.dal.reservation.update.mockResolvedValue(true);
+
+      await reservationController.setPlayer(req, res);
+      expect(mockReservation.playerName).toBe('NewName');
+      expect(events.emit).toHaveBeenCalledWith('reservation.change.name', expect.any(Object));
+      expect(res.send).toHaveBeenCalledWith({ ok: true });
+    });
+  });
+
+  describe('mightBePaid()', () => {
+    it('should return ok: true if conditions met', async () => {
+      req.params = { gameId: 1, bookId: 1 };
+      req.dal.reservation.get.mockResolvedValue({ isOwnerUserId: () => true, isPaid: () => false, isExpired: () => false });
+      
+      await reservationController.mightBePaid(req, res);
+      expect(res.send).toHaveBeenCalledWith({ ok: true });
+    });
+  });
+
+  describe('transfer functionality', () => {
+    it('getTransferCode should return code', async () => {
+      req.params = { gameId: 1, bookId: 1 };
+      req.dal.user.getUser.mockResolvedValue({ userId: 1 });
+      req.dal.game.getGame.mockResolvedValue({ isTimePassed: () => false });
+      req.dal.reservation.get.mockResolvedValue({ isOwnerUser: () => true, isPlayer: () => true });
+      req.dal.transfer.create.mockResolvedValue('code123');
+
+      await reservationController.getTransferCode(req, res);
+      expect(res.send).toHaveBeenCalledWith({ ok: true, transferCode: 'code123' });
+    });
+
+    it('getTransferDetails should return details', async () => {
+      req.params = { transferCode: 'code123' };
+      req.dal.transfer.get.mockResolvedValue({ gameId: 1 });
+      req.dal.game.getGameDetails.mockResolvedValue({ game: 'details' });
+
+      await reservationController.getTransferDetails(req, res);
+      expect(res.send).toHaveBeenCalledWith({ ok: true, gameDetails: { game: 'details' }, transferDetails: { gameId: 1 } });
+    });
+
+    it('doTransfer should complete transfer', async () => {
+      req.params = { transferCode: 'code123' };
+      req.dal.user.getUser.mockResolvedValue({ userId: 2, name: 'NewUser' });
+      const mockTransfer = { gameId: 1, bookId: 1 };
+      req.dal.transfer.get.mockResolvedValue(mockTransfer);
+      const mockReservation = { playerName: 'OldName' };
+      req.dal.reservation.get.mockResolvedValue(mockReservation);
+      req.dal.reservation.update.mockResolvedValue(true);
+      req.dal.transfer.finish.mockResolvedValue(true);
+
+      await reservationController.doTransfer(req, res);
+      expect(mockReservation.userId).toBe(2);
+      expect(mockTransfer.newPlayerId).toBe(2);
+      expect(res.send).toHaveBeenCalledWith({ ok: true });
+    });
+  });
+
+  describe('cancel()', () => {
+    it('should cancel reservation and process refund', async () => {
+      req.params = { gameId: 1, bookId: 1 };
+      const mockUser = { userId: 1 };
+      req.dal.user.getUser.mockResolvedValue(mockUser);
+      
+      const mockGame = { isAdminUser: () => false, isTimePassed: () => false, isRefundAllowed: () => true, organizer: { userId: 2, name: 'Org' } };
+      req.dal.game.getGame.mockResolvedValue(mockGame);
+      
+      const mockReservation = { isOwnerUser: () => true, isCanceled: () => false, isWaiter: () => false, cancel: jest.fn(), paymentStatus: 'paid', realPaymentComplete: () => true, paymentAmount: 100, userId: 1, bookId: 1 };
+      req.dal.reservation.get.mockResolvedValue(mockReservation);
+      
+      req.dal.reservation.update.mockResolvedValue(true);
+      req.dal.game.moveWaiters.mockResolvedValue({ promotedRsv: null, refundAmount: null });
+
+      await reservationController.cancel(req, res);
+      
+      expect(mockReservation.cancel).toHaveBeenCalled();
+      expect(req.dal.payment.addCreditTransaction).toHaveBeenCalledWith(1, 2, 100, 'reservation.cancel', 1);
+      expect(res.send).toHaveBeenCalledWith({ ok: true, refundAmount: 100 });
+    });
+  });
+});

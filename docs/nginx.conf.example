@@ -1,0 +1,38 @@
+# Default server configuration for Basketball Booking Platform
+#
+# Этот конфигурационный файл предназначен для проксирования запросов
+# к frontend (статика) и backend (Node.js API).
+#
+# Инструкция по установке:
+# 1. Скопируйте файл в директорию конфигурации nginx, например: /etc/nginx/sites-available/basket
+# 2. Создайте символическую ссылку: ln -s /etc/nginx/sites-available/basket /etc/nginx/sites-enabled/
+# 3. Измените server_name и root пути на актуальные для вашего сервера
+# 4. Проверьте конфигурацию: nginx -t
+# 5. Перезапустите nginx: systemctl reload nginx
+
+server {
+	# Укажите ваше доменное имя или IP адрес сервера
+	server_name basket.msk.ru;
+
+	# Путь до собранной статики frontend приложения
+	# Предварительно необходимо выполнить сборку в папке /front: npm run build
+	root /home/konstantin/projects.my/basketball2/front/dist;
+	index index.html;
+
+	# Обработка запросов к frontend (SPA роутинг)
+	location / {
+		try_files $uri $uri/ =404;
+	}
+
+	# Проксирование API запросов к backend серверу
+	location /api {
+		# Передаем реальный IP адрес клиента backend-серверу
+		proxy_set_header X-Forwarded-For $remote_addr;
+
+		# Адрес и порт, на котором запущен backend (по умолчанию 3001)
+		proxy_pass http://127.0.0.1:3001;
+
+		# Отключаем кеширование для API запросов
+		add_header "Cache-Control" "no-store";
+	}
+}
