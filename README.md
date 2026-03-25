@@ -32,6 +32,8 @@
 * npm
 
 ### Запуск Backend-части
+1. Создайте конфигурационный файл `settings.json` (инструкция по заполнению: [Создание конфигурационного файла в back/README.md](back/README.md#создание-конфигурационного-файла-settingsjson))
+2. Выполните:
 ```bash
 cd back
 npm install

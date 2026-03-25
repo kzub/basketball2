@@ -179,9 +179,15 @@ const getStartOfTheDate = (date) => {
 };
 
 const getConfig = () => {
-  let data = fs.readFileSync('./config/settings.json');
+  let data = fs.readFileSync('./config/settings.json', 'utf8');
   let mode = getMode();
-  return JSON.parse(data)[mode];
+  try {
+    const strip = require('strip-json-comments');
+    const stripFunc = strip.default || strip;
+    return JSON.parse(stripFunc(data))[mode];
+  } catch (err) {
+    return JSON.parse(data)[mode];
+  }
 };
 
 const eq = (s1, s2) => {

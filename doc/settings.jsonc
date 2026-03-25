@@ -1,0 +1,109 @@
+{
+	// Настройки для production-окружения (используются при BASKET_MODE=prod)
+	"prod": {
+		// Доменное имя сайта для генерации ссылок
+		"site": "basket.msk.ru",
+		// Идентификатор супер-администратора (по умолчанию 1)
+		"ownerId": 1,
+		"logger": {
+			// Директория для хранения логов
+			"logdir": "/var/log/",
+			// Уровень логирования: "info", "warn", "error" или "debug"
+			"loglevel": "info"
+		},
+		"telegram": {
+			// Хост API Telegram (не менять, если нет прокси)
+			"host": "https://api.telegram.org",
+			// Имя бота (без @)
+			"botName": "basketpaybot",
+			// Токен бота, полученный у @BotFather (ЗАПОЛНИТЬ СВОИМ)
+			"token": "ENTER_YOUR_TELEGRAM_BOT_TOKEN_HERE",
+			// ID чата или пользователя для получения критических уведомлений
+			"owner": "ENTER_OWNER_CHAT_ID",
+			// URL вашего сервера для настройки вебхуков Telegram
+			"webhookUrl": "https://basket.msk.ru"
+		},
+		"server": {
+			// Хост для привязки Express-сервера (обычно 127.0.0.1 или 0.0.0.0)
+			"host": "127.0.0.1",
+			// Порт, на котором будет запущен сервер
+			"port": 3001
+		},
+		"sqlite": {
+			// Имя файла базы данных (будет создан в корне проекта, если не существует)
+			"filename": "basket.prod.db"
+		},
+		"auth": {
+			// Алгоритм шифрования сессий/кук (например, aes-128-cbc)
+			"algorithm": "aes-128-cbc",
+			// Секретный ключ шифрования (ЗАПОЛНИТЬ СЛУЧАЙНОЙ СТРОКОЙ 16 симв. для aes-128)
+			"key": "ENTER_YOUR_SECRET_KEY_HERE_16_CH",
+			// Соль для шифрования (ЗАПОЛНИТЬ СЛУЧАЙНОЙ СТРОКОЙ)
+			"salt": "ENTER_YOUR_SALT",
+			// Метод подтверждения по умолчанию ("telegram" или "sms")
+			"userConfirmation": "telegram",
+			// Отключенный метод (опционально)
+			"disable---userConfirmation": "sms"
+		},
+		"twilio": {
+			// Account SID из консоли Twilio (для отправки SMS)
+			"accountSid": "ENTER_TWILIO_ACCOUNT_SID",
+			// Auth Token из консоли Twilio
+			"authToken": "ENTER_TWILIO_AUTH_TOKEN",
+			// Имя отправителя или купленный номер (например, CheckCode)
+			"senderNumber": "CheckCode",
+			"description": "SMS provider configuration"
+		},
+		"payproxy": {
+			// Среда для платежного прокси ("PROD" или "DEV")
+			"env": "PROD",
+			"backends": [{
+				// Хост платежного бэкенда
+				"host": "127.0.0.1",
+				// Порт платежного бэкенда
+				"port": 53001,
+				"env": "DEV"
+			}]
+		}
+	},
+	
+	// Настройки для development-окружения (используются при BASKET_MODE=dev)
+	"dev": {
+		"payproxy": {
+			"env": "DEV"
+		},
+		"site": "dev.basket.msk.ru",
+		"ownerId": 1,
+		"logger": {
+			// При использовании локального запуска удобно сохранять логи в текущую директорию "./"
+			"--logdir": "./",
+			"loglevel": "debug"
+		},
+		"telegram": {
+			"host": "https://api.telegram.org",
+			"token": "ENTER_YOUR_DEV_TELEGRAM_BOT_TOKEN_HERE",
+			"botName": "dev_basketpaybot",
+			"owner": "ENTER_DEV_OWNER_CHAT_ID",
+			"webhookUrl": "https://dev.basket.msk.ru"
+		},
+		"server": {
+			"host": "127.0.0.1",
+			"port": 53001
+		},
+		"sqlite": {
+			"filename": "basket.dev.db"
+		},
+		"auth": {
+			"algorithm": "aes-128-cbc",
+			"key": "ENTER_YOUR_DEV_SECRET_KEY_16C",
+			"salt": "ENTER_DEV_SALT",
+			"userConfirmation": "telegram"
+		},
+		"twilio": {
+			"accountSid": "ENTER_TWILIO_ACCOUNT_SID",
+			"authToken": "ENTER_TWILIO_AUTH_TOKEN",
+			"senderNumber": "CheckCode",
+			"account-name":"dev-sandbox-test"
+		}
+	}
+}
