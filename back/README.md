@@ -78,6 +78,11 @@ BASKET_MODE=dev npm test
 BASKET_MODE=dev npx jest tests --coverage --forceExit
 ```
 
+**Ожидаемое покрытие кода (Test Coverage):**
+Мы стремимся поддерживать высокое покрытие кода тестами. При добавлении нового функционала или исправлении багов:
+- Убедитесь, что метрики покрытия (`Statements`, `Branches`, `Functions`, `Lines`) не деградируют.
+- Проверяйте подробный HTML-отчет в директории `coverage/lcov-report/index.html` после локального запуска тестов с флагом `--coverage`.
+
 **Запуск одного тестового файла (быстро):**
 ```bash
 BASKET_MODE=dev npx jest tests/api/game.test.js

@@ -1,5 +1,8 @@
 # Basketball Booking Platform 🏀
 
+![Vue.js](https://img.shields.io/badge/Vue.js-2.7-4FC08D?style=flat&logo=vue.js)
+![Node.js](https://img.shields.io/badge/Node.js-%3E%3D%2020-339933?style=flat&logo=node.js)
+
 Платформа для бронирования баскетбольных игр и организации тренировок.
 Проект состоит из клиентского веб-приложения (frontend) и серверного API (backend) с интеграцией Telegram и Twilio.
 
