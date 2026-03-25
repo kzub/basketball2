@@ -8,7 +8,8 @@
   "scripts": {
     "serve": "vue-cli-service serve --host basket.host",
     "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint"
+    "lint": "vue-cli-service lint",
+    "test:unit": "vue-cli-service test:unit"
   },
   "dependencies": {
     "axios": "^0.18.1",
@@ -24,7 +25,10 @@
     "@babel/eslint-parser": "^7.24.7",
     "@vue/cli-plugin-babel": "~5.0.8",
     "@vue/cli-plugin-eslint": "~5.0.8",
+    "@vue/cli-plugin-unit-jest": "~5.0.8",
     "@vue/cli-service": "~5.0.8",
+    "@vue/test-utils": "^1.3.6",
+    "@vue/vue2-jest": "^27.0.0",
     "eslint": "^8.57.0",
     "eslint-plugin-vue": "^9.26.0",
     "vue-template-compiler": "^2.7.16"
