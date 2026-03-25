@@ -95,6 +95,7 @@ We use **Jest (v27)** alongside **Supertest**. The project is highly sensitive, 
 *   When modifying critical state (e.g., a reservation is paid, a game is created, a user is banned, credits transferred), always ensure the corresponding `events.emit('event.name', payload)` is triggered so the external bots can notify users/admins. Look at `tests/utils.notifications.test.js` for the list of supported internal events.
 
 ## 4. Operational Directives for Agents
+*   **Git Commits:** Do not commit code yourself. Wait for the user to commit or explicitly ask to do so. Only make the requested modifications and run tests, but do not use `git commit` automatically.
 *   **Verify Before Committing:** Before finalizing a set of changes, you must ensure the test suite still passes. Run `BASKET_MODE=dev npx jest tests --coverage`.
 *   **Clean Up:** Do not leave `fix-*.js`, `.bak` backups, or temporary text files in the project directory when finishing your tasks.
 *   **Version Transitions:** Node v12 to Node v20 transitions require careful attention to dependency bumping. Do not blindly upgrade packages like `sqlite3` without checking Node-API compatibility.
