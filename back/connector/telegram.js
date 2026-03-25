@@ -19,7 +19,7 @@ const botCmd = async (token, method, params, tryNum = 1) => {
     }
   };
   return request(opts).catch(err => {
-    log.error(`cannot send (try ${tryNum}): ${err}`);
+    log.error(`cannot send (try ${tryNum}): ${err}, url: ${url}, params: ${JSON.stringify(params)}`);
     resendLog.push({
       sendAt: Date.now() + 60000,
       token,

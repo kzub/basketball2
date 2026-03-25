@@ -6,6 +6,7 @@ const payment = require('./payment');
 const tgBot = require('./tg.bot');
 const reservation = require('./reservation');
 const user = require('./user');
+const system = require('./system');
 const events = require('../utils/notifications');
 
 const wrapper = (func, needAuth, statusCode = 401) => {
@@ -53,7 +54,8 @@ const smsLimiter = rateLimit({
 });
 
 const init = (app) => {
-  app.use(apiLimiter);
+  app.use('/api', apiLimiter);
+  app.get('/api/status', system.status);
   app.get('/api/game/askToPay/:gameId', wrapper(game.askToPay, true));
   app.get('/api/game/changeStatus/:gameId/:status', wrapper(game.changeStatus, true));
   app.get('/api/game/clone/:gameId/:times/:clearPayment?', wrapper(game.clone, true));

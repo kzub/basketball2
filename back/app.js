@@ -1,6 +1,7 @@
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const express = require('express');
+const path = require('path');
 const uuid = require('uuid');
 
 const apiRoutes = require('./api/routes');
@@ -44,6 +45,9 @@ app.use((req, res, next) => {
 });
 
 apiRoutes.init(app);
+
+const staticPath = path.join(__dirname, '../front/dist');
+app.use(express.static(staticPath));
 
 app.get('*', function (req, res) {
   res.status(404).send('Not Found\n');
