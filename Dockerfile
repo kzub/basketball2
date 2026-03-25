@@ -39,7 +39,7 @@ ENV SQLITE_FILENAME=/app/data/basket.db
 ENV DOCKER_LOGS=true
 
 # Healthcheck must use the dynamic PORT variable to avoid failing when port is overridden
-HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
+HEALTHCHECK --interval=120s --timeout=5s --start-period=5s --retries=2 \
   CMD wget --no-verbose --tries=1 --spider http://127.0.0.1:${PORT}/api/status || exit 1
 
 # Start the application
