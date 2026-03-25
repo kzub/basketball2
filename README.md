@@ -47,6 +47,14 @@ npm install --legacy-peer-deps
 npm run serve # Запуск dev-сервера с hot-reload
 ```
 
+## 🛠 Развертывание (Self-Hosting)
+
+Для развертывания проекта на собственном сервере (production/стабильной среды) рекомендуется использовать **Nginx** для отдачи собранной статики фронтенда и проксирования запросов к API, а также **Systemd** для управления процессом Node.js-бекенда.
+
+Мы подготовили шаблоны конфигураций в папке `docs`:
+*   📄 **[Пример конфигурации Nginx](docs/nginx.conf.example)** — настройка домена, раздача собранного frontend и проксирование запросов к backend.
+*   📄 **[Пример сервиса Systemd](docs/systemd.service.example)** — запуск backend (Node.js) в качестве фонового демона с автоматическим перезапуском при падении.
+
 ## 📸 Скриншоты и интерфейс
 
 Приложение разделено на интерфейсы для **игроков** и **администраторов (организаторов)**.
@@ -55,10 +63,10 @@ npm run serve # Запуск dev-сервера с hot-reload
 
 | Список игр | Экран игры | Мои платежи | Бронирование |
 |:---:|:---:|:---:|:---:|
-| ![Список игр](doc/player/1.%20gamesPlayer.png) | ![Экран игры](doc/player/2.%20gameScreen.png) | ![Платежи](doc/player/5.%20gamePayments.png) | ![Бронирование](doc/player/reservationPlayer.png) |
+| ![Список игр](docs/player/1.%20gamesPlayer.png) | ![Экран игры](docs/player/2.%20gameScreen.png) | ![Платежи](docs/player/5.%20gamePayments.png) | ![Бронирование](docs/player/reservationPlayer.png) |
 
 ### Интерфейс организатора (Админка)
 
 | Управление играми | Создание игры | Прошлые игры |
 |:---:|:---:|:---:|
-| ![Управление играми](doc/admin/1.%20gamesAdmin.png) | ![Создание игры](doc/admin/6.%20newGame.png) | ![Прошлые игры](doc/admin/2.%20pastGames.png) |
+| ![Управление играми](docs/admin/1.%20gamesAdmin.png) | ![Создание игры](docs/admin/6.%20newGame.png) | ![Прошлые игры](docs/admin/2.%20pastGames.png) |

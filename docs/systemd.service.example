@@ -1,0 +1,54 @@
+# Пример конфигурации Systemd сервиса для Basketball Backend
+#
+# Как установить:
+# 1. Скопируйте этот файл в директорию systemd:
+#    sudo cp docs/systemd.service.example /etc/systemd/system/basketmsk.service
+#
+# 2. Отредактируйте файл под вашу систему, указав правильные пути WorkingDirectory,
+#    путь до node, пользователя и режим BASKET_MODE.
+#
+# 3. Перезагрузите конфигурацию systemd:
+#    sudo systemctl daemon-reload
+#
+# 4. Включите автозапуск и запустите сервис:
+#    sudo systemctl enable basketmsk
+#    sudo systemctl start basketmsk
+#
+# 5. Проверить логи:
+#    sudo journalctl -fu basketmsk
+
+[Unit]
+Description=Basketball Backend Server (Node.js)
+# Запуск сервиса после того как сеть будет готова
+After=network.target
+
+[Service]
+# Автоматический перезапуск в случае падения
+Restart=always
+# Задержка перед рестартом
+RestartSec=5
+
+# Путь к директории backend
+WorkingDirectory=/home/konstantin/projects.my/basketball2/back
+
+# Запуск приложения
+# Можно использовать прямо node, указав полный путь (which node)
+ExecStart=/usr/local/bin/node server.js
+
+# Окружение: укажите 'prod' или 'dev' в зависимости от вашего сценария
+Environment="BASKET_MODE=prod"
+
+# Пользователь от которого запускается процесс
+User=root
+# Примечание: В production лучше создать отдельного пользователя и указать его тут:
+# User=nodeuser
+# Group=nodegroup
+
+# Логирование через syslog/journald
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=basketmsk
+
+[Install]
+# Запуск при старте системы (multi-user.target - стандартный уровень запуска)
+WantedBy=multi-user.target

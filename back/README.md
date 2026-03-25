@@ -103,7 +103,7 @@ BASKET_MODE=dev npx jest tests/api/game.test.js
 В папке `back/config/` создайте файл `settings.json` (бэкенд поддерживает комментарии внутри JSON).
 
 Пример конфигурационного файла со структурой и описанием полей можно найти здесь:
-👉 **[doc/settings.jsonc](../doc/settings.jsonc)**
+👉 **[docs/settings.jsonc](../docs/settings.jsonc)**
 
 1. **Установка зависимостей:**
    ```bash
