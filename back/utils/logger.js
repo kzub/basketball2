@@ -39,7 +39,7 @@ const jsonFormat = (name, req) => format.combine(
 );
 
 let logTransport = new winston.transports.Console();
-if (config.logger.logdir) {
+if (config.logger.logdir && process.env.DOCKER_LOGS !== 'true') {
   logTransport = new (winston.transports.DailyRotateFile)({
     filename: `${config.logger.logdir}basketmsk-%DATE%.log`,
     datePattern: 'YYYY-MM-DD',
@@ -52,7 +52,7 @@ if (config.logger.logdir) {
 const create = (name, req) => {
   let format;
 
-  if (config.logger.logfile) {
+  if (config.logger.logfile && process.env.DOCKER_LOGS !== 'true') {
     format = jsonFormat(name, req);
   } else {
     format = consoleFormat(name, req);

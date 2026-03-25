@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  basket:
+    # Use the pre-built image from GitHub Container Registry (supports ARCH overrides via .env)
+    image: ghcr.io/kzub/basketball2/basketball_app:latest-${ARCH:-amd64}
+    container_name: basketball_app
+    restart: unless-stopped
+    ports:
+      # Проброс порта (host:container).
+      - 3001:3001
+    volumes:
+      # Подключаем папку с данными.
+      # Положите файл settings.json в эту папку перед запуском.
+      # Файл БД будет автоматически сохранен здесь как basket.db
+      - ./data:/app/data
+    environment:
+      - BASKET_MODE=prod
+      - PORT=3001
+      - SQLITE_FILENAME=/app/data/basket.db

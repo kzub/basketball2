@@ -5,8 +5,9 @@ let sqlite3 = require('sqlite3').verbose();
 
 const log = logger.create('DAL');
 
-let db = new sqlite3.Database(config.sqlite.filename);
-log.info(`use DB filename: ${config.sqlite.filename}`);
+const dbFilename = process.env.SQLITE_FILENAME || config.sqlite.filename;
+let db = new sqlite3.Database(dbFilename);
+log.info(`use DB filename: ${dbFilename}`);
 
 db.serialize();
 db.run(`CREATE TABLE IF NOT EXISTS bookings (
@@ -178,5 +179,15 @@ dalInstance.reservation = require('./dal.reservation').init(execSQL('DAL_RSV'), 
 dalInstance.transfer = require('./dal.transfer').init(execSQL('DAL_TRNSFR'), dalInstance);
 dalInstance.payment = require('./dal.payment').init(execSQL('DAL_PAYMENT'), dalInstance);
 dalInstance.notification = require('./dal.notification').init(execSQL('DAL_NOTIFICATION'), dalInstance);
+dalInstance.system = {
+  status: async () => {
+    return new Promise((resolve, reject) => {
+      db.get('SELECT 1 as ok', (err, row) => {
+        if (err) reject(err);
+        else resolve(row);
+      });
+    });
+  }
+};
 
 module.exports = dalInstance;
