@@ -1,0 +1,9 @@
+node_modules
+back/node_modules
+front/node_modules
+npm-debug.log
+.git
+.env
+data/
+*.db
+front/dist

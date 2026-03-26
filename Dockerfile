@@ -20,10 +20,10 @@ WORKDIR /app/back
 # Create necessary directories
 RUN mkdir -p /app/data /app/back/config
 
-# Copy backend dependencies from build-back stage
-COPY --from=build-back /app/back/node_modules ./node_modules
 # Copy backend code
 COPY back/ ./
+# Copy backend dependencies from build-back stage
+COPY --from=build-back /app/back/node_modules ./node_modules
 
 # Link the config folder to the data folder so settings can be provided via volume
 RUN rm -rf config/settings.json && ln -sf /app/data/settings.json config/settings.json
