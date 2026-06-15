@@ -18,7 +18,7 @@
     "express-rate-limit": "^5.0.0",
     "request": "^2.88.0",
     "request-promise-native": "^1.0.7",
-    "sqlite3": "^5.1.7",
+    "sqlite3": "^6.0.1",
     "strip-json-comments": "^3.1.1",
     "twilio": "^3.33.0",
     "uuid": "^3.3.2",
